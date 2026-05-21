@@ -1,49 +1,58 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Upload, FileText, Download, Trash2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Upload, FileText, Download, Trash2, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { useTemplate } from '../../hooks/useTemplate';
+import { templateService } from '../../services/templateService';
 
 export default function TemplateSurat() {
-  const [templates, setTemplates] = useState([
-    { id: 1, nama: 'Surat Keterangan Pengantar RT/RW', filename: 'template_pengantar_rtrw.docx', size: '25 KB' },
-    { id: 2, nama: 'Surat Keterangan Usaha (SKU)', filename: 'template_sku.docx', size: '28 KB' },
-    { id: 3, nama: 'Surat Keterangan Tidak Mampu (SKTM)', filename: 'template_sktm.docx', size: '24 KB' },
-    { id: 4, nama: 'Surat Keterangan Kematian', filename: 'template_surat_kematian.docx', size: '26 KB' },
-  ]);
+  const { data: templates, loading, error, refetch } = useTemplate();
 
   const [newTemplateName, setNewTemplateName] = useState('');
   const [uploadedFile, setUploadedFile] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [deletingId, setDeletingId] = useState(null);
 
   const handleUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setUploadedFile(file);
-    }
+    if (file) setUploadedFile(file);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newTemplateName || !uploadedFile) return;
 
-    const newTemplate = {
-      id: templates.length + 1,
-      nama: newTemplateName,
-      filename: uploadedFile.name,
-      size: `${Math.round(uploadedFile.size / 1024)} KB`
-    };
+    setUploadError('');
+    setUploadLoading(true);
 
-    setTemplates([...templates, newTemplate]);
+    const formData = new FormData();
+    formData.append('nama_template', newTemplateName);
+    formData.append('file', uploadedFile);
+
+    const { error: err } = await templateService.upload(formData);
+
+    setUploadLoading(false);
+
+    if (err) {
+      setUploadError(err);
+      return;
+    }
+
     setNewTemplateName('');
     setUploadedFile(null);
     setSubmitted(true);
+    refetch(); // refresh daftar template
 
-    setTimeout(() => {
-      setSubmitted(false);
-    }, 3000);
+    setTimeout(() => setSubmitted(false), 3000);
   };
 
-  const handleDelete = (id) => {
-    setTemplates(templates.filter(t => t.id !== id));
+  const handleDelete = async (id) => {
+    if (!window.confirm('Yakin ingin menghapus template ini?')) return;
+    setDeletingId(id);
+    const { error: err } = await templateService.deleteById(id);
+    setDeletingId(null);
+    if (!err) refetch();
   };
 
   return (
@@ -61,39 +70,74 @@ export default function TemplateSurat() {
       {/* Main Content */}
       <main className="flex-1 max-w-5xl mx-auto w-full p-6 space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
+
           {/* List of Templates */}
           <div className="lg:col-span-2 space-y-4">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
               <h3 className="font-bold text-slate-900 mb-4">Daftar Dokumen Template Aktif</h3>
-              
-              <div className="divide-y divide-slate-100">
-                {templates.map(template => (
-                  <div key={template.id} className="py-4 flex items-center justify-between gap-4">
-                    <div className="flex items-start space-x-3">
-                      <div className="p-2.5 bg-blue-50 text-blue-900 rounded-xl">
-                        <FileText className="w-5 h-5" />
+
+              {/* Loading */}
+              {loading && (
+                <div className="flex items-center justify-center py-10 gap-2 text-slate-400">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">Memuat template...</span>
+                </div>
+              )}
+
+              {/* Error */}
+              {!loading && error && (
+                <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {/* Empty */}
+              {!loading && !error && templates.length === 0 && (
+                <p className="text-slate-400 text-sm text-center py-8">Belum ada template yang diunggah.</p>
+              )}
+
+              {/* Template List */}
+              {!loading && !error && templates.length > 0 && (
+                <div className="divide-y divide-slate-100">
+                  {templates.map((template) => (
+                    <div key={template.id} className="py-4 flex items-center justify-between gap-4">
+                      <div className="flex items-start space-x-3">
+                        <div className="p-2.5 bg-blue-50 text-blue-900 rounded-xl">
+                          <FileText className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-slate-800">
+                            {template.nama_template || template.nama}
+                          </h4>
+                          <p className="text-slate-400 text-xs mt-0.5">
+                            {template.filename || template.file_name || '—'}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-bold text-sm text-slate-800">{template.nama}</h4>
-                        <p className="text-slate-400 text-xs mt-0.5">{template.filename} • {template.size}</p>
+                      <div className="flex items-center space-x-2">
+                        <a
+                          href={templateService.getDownloadUrl(template.id)}
+                          className="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg hover:bg-blue-50 transition"
+                          title="Unduh"
+                        >
+                          <Download className="w-4 h-4" />
+                        </a>
+                        <button
+                          onClick={() => handleDelete(template.id)}
+                          disabled={deletingId === template.id}
+                          className="p-2 text-slate-400 hover:text-rose-600 bg-slate-50 rounded-lg hover:bg-rose-50 transition disabled:opacity-60"
+                          title="Hapus"
+                        >
+                          {deletingId === template.id
+                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                            : <Trash2 className="w-4 h-4" />}
+                        </button>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <button className="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg hover:bg-blue-50 transition" title="Unduh">
-                        <Download className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(template.id)}
-                        className="p-2 text-slate-400 hover:text-rose-600 bg-slate-50 rounded-lg hover:bg-rose-50 transition"
-                        title="Hapus"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -101,11 +145,18 @@ export default function TemplateSurat() {
           <div className="space-y-4">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
               <h3 className="font-bold text-slate-900 mb-4">Unggah Template Baru</h3>
-              
+
               {submitted && (
-                <div className="mb-4 bg-emerald-50 border border-emerald-250 text-emerald-800 p-3 rounded-xl flex items-center space-x-2 text-xs">
+                <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-xl flex items-center space-x-2 text-xs">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Template baru berhasil ditambahkan!</span>
+                </div>
+              )}
+
+              {uploadError && (
+                <div className="mb-4 flex items-center gap-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-3">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{uploadError}</span>
                 </div>
               )}
 
@@ -143,9 +194,11 @@ export default function TemplateSurat() {
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-slate-950 text-white rounded-xl text-xs font-bold hover:bg-slate-900 transition shadow"
+                  disabled={uploadLoading}
+                  className="w-full py-2.5 bg-slate-950 text-white rounded-xl text-xs font-bold hover:bg-slate-900 transition shadow disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Tambah Template Surat
+                  {uploadLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {uploadLoading ? 'Mengunggah...' : 'Tambah Template Surat'}
                 </button>
               </form>
             </div>

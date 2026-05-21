@@ -1,43 +1,35 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Search, Calendar, FileText, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Search, Loader2, AlertCircle } from 'lucide-react';
+import { useSurat } from '../../hooks/useSurat';
+
+/** Format tanggal ISO ke format "DD Mon YYYY" */
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  return new Date(dateStr).toLocaleDateString('id-ID', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  });
+}
+
+const STATUS_MAP = {
+  approved:    { text: 'Disetujui RW (Selesai)', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+  approved_rw: { text: 'Disetujui RW (Selesai)', color: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+  rejected:    { text: 'Ditolak RT', color: 'bg-rose-100 text-rose-800 border-rose-200' },
+  rejected_rt: { text: 'Ditolak RT', color: 'bg-rose-100 text-rose-800 border-rose-200' },
+};
 
 export default function RiwayatSurat() {
   const [searchTerm, setSearchTerm] = useState('');
+  const { data: history, loading, error } = useSurat('riwayat');
 
-  const history = [
-    {
-      id: 1,
-      tanggal: '18 Mei 2026',
-      warga: 'Rian Hidayat',
-      subjek: 'Surat Pengantar Nikah (N1-N4)',
-      status: 'approved_rw',
-      statusText: 'Disetujui RW (Selesai)',
-      statusColor: 'bg-emerald-100 text-emerald-800 border-emerald-200'
-    },
-    {
-      id: 2,
-      tanggal: '10 Mei 2026',
-      warga: 'Siti Rahma',
-      subjek: 'Surat Keterangan Kematian',
-      status: 'approved_rw',
-      statusText: 'Disetujui RW (Selesai)',
-      statusColor: 'bg-emerald-100 text-emerald-800 border-emerald-200'
-    },
-    {
-      id: 3,
-      tanggal: '03 Mei 2026',
-      warga: 'Joko Susilo',
-      subjek: 'Surat Keterangan Tidak Mampu (SKTM)',
-      status: 'rejected_rt',
-      statusText: 'Ditolak RT',
-      statusColor: 'bg-rose-100 text-rose-800 border-rose-200'
-    }
-  ];
-
-  const filteredHistory = history.filter(item =>
-    item.warga.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.subjek.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredHistory = history.filter(
+    (item) =>
+      (item.nama_warga || item.warga?.nama || '')
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (item.jenis_surat || item.subjek || '')
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -75,42 +67,69 @@ export default function RiwayatSurat() {
           </div>
         </div>
 
-        {/* History Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-500">
-              <thead className="bg-slate-50 text-slate-700 uppercase font-semibold text-xs border-b border-slate-150">
-                <tr>
-                  <th className="px-6 py-4">Tanggal Proses</th>
-                  <th className="px-6 py-4">Nama Warga</th>
-                  <th className="px-6 py-4">Jenis Surat / Pengantar</th>
-                  <th className="px-6 py-4">Status Akhir</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredHistory.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/50 transition">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">{item.tanggal}</td>
-                    <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-800">{item.warga}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{item.subjek}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${item.statusColor}`}>
-                        {item.statusText}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {filteredHistory.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-slate-400">
-                      Tidak ada riwayat surat yang cocok dengan pencarian Anda.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        {/* Loading */}
+        {loading && (
+          <div className="flex items-center justify-center py-16 gap-2 text-slate-400">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span className="text-sm">Memuat riwayat surat...</span>
           </div>
-        </div>
+        )}
+
+        {/* Error */}
+        {!loading && error && (
+          <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-4">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* History Table */}
+        {!loading && !error && (
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-500">
+                <thead className="bg-slate-50 text-slate-700 uppercase font-semibold text-xs border-b border-slate-150">
+                  <tr>
+                    <th className="px-6 py-4">Tanggal Proses</th>
+                    <th className="px-6 py-4">Nama Warga</th>
+                    <th className="px-6 py-4">Jenis Surat / Pengantar</th>
+                    <th className="px-6 py-4">Status Akhir</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredHistory.map((item) => {
+                    const statusInfo = STATUS_MAP[item.status] || { text: item.status, color: 'bg-slate-100 text-slate-700 border-slate-200' };
+                    return (
+                      <tr key={item.id} className="hover:bg-slate-50/50 transition">
+                        <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">
+                          {formatDate(item.created_at || item.tanggal)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap font-bold text-slate-800">
+                          {item.nama_warga || item.warga?.nama || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">{item.jenis_surat || item.subjek}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${statusInfo.color}`}>
+                            {statusInfo.text}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {filteredHistory.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8 text-center text-slate-400">
+                        {history.length === 0
+                          ? 'Belum ada riwayat surat.'
+                          : 'Tidak ada riwayat yang cocok dengan pencarian Anda.'}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

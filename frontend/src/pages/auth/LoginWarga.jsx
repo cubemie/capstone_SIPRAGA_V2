@@ -1,15 +1,32 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, UserCheck } from 'lucide-react';
+import { CreditCard, Lock, UserCheck, Loader2, AlertCircle } from 'lucide-react';
+import { authService } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginWarga() {
-  const [email, setEmail] = useState('');
+  const [nik, setNik] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulate login
+    setError('');
+    setLoading(true);
+
+    const { data, error: err } = await authService.loginWarga({ nik, password });
+
+    setLoading(false);
+
+    if (err) {
+      setError(err);
+      return;
+    }
+
+    login(data.token);
     navigate('/warga/dashboard');
   };
 
@@ -30,25 +47,33 @@ export default function LoginWarga() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-slate-150">
+          {error && (
+            <div className="mb-4 flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-slate-700">
-                Alamat Email Warga
+              <label htmlFor="nik" className="block text-sm font-semibold text-slate-700">
+                NIK (Nomor Induk Kependudukan)
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-400" aria-hidden="true" />
+                  <CreditCard className="h-5 w-5 text-slate-400" aria-hidden="true" />
                 </div>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
+                  id="nik"
+                  name="nik"
+                  type="text"
+                  maxLength={16}
+                  autoComplete="off"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={nik}
+                  onChange={(e) => setNik(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                  placeholder="nama@email.com"
+                  placeholder="16 digit NIK"
                 />
               </div>
             </div>
@@ -75,32 +100,14 @@ export default function LoginWarga() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded-md"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-slate-900">
-                  Ingat Saya
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-                  Lupa kata sandi?
-                </a>
-              </div>
-            </div>
-
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+                disabled={loading}
+                className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Masuk ke Dashboard Warga
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {loading ? 'Memproses...' : 'Masuk ke Dashboard Warga'}
               </button>
             </div>
           </form>

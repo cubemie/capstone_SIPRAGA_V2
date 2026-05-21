@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, CreditCard, MapPin, Calendar } from 'lucide-react';
+import { User, Mail, Lock, CreditCard, MapPin, Calendar, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { authService } from '../../services/authService';
 
 export default function RegisterWarga() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     nik: '',
     nama: '',
     email: '',
     password: '',
+    confirm_password: '',
     tempatLahir: '',
-    tanggalLahir: '',
-    jenisKelamin: 'Laki-laki',
+    tanggal_lahir: '',
+    jenis_kelamin: 'Laki-laki',
     alamat: '',
     rt: '',
     rw: '',
@@ -26,10 +31,35 @@ export default function RegisterWarga() {
     });
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    // Simulate register
-    navigate('/login-warga');
+    setError('');
+    setSuccess('');
+
+    if (formData.password !== formData.confirm_password) {
+      setError('Konfirmasi password tidak cocok.');
+      return;
+    }
+
+    setLoading(true);
+    const { data, error: err } = await authService.registerWarga({
+      nik: formData.nik,
+      nama: formData.nama,
+      email: formData.email,
+      password: formData.password,
+      confirm_password: formData.confirm_password,
+      jenis_kelamin: formData.jenis_kelamin,
+      tanggal_lahir: formData.tanggal_lahir,
+    });
+    setLoading(false);
+
+    if (err) {
+      setError(err);
+      return;
+    }
+
+    setSuccess('Registrasi berhasil! Mengarahkan ke halaman login...');
+    setTimeout(() => navigate('/login-warga'), 2000);
   };
 
   return (
@@ -50,6 +80,18 @@ export default function RegisterWarga() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
         <div className="bg-white py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-slate-150">
           <form className="space-y-6" onSubmit={handleRegister}>
+            {error && (
+              <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+            {success && (
+              <div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3">
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{success}</span>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* NIK */}
               <div>
@@ -109,7 +151,6 @@ export default function RegisterWarga() {
                 </div>
               </div>
 
-              {/* Password */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700">Kata Sandi</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
@@ -121,6 +162,25 @@ export default function RegisterWarga() {
                     type="password"
                     required
                     value={formData.password}
+                    onChange={handleChange}
+                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              {/* Konfirmasi Password */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-700">Konfirmasi Kata Sandi</label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-slate-400" />
+                  </div>
+                  <input
+                    name="confirm_password"
+                    type="password"
+                    required
+                    value={formData.confirm_password}
                     onChange={handleChange}
                     className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                     placeholder="••••••••"
@@ -150,10 +210,10 @@ export default function RegisterWarga() {
                     <Calendar className="h-5 w-5 text-slate-400" />
                   </div>
                   <input
-                    name="tanggalLahir"
+                    name="tanggal_lahir"
                     type="date"
                     required
-                    value={formData.tanggalLahir}
+                    value={formData.tanggal_lahir}
                     onChange={handleChange}
                     className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                   />
@@ -164,8 +224,8 @@ export default function RegisterWarga() {
               <div>
                 <label className="block text-sm font-semibold text-slate-700">Jenis Kelamin</label>
                 <select
-                  name="jenisKelamin"
-                  value={formData.jenisKelamin}
+                  name="jenis_kelamin"
+                  value={formData.jenis_kelamin}
                   onChange={handleChange}
                   className="mt-1 block w-full px-3 py-2 border border-slate-300 bg-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                 >
@@ -225,9 +285,11 @@ export default function RegisterWarga() {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+                disabled={loading}
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Daftar Akun
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {loading ? 'Mendaftar...' : 'Daftar Akun'}
               </button>
             </div>
           </form>

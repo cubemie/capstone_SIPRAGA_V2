@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Award, Check, Upload, Trash2, Edit2 } from 'lucide-react';
+import { ArrowLeft, Award, Check, Upload, Trash2 } from 'lucide-react';
 
+/**
+ * TtdSurat — Halaman pengaturan tanda tangan digital.
+ *
+ * Fitur upload lokal sudah siap. Integrasi API untuk simpan
+ * ke server dapat ditambahkan saat endpoint tersedia.
+ */
 export default function TtdSurat() {
   const [signatureUrl, setSignatureUrl] = useState(null);
   const [isSaved, setIsSaved] = useState(false);
@@ -16,6 +22,7 @@ export default function TtdSurat() {
   };
 
   const handleSave = () => {
+    // TODO: panggil signatureService.upload(file) saat endpoint siap
     setIsSaved(true);
   };
 

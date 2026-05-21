@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { isLoggedIn } = require('../middlewares/authMiddleware');
+const { verifyToken } = require('../middlewares/authMiddleware');
 const { uploadTtd, getTtd } = require('../controllers/ttdController');
 
 const storage = multer.diskStorage({
@@ -24,9 +24,9 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter });
 
 // Upload tanda tangan
-router.post('/upload-ttd', isLoggedIn, upload.single('ttdImage'), uploadTtd);
+router.post('/upload-ttd', verifyToken, upload.single('ttdImage'), uploadTtd);
 
 // Ambil tanda tangan saat ini
-router.get('/current-ttd', isLoggedIn, getTtd);
+router.get('/current-ttd', verifyToken, getTtd);
 
 module.exports = router;

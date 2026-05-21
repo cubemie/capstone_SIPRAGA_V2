@@ -1,19 +1,46 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, ShieldAlert, Award } from 'lucide-react';
+import { Lock, ShieldAlert, Loader2, AlertCircle } from 'lucide-react';
+import { authService } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginRtRw() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('rt'); // 'rt', 'rw', 'superadmin'
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (role === 'rt' || role === 'rw') {
-      navigate('/rtrw/dashboard');
-    } else if (role === 'superadmin') {
+    setError('');
+    setLoading(true);
+
+    // Pilih service method berdasarkan role yang dipilih
+    const serviceCall =
+      role === 'superadmin'
+        ? authService.loginSuperadmin({ username, password })
+        : authService.loginRtRw({ username, password });
+
+    const { data, error: err } = await serviceCall;
+
+    setLoading(false);
+
+    if (err) {
+      setError(err);
+      return;
+    }
+
+    login(data.token);
+
+    // Navigasi berdasarkan role yang dikembalikan server
+    const userRole = data.role;
+    if (userRole === 'superadmin') {
       navigate('/superadmin/dashboard');
+    } else {
+      navigate('/rtrw/dashboard');
     }
   };
 
@@ -22,7 +49,7 @@ export default function LoginRtRw() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link to="/" className="text-3xl">📮</Link>
         <h2 className="mt-4 text-center text-3xl font-extrabold text-slate-900">
-          Login Staff & Administrasi
+          Login Staff &amp; Administrasi
         </h2>
         <p className="mt-2 text-center text-sm text-slate-600">
           Khusus untuk Ketua RT, RW, dan Super Admin
@@ -35,7 +62,7 @@ export default function LoginRtRw() {
           <div className="grid grid-cols-3 gap-2 mb-6 bg-slate-100 p-1.5 rounded-xl">
             <button
               type="button"
-              onClick={() => setRole('rt')}
+              onClick={() => { setRole('rt'); setError(''); }}
               className={`py-2 text-xs font-semibold rounded-lg transition ${
                 role === 'rt' ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
               }`}
@@ -44,7 +71,7 @@ export default function LoginRtRw() {
             </button>
             <button
               type="button"
-              onClick={() => setRole('rw')}
+              onClick={() => { setRole('rw'); setError(''); }}
               className={`py-2 text-xs font-semibold rounded-lg transition ${
                 role === 'rw' ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
               }`}
@@ -53,7 +80,7 @@ export default function LoginRtRw() {
             </button>
             <button
               type="button"
-              onClick={() => setRole('superadmin')}
+              onClick={() => { setRole('superadmin'); setError(''); }}
               className={`py-2 text-xs font-semibold rounded-lg transition ${
                 role === 'superadmin' ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
               }`}
@@ -62,14 +89,21 @@ export default function LoginRtRw() {
             </button>
           </div>
 
+          {error && (
+            <div className="mb-4 flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
           <form className="space-y-6" onSubmit={handleLogin}>
             <div>
               <label htmlFor="username" className="block text-sm font-semibold text-slate-700">
-                Username / Email
+                Username
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-slate-400" />
+                  <ShieldAlert className="h-5 w-5 text-slate-400" />
                 </div>
                 <input
                   id="username"
@@ -106,9 +140,13 @@ export default function LoginRtRw() {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+                disabled={loading}
+                className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Masuk sebagai {role === 'rt' ? 'Ketua RT' : role === 'rw' ? 'Ketua RW' : 'Super Admin'}
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {loading
+                  ? 'Memproses...'
+                  : `Masuk sebagai ${role === 'rt' ? 'Ketua RT' : role === 'rw' ? 'Ketua RW' : 'Super Admin'}`}
               </button>
             </div>
           </form>

@@ -5,7 +5,7 @@ const path = require('path');
 const fs = require('fs');
 
 const { ajukanSurat, getSuratMilikSaya, getStatistikSurat, getSuratMenungguTTD, tandaTanganiSurat, tolakSurat, getRiwayatSuratRtRw, uploadTemplateSurat } = require('../controllers/suratController');
-const { isLoggedIn } = require('../middlewares/authMiddleware');
+const { verifyToken } = require('../middlewares/authMiddleware');
 
 
 const storage = multer.diskStorage({
@@ -34,12 +34,12 @@ const uploadTemplate = multer({ storage: templateStorage });
 
 const upload = multer({ storage });
 
-router.get('/statistik', isLoggedIn, getStatistikSurat);
+router.get('/statistik', verifyToken, getStatistikSurat);
 
-router.post('/ajukan', isLoggedIn, upload.single('fileSurat'), ajukanSurat);
-router.get('/milik-saya', isLoggedIn, getSuratMilikSaya);
+router.post('/ajukan', verifyToken, upload.single('fileSurat'), ajukanSurat);
+router.get('/milik-saya', verifyToken, getSuratMilikSaya);
 
-router.get('/download/:filename', isLoggedIn, (req, res) => {
+router.get('/download/:filename', verifyToken, (req, res) => {
   const filename = req.params.filename;
   const filePath = path.join(__dirname, '..', 'uploads', filename);
 
@@ -51,7 +51,7 @@ router.get('/download/:filename', isLoggedIn, (req, res) => {
   });
 });
 
-router.get('/menunggu-ttd', isLoggedIn, getSuratMenungguTTD);
+router.get('/menunggu-ttd', verifyToken, getSuratMenungguTTD);
 // Tambahkan storage baru untuk signed files di luar controller
 const signedStorage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/signed/'),
@@ -63,10 +63,10 @@ const signedStorage = multer.diskStorage({
 
 const uploadSigned = multer({ storage: signedStorage });
 
-router.post('/tanda-tangani/:id', isLoggedIn, uploadSigned.single('fileSurat'), tandaTanganiSurat);
-router.post('/tolak/:id', isLoggedIn, tolakSurat);
-router.get('/riwayat-rtrw', isLoggedIn, getRiwayatSuratRtRw);
-router.post('/template/upload', isLoggedIn, uploadTemplate.single('fileTemplate'), uploadTemplateSurat);
+router.post('/tanda-tangani/:id', verifyToken, uploadSigned.single('fileSurat'), tandaTanganiSurat);
+router.post('/tolak/:id', verifyToken, tolakSurat);
+router.get('/riwayat-rtrw', verifyToken, getRiwayatSuratRtRw);
+router.post('/template/upload', verifyToken, uploadTemplate.single('fileTemplate'), uploadTemplateSurat);
 
 
 module.exports = router;

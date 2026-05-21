@@ -1,20 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Send, ArrowLeft, Upload, FileText, CheckCircle } from 'lucide-react';
+import { Send, ArrowLeft, Upload, FileText, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
+import { suratService } from '../../services/suratService';
+import { templateService } from '../../services/templateService';
 
 export default function AjukanSurat() {
   const [subjek, setSubjek] = useState('');
-  const [template, setTemplate] = useState('surat_pengantar');
+  const [templateId, setTemplateId] = useState('');
   const [file, setFile] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Fetch daftar template dari backend
+  const [templates, setTemplates] = useState([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
+
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    async function fetchTemplates() {
+      const { data, error: err } = await templateService.getAll();
+      setLoadingTemplates(false);
+      if (!err && data) {
+        const list = Array.isArray(data) ? data : data?.data ?? [];
+        setTemplates(list);
+        if (list.length > 0) setTemplateId(list[0].id);
+      }
+    }
+    fetchTemplates();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append('subjek', subjek);
+    formData.append('template_id', templateId);
+    if (file) formData.append('dokumen', file);
+
+    const { error: err } = await suratService.ajukanSurat(formData);
+
+    setLoading(false);
+
+    if (err) {
+      setError(err);
+      return;
+    }
+
     setSubmitted(true);
-    setTimeout(() => {
-      navigate('/warga/status');
-    }, 2000);
+    setTimeout(() => navigate('/warga/status'), 2000);
   };
 
   return (
@@ -47,9 +84,16 @@ export default function AjukanSurat() {
               <div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">Formulir Pengajuan Surat Pengantar</h3>
                 <p className="text-slate-500 text-sm">
-                  Harap mengisi data di bawah ini dengan benar untuk pengajuan surat resmi ke RT & RW.
+                  Harap mengisi data di bawah ini dengan benar untuk pengajuan surat resmi ke RT &amp; RW.
                 </p>
               </div>
+
+              {error && (
+                <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
 
               {/* Subject */}
               <div>
@@ -67,16 +111,27 @@ export default function AjukanSurat() {
               {/* Template Select */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700">Pilih Template Surat</label>
-                <select
-                  value={template}
-                  onChange={(e) => setTemplate(e.target.value)}
-                  className="mt-1 block w-full px-4 py-2 border border-slate-300 bg-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-                >
-                  <option value="surat_pengantar">Surat Keterangan Pengantar RT/RW</option>
-                  <option value="sku">Surat Keterangan Usaha (SKU)</option>
-                  <option value="sktm">Surat Keterangan Tidak Mampu (SKTM)</option>
-                  <option value="surat_kematian">Surat Keterangan Kematian</option>
-                </select>
+                {loadingTemplates ? (
+                  <div className="mt-1 flex items-center gap-2 text-slate-400 text-sm py-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Memuat template...</span>
+                  </div>
+                ) : (
+                  <select
+                    value={templateId}
+                    onChange={(e) => setTemplateId(e.target.value)}
+                    required
+                    className="mt-1 block w-full px-4 py-2 border border-slate-300 bg-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                  >
+                    {templates.length === 0 ? (
+                      <option value="">— Belum ada template tersedia —</option>
+                    ) : (
+                      templates.map((t) => (
+                        <option key={t.id} value={t.id}>{t.nama_template || t.nama}</option>
+                      ))
+                    )}
+                  </select>
+                )}
               </div>
 
               {/* File Upload */}
@@ -91,6 +146,7 @@ export default function AjukanSurat() {
                         <input
                           type="file"
                           className="sr-only"
+                          accept=".pdf,.jpg,.jpeg,.png"
                           onChange={(e) => setFile(e.target.files[0])}
                         />
                       </label>
@@ -110,9 +166,16 @@ export default function AjukanSurat() {
                 <Link to="/warga/dashboard" className="px-5 py-2.5 bg-slate-100 text-slate-700 font-semibold rounded-xl hover:bg-slate-200 transition text-sm">
                   Batalkan
                 </Link>
-                <button type="submit" className="px-5 py-2.5 bg-blue-900 text-white font-semibold rounded-xl hover:bg-blue-800 transition text-sm flex items-center">
-                  <Send className="w-4 h-4 mr-2" />
-                  Kirim Pengajuan
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-5 py-2.5 bg-blue-900 text-white font-semibold rounded-xl hover:bg-blue-800 transition text-sm flex items-center disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Mengirim...</>
+                  ) : (
+                    <><Send className="w-4 h-4 mr-2" /> Kirim Pengajuan</>
+                  )}
                 </button>
               </div>
             </form>

@@ -1,8 +1,48 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { FileText, Send, HelpCircle, User, Bell, LogOut, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FileText, Send, User, Bell, LogOut, CheckCircle2, Clock, XCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useSurat } from '../../hooks/useSurat';
+
+/** Hitung jumlah surat per status dari array data */
+function countByStatus(suratList, statusMatch) {
+  return suratList.filter((s) => statusMatch.includes(s.status)).length;
+}
+
+/** Format tanggal ISO ke format "DD Mon YYYY" */
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  return new Date(dateStr).toLocaleDateString('id-ID', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  });
+}
+
+/** Label + warna badge status */
+const STATUS_MAP = {
+  pending_rt: { text: 'Menunggu RT', color: 'bg-amber-100 text-amber-800' },
+  pending_rw: { text: 'Menunggu RW', color: 'bg-indigo-100 text-indigo-800' },
+  approved:   { text: 'Disetujui RW', color: 'bg-emerald-100 text-emerald-800' },
+  rejected:   { text: 'Ditolak', color: 'bg-rose-100 text-rose-800' },
+};
 
 export default function WargaDashboard() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const { data: suratList, loading } = useSurat('my');
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login-warga');
+  };
+
+  // Stats dihitung dari data real
+  const pending = countByStatus(suratList, ['pending_rt', 'pending_rw']);
+  const approved = countByStatus(suratList, ['approved']);
+  const rejected = countByStatus(suratList, ['rejected']);
+
+  // 3 surat terakhir
+  const recentSurat = suratList.slice(0, 3);
+
   return (
     <div className="min-h-screen bg-slate-50 flex font-sans text-slate-800">
       {/* Sidebar */}
@@ -26,10 +66,13 @@ export default function WargaDashboard() {
           </Link>
         </nav>
         <div className="p-4 border-t border-blue-800">
-          <Link to="/" className="flex items-center space-x-3 px-4 py-2.5 hover:bg-red-800 hover:text-white rounded-xl font-medium transition text-slate-300">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-3 px-4 py-2.5 hover:bg-red-800 hover:text-white rounded-xl font-medium transition text-slate-300"
+          >
             <LogOut className="w-5 h-5" />
             <span>Keluar</span>
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -42,15 +85,17 @@ export default function WargaDashboard() {
           </h1>
           <div className="hidden md:block">
             <span className="text-slate-500 font-medium text-sm">Selamat Datang kembali,</span>
-            <h2 className="text-lg font-bold text-slate-800">Danella Nur Aisyah</h2>
+            <h2 className="text-lg font-bold text-slate-800">{user?.nama || 'Warga'}</h2>
           </div>
           <div className="flex items-center space-x-4">
             <button className="p-2 text-slate-400 hover:text-slate-600 relative bg-slate-100 rounded-full">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+              {pending > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+              )}
             </button>
             <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-900 flex items-center justify-center font-bold">
-              DN
+              {user?.nama?.slice(0, 2).toUpperCase() || 'WG'}
             </div>
           </div>
         </header>
@@ -62,7 +107,7 @@ export default function WargaDashboard() {
             <div>
               <h3 className="text-xl font-bold mb-2">Butuh Surat Pengantar RT/RW?</h3>
               <p className="text-slate-200 text-sm max-w-xl">
-                Ajukan surat pengantar resmi secara digital sekarang. Proses verifikasi langsung dipantau oleh ketua RT & RW setempat.
+                Ajukan surat pengantar resmi secara digital sekarang. Proses verifikasi langsung dipantau oleh ketua RT &amp; RW setempat.
               </p>
             </div>
             <Link to="/warga/ajukan" className="bg-white text-blue-900 px-6 py-2.5 rounded-xl font-bold hover:bg-slate-100 transition shadow self-start md:self-auto">
@@ -78,7 +123,7 @@ export default function WargaDashboard() {
               </div>
               <div>
                 <span className="text-sm text-slate-500 font-medium">Menunggu Persetujuan</span>
-                <p className="text-2xl font-bold text-slate-800">1</p>
+                <p className="text-2xl font-bold text-slate-800">{loading ? '—' : pending}</p>
               </div>
             </div>
 
@@ -87,8 +132,8 @@ export default function WargaDashboard() {
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <span className="text-sm text-slate-500 font-medium">Disetujui & Selesai</span>
-                <p className="text-2xl font-bold text-slate-800">4</p>
+                <span className="text-sm text-slate-500 font-medium">Disetujui &amp; Selesai</span>
+                <p className="text-2xl font-bold text-slate-800">{loading ? '—' : approved}</p>
               </div>
             </div>
 
@@ -98,7 +143,7 @@ export default function WargaDashboard() {
               </div>
               <div>
                 <span className="text-sm text-slate-500 font-medium">Pengajuan Ditolak</span>
-                <p className="text-2xl font-bold text-slate-800">0</p>
+                <p className="text-2xl font-bold text-slate-800">{loading ? '—' : rejected}</p>
               </div>
             </div>
           </div>
@@ -112,38 +157,49 @@ export default function WargaDashboard() {
               </Link>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-500">
-                <thead className="bg-slate-50 text-slate-700 uppercase font-semibold text-xs border-b border-slate-150">
-                  <tr>
-                    <th className="px-6 py-3">Tanggal</th>
-                    <th className="px-6 py-3">Subjek / Jenis Surat</th>
-                    <th className="px-6 py-3">Tujuan</th>
-                    <th className="px-6 py-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  <tr className="hover:bg-slate-50/55 transition">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">20 Mei 2026</td>
-                    <td className="px-6 py-4 whitespace-nowrap">Surat Pengantar Domisili</td>
-                    <td className="px-6 py-4 whitespace-nowrap">Pengurusan KTP Baru</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">
-                        Menunggu RT
-                      </span>
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-slate-50/55 transition">
-                    <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">10 April 2026</td>
-                    <td className="px-6 py-4 whitespace-nowrap">Surat Keterangan Usaha (SKU)</td>
-                    <td className="px-6 py-4 whitespace-nowrap">Pengajuan Kredit Bank</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-bold">
-                        Disetujui RW
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              {loading ? (
+                <div className="flex items-center justify-center py-12 gap-2 text-slate-400">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">Memuat data surat...</span>
+                </div>
+              ) : recentSurat.length === 0 ? (
+                <div className="py-12 text-center text-slate-400 text-sm">
+                  Belum ada pengajuan surat.{' '}
+                  <Link to="/warga/ajukan" className="text-blue-600 font-semibold hover:underline">
+                    Ajukan sekarang
+                  </Link>
+                </div>
+              ) : (
+                <table className="w-full text-left text-sm text-slate-500">
+                  <thead className="bg-slate-50 text-slate-700 uppercase font-semibold text-xs border-b border-slate-150">
+                    <tr>
+                      <th className="px-6 py-3">Tanggal</th>
+                      <th className="px-6 py-3">Jenis Surat</th>
+                      <th className="px-6 py-3">Keperluan</th>
+                      <th className="px-6 py-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {recentSurat.map((s) => {
+                      const statusInfo = STATUS_MAP[s.status] || { text: s.status, color: 'bg-slate-100 text-slate-700' };
+                      return (
+                        <tr key={s.id} className="hover:bg-slate-50/55 transition">
+                          <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">
+                            {formatDate(s.created_at || s.tanggal)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">{s.jenis_surat || s.subjek}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">{s.keperluan || '-'}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`${statusInfo.color} text-xs px-2.5 py-1 rounded-full font-bold`}>
+                              {statusInfo.text}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </main>

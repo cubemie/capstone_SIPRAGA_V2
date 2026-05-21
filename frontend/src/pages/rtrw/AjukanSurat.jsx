@@ -1,21 +1,39 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Send, ArrowLeft, User, FileText, CheckCircle2 } from 'lucide-react';
+import { Send, ArrowLeft, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
+import { suratService } from '../../services/suratService';
 
 export default function RtRwAjukanSurat() {
   const navigate = useNavigate();
   const [wargaNik, setWargaNik] = useState('');
   const [wargaNama, setWargaNama] = useState('');
-  const [subjek, setSubjek] = useState('');
+  const [jenisSurat, setJenisSurat] = useState('');
   const [alasan, setAlasan] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    const { error: err } = await suratService.ajukanSuratOffline({
+      nik_warga: wargaNik,
+      nama_warga: wargaNama,
+      jenis_surat: jenisSurat,
+      alasan,
+    });
+
+    setLoading(false);
+
+    if (err) {
+      setError(err);
+      return;
+    }
+
     setSubmitted(true);
-    setTimeout(() => {
-      navigate('/rtrw/dashboard');
-    }, 2000);
+    setTimeout(() => navigate('/rtrw/dashboard'), 2000);
   };
 
   return (
@@ -52,6 +70,13 @@ export default function RtRwAjukanSurat() {
                 </p>
               </div>
 
+              {error && (
+                <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* NIK Warga */}
                 <div>
@@ -81,12 +106,13 @@ export default function RtRwAjukanSurat() {
                 </div>
               </div>
 
-              {/* Subjek Surat */}
+              {/* Jenis Surat */}
               <div>
                 <label className="block text-sm font-semibold text-slate-700">Jenis Surat Pengantar</label>
                 <select
-                  value={subjek}
-                  onChange={(e) => setSubjek(e.target.value)}
+                  value={jenisSurat}
+                  onChange={(e) => setJenisSurat(e.target.value)}
+                  required
                   className="mt-1 block w-full px-4 py-2 border border-slate-300 bg-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                 >
                   <option value="">-- Pilih Jenis Surat --</option>
@@ -114,9 +140,16 @@ export default function RtRwAjukanSurat() {
                 <Link to="/rtrw/dashboard" className="px-5 py-2.5 bg-slate-100 text-slate-700 font-semibold rounded-xl hover:bg-slate-200 transition text-sm">
                   Batalkan
                 </Link>
-                <button type="submit" className="px-5 py-2.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition text-sm flex items-center shadow">
-                  <Send className="w-4 h-4 mr-2" />
-                  Terbitkan & Simpan Surat
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-5 py-2.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition text-sm flex items-center shadow disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Menyimpan...</>
+                  ) : (
+                    <><Send className="w-4 h-4 mr-2" /> Terbitkan &amp; Simpan Surat</>
+                  )}
                 </button>
               </div>
             </form>
