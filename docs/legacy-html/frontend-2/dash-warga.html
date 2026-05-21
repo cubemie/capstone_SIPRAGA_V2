@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard Warga</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+<body class="bg-gray-100 flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg h-screen p-5">
+        <h2 class="text-xl font-bold text-gray-700 mb-6">🏠 Dashboard Warga</h2>
+        <ul class="space-y-3">
+            <li>
+                <a href="ajukan-surat-rtrw.html" class="flex items-center p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    📮 Ajukan Surat ke RT/RW
+                </a>
+            </li>
+            <li>
+                <a href="templatesurat.html" class="flex items-center p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    📂 Cek Template Surat
+                </a>
+            </li>
+            <li>
+                <a href="cek-statussurat-warga.html" class="flex items-center p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    📊 Cek Status Surat
+                </a>
+            </li>
+            <li>
+                <a href="inputdata-warga.html" class="flex items-center p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    🆔 Input Data KTP
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1">
+        <!-- Header -->
+        <header class="bg-blue-900 text-white p-4 flex justify-between items-center shadow-md">
+            <h1 class="text-lg font-semibold">Sistem Persuratan RT RW</h1>
+
+            <!-- Profil & Dropdown -->
+            <div class="relative">
+                <button id="profileBtn" class="flex items-center space-x-2 hover:bg-blue-700 px-3 py-2 rounded-lg">
+                    <!-- Ikon User -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="7" r="4"></circle>
+                        <path d="M5.5 21a8.38 8.38 0 0 1 13 0"></path>
+                    </svg>
+                    <span class="hidden md:inline">Warga</span>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div id="profileMenu" class="hidden absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg overflow-hidden">
+                    <a href="profil-warga.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">🔹 Profil</a>
+                    <a href="logout.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">🚪 Logout</a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+    <div class="flex-1 p-5">
+        <!-- Dashboard Grid -->
+        <main class="grid grid-cols-3 gap-3 mt-4">
+            <!-- Info Persuratan -->
+            <div class="bg-white p-4 rounded-lg shadow-md col-span-1 max-w-[250px] max-h-[310px] ml-12 mr-6">
+                <h3 class="text-lg font-bold text-gray-800">📋 Informasi Persuratan</h3>
+                <div class="grid grid-cols-2 gap-2 mt-3 text-center">
+                    <div class="bg-blue-500 text-white p-3 rounded-md">
+                        <p class="text-sm">Diajukan</p>
+                        <p class="text-xl font-bold">15</p>
+                    </div>
+                    <div class="bg-green-500 text-white p-3 rounded-md">
+                        <p class="text-sm">Disetujui</p>
+                        <p class="text-xl font-bold">10</p>
+                    </div>
+                    <div class="bg-yellow-500 text-white p-3 rounded-md">
+                        <p class="text-sm">Menunggu</p>
+                        <p class="text-xl font-bold">3</p>
+                    </div>
+                    <div class="bg-red-500 text-white p-3 rounded-md">
+                        <p class="text-sm">Ditolak</p>
+                        <p class="text-xl font-bold">2</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Circular Progress Kelengkapan Data -->
+            <div class="bg-white p-4 rounded-lg shadow-md flex flex-col items-center col-span-1 max-w-[250px] max-h-[310px] ml-2 mr-6">
+                <h3 class="text-md font-bold text-gray-800">🆔 Kelengkapan Data Diri</h3>
+                <canvas id="progressChart" width="80" height="80" class="mt-2"></canvas>
+                <p class="text-gray-600 mt-2">85% Lengkap</p>
+            </div>
+
+            <!-- Stacked Bar Chart: Tren Persuratan -->
+            <div class="bg-white p-4 rounded-lg shadow-md col-span-1 max-w-[460px] max-h-[270px] ml-18 mr-6">
+                <h3 class="text-lg font-bold text-gray-800">📈 Tren Persuratan</h3>
+                <canvas id="stackedBarChart" class="mt-3"></canvas>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Pie Chart (Status Surat)
+        new Chart(document.getElementById("pieChart"), {
+            type: "pie",
+            data: {
+                labels: ["Disetujui", "Menunggu", "Ditolak"],
+                datasets: [{
+                    data: [10, 3, 2],
+                    backgroundColor: ["#4CAF50", "#FFC107", "#F44336"]
+                }]
+            }
+        });
+
+        // Stacked Bar Chart (Tren Persuratan)
+        new Chart(document.getElementById("stackedBarChart"), {
+            type: "bar",
+            data: {
+                labels: ["Sep", "Okt", "Nov", "Des", "Jan", "Feb"],
+                datasets: [
+                    { label: "Disetujui", data: [8, 10, 9, 11, 12, 10], backgroundColor: "#4CAF50", stack: "Stack 0" },
+                    { label: "Menunggu", data: [3, 2, 3, 1, 2, 3], backgroundColor: "#FFC107", stack: "Stack 0" },
+                    { label: "Ditolak", data: [2, 3, 1, 2, 3, 2], backgroundColor: "#F44336", stack: "Stack 0" }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: "top" } },
+                scales: { 
+                    x: { stacked: true },
+                    y: { stacked: true }
+                }
+            }
+        });
+
+        // Circular Progress Chart (Data Diri)
+        new Chart(document.getElementById("progressChart"), {
+            type: "doughnut",
+            data: { datasets: [{ data: [85, 15], backgroundColor: ["#4CAF50", "#E0E0E0"] }] },
+            options: { cutout: "80%" }
+        });
+    </script>
+
+    <script>
+        // Toggle dropdown menu profil
+        document.getElementById("profileBtn").addEventListener("click", function () {
+            document.getElementById("profileMenu").classList.toggle("hidden");
+        });
+
+        // Tutup dropdown jika klik di luar
+        document.addEventListener("click", function (event) {
+            const profileMenu = document.getElementById("profileMenu");
+            const profileBtn = document.getElementById("profileBtn");
+            if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
+                profileMenu.classList.add("hidden");
+            }
+        });
+    </script>
+
+</body>
+</html>

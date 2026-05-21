@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
@@ -20,7 +21,7 @@ app.use('/uploads', express.static('uploads'));
 
 // Setup session
 app.use(session({
-  secret: 'secret-key-strong',  // ganti dengan secret yang kuat
+  secret: process.env.SESSION_SECRET || 'secret-key-strong',  // ganti dengan secret yang kuat
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false } // set true kalau pakai HTTPS

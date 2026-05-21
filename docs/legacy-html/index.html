@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login & Register</title>
+    <link rel="stylesheet" href="css/index.css" />
+  </head>
+  <body>
+    <div class="container">
+      <img src="src/images.jpeg" alt="" />
+      <h2 id="form-title">Logan</h2>
+      <p>Sistem Informasi Persuratan RT/RW Nasional</p>
+
+      <form id="login-form">
+        <div class="input-group">
+          <input type="text" id="login-nik" placeholder="NIK" required />
+        </div>
+        <div class="input-group">
+          <input
+            type="password"
+            id="login-password"
+            placeholder="Password"
+            required
+          />
+        </div>
+        <button type="submit" class="btn">Login</button>
+      </form>
+
+      <form id="register-form" style="display: none">
+        <div class="input-group">
+          <input type="text" id="register-nik" placeholder="NIK" required />
+        </div>
+        <div class="input-group">
+          <input type="text" id="register-nama" placeholder="Nama" required />
+        </div>
+        <div class="input-group">
+          <input
+            type="text"
+            id="register-tempatlahir"
+            placeholder="Tempat Lahir"
+            required
+          />
+        </div>
+        <div class="input-group">
+          <input type="date" id="register-tanggallahir" required />
+        </div>
+        <div class="input-group">
+          <select id="register-jeniskelamin" required>
+            <option value="">Select Gender</option>
+            <option value="Laki-laki">Male</option>
+            <option value="Perempuan">Female</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <input
+            type="text"
+            id="register-alamat"
+            placeholder="Alamat"
+            required
+          />
+        </div>
+        <div class="input-group">
+          <input
+            type="email"
+            id="register-email"
+            placeholder="Email"
+            required
+          />
+        </div>
+        <div class="input-group">
+          <input
+            type="password"
+            id="register-password"
+            placeholder="Password"
+            required
+          />
+        </div>
+        <button type="submit" class="btn">Register</button>
+      </form>
+
+      <p id="toggle-text">
+        Don't have an account?
+        <span class="toggle" onclick="toggleForm()">Register</span>
+      </p>
+    </div>
+
+    <script src="js/script.js"></script>
+  </body>
+</html>
