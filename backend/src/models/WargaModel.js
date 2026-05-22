@@ -15,7 +15,7 @@ class WargaModel {
    */
   static async findByNik(nik) {
     const [rows] = await db.query('SELECT * FROM warga WHERE NIK = ?', [nik]);
-    return rows[0] ?? null;
+    return rows[0] || null;
   }
 
   /**
@@ -25,7 +25,7 @@ class WargaModel {
    */
   static async findByEmail(email) {
     const [rows] = await db.query('SELECT * FROM warga WHERE email = ?', [email]);
-    return rows[0] ?? null;
+    return rows[0] || null;
   }
 
   /**
@@ -39,7 +39,7 @@ class WargaModel {
       'SELECT * FROM warga WHERE NIK = ? OR email = ?',
       [nik, email]
     );
-    return rows[0] ?? null;
+    return rows[0] || null;
   }
 
   /**
@@ -49,7 +49,7 @@ class WargaModel {
    */
   static async findById(id) {
     const [rows] = await db.query('SELECT * FROM warga WHERE id_warga = ?', [id]);
-    return rows[0] ?? null;
+    return rows[0] || null;
   }
 
   /**

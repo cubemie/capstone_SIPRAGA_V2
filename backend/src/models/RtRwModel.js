@@ -18,7 +18,7 @@ class RtRwModel {
    */
   static async findRtByUsername(username) {
     const [rows] = await db.query('SELECT * FROM rt WHERE username = ?', [username]);
-    return rows[0] ?? null;
+    return rows[0] || null;
   }
 
   /**
@@ -28,7 +28,7 @@ class RtRwModel {
    */
   static async findRtById(id) {
     const [rows] = await db.query('SELECT * FROM rt WHERE rt_id = ?', [id]);
-    return rows[0] ?? null;
+    return rows[0] || null;
   }
 
   /**
@@ -53,7 +53,7 @@ class RtRwModel {
       [
         data.no_rt, data.rw_id, data.nama_ketua,
         data.provinsi, data.kota, data.kecamatan, data.kelurahan_desa,
-        data.username, data.password, data.ttd_digital ?? null,
+        data.username, data.password, data.ttd_digital || null,
       ]
     );
   }
@@ -76,7 +76,7 @@ class RtRwModel {
    */
   static async findRwByUsername(username) {
     const [rows] = await db.query('SELECT * FROM rw WHERE username = ?', [username]);
-    return rows[0] ?? null;
+    return rows[0] || null;
   }
 
   /**
@@ -86,7 +86,7 @@ class RtRwModel {
    */
   static async findRwById(id) {
     const [rows] = await db.query('SELECT * FROM rw WHERE rw_id = ?', [id]);
-    return rows[0] ?? null;
+    return rows[0] || null;
   }
 
   /**
@@ -121,7 +121,7 @@ class RtRwModel {
       [
         data.rw_id, data.no_rw, data.nama_ketua,
         data.provinsi, data.kota, data.kecamatan, data.kelurahan_desa,
-        data.username, data.password, data.ttd_digital ?? null,
+        data.username, data.password, data.ttd_digital || null,
       ]
     );
   }
@@ -144,7 +144,7 @@ class RtRwModel {
    */
   static async findSuperadminByUsername(username) {
     const [rows] = await db.query('SELECT * FROM superadmin WHERE username = ?', [username]);
-    return rows[0] ?? null;
+    return rows[0] || null;
   }
 }
 

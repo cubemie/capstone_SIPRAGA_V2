@@ -29,7 +29,7 @@ class TemplateSuratModel {
       'SELECT * FROM template_surat WHERE id_template = ?',
       [id]
     );
-    return rows[0] ?? null;
+    return rows[0] || null;
   }
 
   /**

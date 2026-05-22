@@ -1,28 +1,22 @@
-const jwt = require('jsonwebtoken');
+const { extractAndVerifyToken } = require('./authMiddleware');
 
 /**
  * Middleware untuk memverifikasi JWT token RT/RW.
- * Token diambil dari header Authorization: Bearer <token>
- * Payload JWT harus mengandung role: 'rt' atau 'rw'
+ * Payload JWT harus mengandung role: 'rt' atau 'rw'.
+ * Hasil decode disimpan di req.rtRwUser.
  */
+const ALLOWED_ROLES = ['rt', 'rw'];
+
 module.exports = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Format: Bearer <token>
+  const result = extractAndVerifyToken(req, res);
+  if (!result) return; // response sudah dikirim
 
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized. Token tidak ditemukan.' });
+  const { decoded } = result;
+
+  if (!ALLOWED_ROLES.includes(decoded.role)) {
+    return res.status(403).json({ message: 'Akses ditolak. Hanya RT/RW yang diizinkan.' });
   }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    if (decoded.role !== 'rt' && decoded.role !== 'rw') {
-      return res.status(403).json({ message: 'Akses ditolak. Hanya RT/RW yang diizinkan.' });
-    }
-
-    req.rtRwUser = decoded; // { id, username, role, rt, rw }
-    next();
-  } catch (err) {
-    return res.status(403).json({ message: 'Token tidak valid atau sudah kadaluarsa.' });
-  }
+  req.rtRwUser = decoded; // { id, username, role }
+  next();
 };

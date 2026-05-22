@@ -1,75 +1,92 @@
-const db = require('../config/db');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+/**
+ * AuthController
+ *
+ * Thin controller — hanya mengekstrak data dari request,
+ * meneruskan ke AuthService, dan mengembalikan response HTTP.
+ * Error fatal diteruskan ke global errorHandler via next(err).
+ */
 
-exports.register = async (req, res) => {
-  const { nik, nama, jenis_kelamin, tanggal_lahir, email, password, confirm_password } = req.body;
+const AuthService = require('../services/AuthService');
 
-  if (!nik || !nama || !jenis_kelamin || !tanggal_lahir || !email || !password || !confirm_password) {
-    return res.status(400).json({ message: 'Semua field wajib diisi.' });
-  }
-  if (password !== confirm_password) {
-    return res.status(400).json({ message: 'Konfirmasi password tidak cocok.' });
-  }
-
-  try {
-    const [existing] = await db.query('SELECT * FROM warga WHERE NIK = ? OR email = ?', [nik, email]);
-    if (existing.length > 0) {
-      return res.status(400).json({ message: 'NIK atau email sudah terdaftar.' });
+class AuthController {
+  /** POST /api/auth/register */
+  static async register(req, res, next) {
+    try {
+      const { data, error } = await AuthService.registerWarga(req.body);
+      if (error) return res.status(400).json({ message: error });
+      res.status(201).json(data);
+    } catch (err) {
+      next(err);
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    await db.query(`
-      INSERT INTO warga (NIK, nama, jenis_kelamin, tanggal_lahir, email, password)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `, [nik, nama, jenis_kelamin, tanggal_lahir, email, hashedPassword]);
-
-    res.status(201).json({ message: 'Registrasi berhasil. Silakan login.' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Terjadi kesalahan server.' });
-  }
-};
-
-exports.login = async (req, res) => {
-  const { nik, password } = req.body;
-
-  if (!nik || !password) {
-    return res.status(400).json({ message: 'NIK dan password wajib diisi.' });
   }
 
-  try {
-    const [rows] = await db.query('SELECT * FROM warga WHERE NIK = ?', [nik]);
-    if (rows.length === 0) {
-      return res.status(400).json({ message: 'NIK belum terdaftar.' });
+  /** POST /api/auth/login */
+  static async loginWarga(req, res, next) {
+    try {
+      const { nik, password } = req.body;
+      const { data, error } = await AuthService.loginWarga(nik, password);
+      if (error) return res.status(400).json({ message: error });
+      res.json(data);
+    } catch (err) {
+      next(err);
     }
-
-    const user = rows[0];
-    const validPassword = await bcrypt.compare(password, user.password);
-
-    if (!validPassword) {
-      return res.status(400).json({ message: 'Password salah.' });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      {
-        id_warga: user.id_warga,
-        nama: user.nama,
-        nik: user.NIK
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
-    res.json({ message: 'Login berhasil', token });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Terjadi kesalahan server.' });
   }
-};
 
-exports.logout = (req, res) => {
-  // JWT stateless — logout cukup hapus token di sisi client
-  res.json({ message: 'Logout berhasil.' });
-};
+  /** POST /api/auth/login-rtrw */
+  static async loginRtRw(req, res, next) {
+    try {
+      const { username, password } = req.body;
+      const { data, error } = await AuthService.loginRtRw(username, password);
+      if (error) return res.status(400).json({ message: error });
+      res.json(data);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** POST /api/superadmin/login */
+  static async loginSuperadmin(req, res, next) {
+    try {
+      const { username, password } = req.body;
+      const { data, error } = await AuthService.loginSuperadmin(username, password);
+      if (error) return res.status(400).json({ message: error });
+      res.json(data);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** POST /api/auth/logout */
+  static logout(req, res) {
+    res.json({ message: 'Logout berhasil.' });
+  }
+
+  /** GET /api/auth/check-session */
+  static checkSession(req, res) {
+    res.json({ loggedIn: true, user: req.user });
+  }
+
+  /** POST /api/superadmin/rt */
+  static async insertRt(req, res, next) {
+    try {
+      const { data, error } = await AuthService.createRt(req.body);
+      if (error) return res.status(400).json({ message: error });
+      res.status(201).json(data);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** POST /api/superadmin/rw */
+  static async insertRw(req, res, next) {
+    try {
+      const { data, error } = await AuthService.createRw(req.body);
+      if (error) return res.status(400).json({ message: error });
+      res.status(201).json(data);
+    } catch (err) {
+      next(err);
+    }
+  }
+}
+
+module.exports = AuthController;

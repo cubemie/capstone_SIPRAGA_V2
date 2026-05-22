@@ -1,28 +1,20 @@
-const jwt = require('jsonwebtoken');
+const { extractAndVerifyToken } = require('./authMiddleware');
 
 /**
  * Middleware untuk memverifikasi JWT token Superadmin.
- * Token diambil dari header Authorization: Bearer <token>
- * Payload JWT harus mengandung role: 'superadmin'
+ * Payload JWT harus mengandung role: 'superadmin'.
+ * Hasil decode disimpan di req.superadmin.
  */
 module.exports = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Format: Bearer <token>
+  const result = extractAndVerifyToken(req, res);
+  if (!result) return; // response sudah dikirim
 
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized. Token tidak ditemukan.' });
+  const { decoded } = result;
+
+  if (decoded.role !== 'superadmin') {
+    return res.status(403).json({ message: 'Akses ditolak. Hanya superadmin yang diizinkan.' });
   }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    if (decoded.role !== 'superadmin') {
-      return res.status(403).json({ message: 'Unauthorized: hanya superadmin yang boleh mengakses.' });
-    }
-
-    req.superadmin = decoded; // { id, username, role }
-    next();
-  } catch (err) {
-    return res.status(403).json({ message: 'Token tidak valid atau sudah kadaluarsa.' });
-  }
+  req.superadmin = decoded; // { id, username, role }
+  next();
 };

@@ -5,7 +5,8 @@
  * Tidak mengandung logika bisnis — hanya query SQL.
  */
 
-const db = require('../config/db');
+const db          = require('../config/db');
+const SURAT_STATUS = require('../constants/suratStatus');
 
 /** Padding angka RT/RW ke 3 digit: "1" → "001" */
 function padRtRw(val) {
@@ -33,7 +34,7 @@ class SuratModel {
   static async findByWargaId(id_warga) {
     const [rows] = await db.query(
       `SELECT id, subjek, file_path, file_path_signed,
-              tanggal_ajuan AS created_at, status, alasan_penolakan AS alasan_penolakan
+              tanggal_ajuan AS created_at, status, alasan_penolakan
        FROM pengajuan_surat
        WHERE id_warga = ?
        ORDER BY tanggal_ajuan DESC`,
@@ -43,7 +44,7 @@ class SuratModel {
   }
 
   /**
-   * Ambil semua surat yang masuk dan menunggu verifikasi (status = 1).
+   * Ambil semua surat yang masuk dan menunggu verifikasi.
    * @returns {Array}
    */
   static async findMasuk() {
@@ -52,14 +53,15 @@ class SuratModel {
               ps.status, w.nama AS nama_warga, w.NIK AS nik_warga
        FROM pengajuan_surat ps
        JOIN warga w ON ps.id_warga = w.id_warga
-       WHERE ps.status = 1
-       ORDER BY ps.tanggal_ajuan ASC`
+       WHERE ps.status = ?
+       ORDER BY ps.tanggal_ajuan ASC`,
+      [SURAT_STATUS.MENUNGGU]
     );
     return rows;
   }
 
   /**
-   * Ambil riwayat surat yang sudah selesai diproses (status 2 = disetujui, 3 = ditolak).
+   * Ambil riwayat surat yang sudah selesai diproses.
    * @returns {Array}
    */
   static async findRiwayat() {
@@ -68,33 +70,34 @@ class SuratModel {
               ps.status, w.nama AS nama_warga
        FROM pengajuan_surat ps
        JOIN warga w ON ps.id_warga = w.id_warga
-       WHERE ps.status IN (2, 3)
-       ORDER BY ps.tanggal_ajuan DESC`
+       WHERE ps.status IN (?, ?)
+       ORDER BY ps.tanggal_ajuan DESC`,
+      [SURAT_STATUS.DISETUJUI, SURAT_STATUS.DITOLAK]
     );
     return rows;
   }
 
   /**
-   * Setujui surat (update file signed + ubah status ke 2).
+   * Setujui surat (update file signed + ubah status ke DISETUJUI).
    * @param {number} id
-   * @param {string} file_path_signed
+   * @param {string|null} file_path_signed
    */
   static async approve(id, file_path_signed) {
     await db.query(
-      'UPDATE pengajuan_surat SET file_path_signed = ?, status = 2 WHERE id = ?',
-      [file_path_signed, id]
+      'UPDATE pengajuan_surat SET file_path_signed = ?, status = ? WHERE id = ?',
+      [file_path_signed, SURAT_STATUS.DISETUJUI, id]
     );
   }
 
   /**
-   * Tolak surat (ubah status ke 3 + simpan alasan).
+   * Tolak surat (ubah status ke DITOLAK + simpan alasan).
    * @param {number} id
    * @param {string} alasan
    */
   static async reject(id, alasan) {
     await db.query(
-      'UPDATE pengajuan_surat SET status = 3, alasan_penolakan = ? WHERE id = ?',
-      [alasan, id]
+      'UPDATE pengajuan_surat SET status = ?, alasan_penolakan = ? WHERE id = ?',
+      [SURAT_STATUS.DITOLAK, alasan, id]
     );
   }
 
@@ -107,12 +110,12 @@ class SuratModel {
     const [rows] = await db.query(
       `SELECT
          COUNT(*) AS total,
-         SUM(status = 1) AS menunggu,
-         SUM(status = 2) AS disetujui,
-         SUM(status = 3) AS ditolak
+         SUM(status = ?) AS menunggu,
+         SUM(status = ?) AS disetujui,
+         SUM(status = ?) AS ditolak
        FROM pengajuan_surat
        WHERE id_warga = ?`,
-      [id_warga]
+      [SURAT_STATUS.MENUNGGU, SURAT_STATUS.DISETUJUI, SURAT_STATUS.DITOLAK, id_warga]
     );
     return rows[0];
   }

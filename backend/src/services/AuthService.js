@@ -7,15 +7,43 @@
  * - Login RT/RW (JWT)
  * - Login Superadmin (JWT)
  * - Pembuatan akun RT/RW oleh superadmin
- *
- * Konsolidasi dari: authController, authRtRwController, superAdminController, rtRwController
  */
 
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-
+const bcrypt    = require('bcryptjs');
+const jwt       = require('jsonwebtoken');
 const WargaModel = require('../models/WargaModel');
-const RtRwModel = require('../models/RtRwModel');
+const RtRwModel  = require('../models/RtRwModel');
+
+// ─── Konstanta ────────────────────────────────────────────────────────────────
+
+const NIK_LENGTH      = 16;
+const BCRYPT_ROUNDS   = 10;
+const JWT_EXPIRES_IN  = '1d';
+
+// ─── Helper validasi ──────────────────────────────────────────────────────────
+
+/**
+ * Validasi NIK: harus 16 digit angka.
+ * @param {string} nik
+ * @returns {string|null} pesan error, atau null jika valid
+ */
+function validateNik(nik) {
+  if (!nik || typeof nik !== 'string') return 'NIK wajib diisi.';
+  if (!/^\d+$/.test(nik))             return 'NIK hanya boleh berisi angka.';
+  if (nik.length !== NIK_LENGTH)      return `NIK harus ${NIK_LENGTH} digit.`;
+  return null;
+}
+
+/**
+ * Sign JWT dengan payload dan options standar.
+ * @param {Object} payload
+ * @returns {string} token
+ */
+function signToken(payload) {
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+}
+
+// ─── Class ────────────────────────────────────────────────────────────────────
 
 class AuthService {
   // ─── Warga ───────────────────────────────────────────────────────────────
@@ -32,17 +60,23 @@ class AuthService {
     if (!nik || !nama || !email || !password || !confirm_password || !jenis_kelamin || !tanggal_lahir) {
       return { data: null, error: 'Semua field wajib diisi.' };
     }
+
+    // Validasi format NIK
+    const nikError = validateNik(nik);
+    if (nikError) return { data: null, error: nikError };
+
+    // Validasi konfirmasi password
     if (password !== confirm_password) {
       return { data: null, error: 'Konfirmasi password tidak cocok.' };
     }
 
-    // Cek duplikat
+    // Cek duplikat NIK atau email
     const existing = await WargaModel.findByNikOrEmail(nik, email);
     if (existing) {
       return { data: null, error: 'NIK atau email sudah terdaftar.' };
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
     await WargaModel.create({ nik, nama, email, password: hashedPassword, jenis_kelamin, tanggal_lahir });
 
     return { data: { message: 'Registrasi berhasil. Silakan login.' }, error: null };
@@ -60,20 +94,17 @@ class AuthService {
     }
 
     const user = await WargaModel.findByNik(nik);
-    if (!user) {
-      return { data: null, error: 'NIK belum terdaftar.' };
-    }
+    if (!user) return { data: null, error: 'NIK belum terdaftar.' };
 
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) {
-      return { data: null, error: 'Password salah.' };
-    }
+    if (!valid) return { data: null, error: 'Password salah.' };
 
-    const token = jwt.sign(
-      { id_warga: user.id_warga, nama: user.nama, nik: user.NIK, role: 'warga' },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+    const token = signToken({
+      id_warga: user.id_warga,
+      nama:     user.nama,
+      nik:      user.NIK,
+      role:     'warga',
+    });
 
     return { data: { message: 'Login berhasil', token }, error: null };
   }
@@ -81,7 +112,7 @@ class AuthService {
   // ─── RT / RW ─────────────────────────────────────────────────────────────
 
   /**
-   * Login RT atau RW dengan username dan password.
+   * Login RT atau RW.
    * Mencari di tabel `rt` terlebih dahulu, lalu `rw`.
    * @param {string} username
    * @param {string} password
@@ -92,35 +123,26 @@ class AuthService {
       return { data: null, error: 'Username dan password wajib diisi.' };
     }
 
-    // Cari di tabel RT
+    // Cari di tabel RT, lalu RW
     let user = await RtRwModel.findRtByUsername(username);
     let role = 'rt';
 
-    // Kalau tidak ada di RT, cari di RW
     if (!user) {
       user = await RtRwModel.findRwByUsername(username);
       role = 'rw';
     }
 
-    if (!user) {
-      return { data: null, error: 'Username tidak ditemukan.' };
-    }
+    if (!user) return { data: null, error: 'Username tidak ditemukan.' };
 
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) {
-      return { data: null, error: 'Password salah.' };
-    }
+    if (!valid) return { data: null, error: 'Password salah.' };
 
-    const token = jwt.sign(
-      {
-        id: user.rt_id ?? user.rw_id,
-        username: user.username,
-        nama: user.nama_ketua,
-        role,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+    const token = signToken({
+      id:       user.rt_id || user.rw_id,
+      username: user.username,
+      nama:     user.nama_ketua,
+      role,
+    });
 
     return { data: { message: 'Login berhasil', token, role }, error: null };
   }
@@ -128,7 +150,7 @@ class AuthService {
   // ─── Superadmin ──────────────────────────────────────────────────────────
 
   /**
-   * Login superadmin dengan username dan password.
+   * Login superadmin.
    * @param {string} username
    * @param {string} password
    * @returns {{ data: Object|null, error: string|null }}
@@ -139,20 +161,12 @@ class AuthService {
     }
 
     const user = await RtRwModel.findSuperadminByUsername(username);
-    if (!user) {
-      return { data: null, error: 'Username tidak ditemukan.' };
-    }
+    if (!user) return { data: null, error: 'Username tidak ditemukan.' };
 
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) {
-      return { data: null, error: 'Password salah.' };
-    }
+    if (!valid) return { data: null, error: 'Password salah.' };
 
-    const token = jwt.sign(
-      { id: user.id, username: user.username, role: 'superadmin' },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+    const token = signToken({ id: user.id, username: user.username, role: 'superadmin' });
 
     return { data: { message: 'Login superadmin berhasil', token, role: 'superadmin' }, error: null };
   }
@@ -160,7 +174,7 @@ class AuthService {
   // ─── Manajemen RT/RW oleh Superadmin ─────────────────────────────────────
 
   /**
-   * Buat akun RT baru (dipanggil oleh superadmin).
+   * Buat akun RT baru.
    * @param {Object} data
    * @returns {{ data: Object|null, error: string|null }}
    */
@@ -172,23 +186,19 @@ class AuthService {
     }
 
     const rwExists = await RtRwModel.isRwExists(rw_id);
-    if (!rwExists) {
-      return { data: null, error: 'rw_id tidak ditemukan.' };
-    }
+    if (!rwExists) return { data: null, error: 'rw_id tidak ditemukan.' };
 
     const usernameTaken = await RtRwModel.isRtUsernameTaken(username);
-    if (usernameTaken) {
-      return { data: null, error: 'Username RT sudah digunakan.' };
-    }
+    if (usernameTaken) return { data: null, error: 'Username RT sudah digunakan.' };
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
     await RtRwModel.createRt({ ...data, password: hashedPassword });
 
     return { data: { message: 'Data RT berhasil ditambahkan.' }, error: null };
   }
 
   /**
-   * Buat akun RW baru (dipanggil oleh superadmin).
+   * Buat akun RW baru.
    * @param {Object} data
    * @returns {{ data: Object|null, error: string|null }}
    */
@@ -200,11 +210,9 @@ class AuthService {
     }
 
     const usernameTaken = await RtRwModel.isRwUsernameTaken(username);
-    if (usernameTaken) {
-      return { data: null, error: 'Username RW sudah digunakan.' };
-    }
+    if (usernameTaken) return { data: null, error: 'Username RW sudah digunakan.' };
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
     await RtRwModel.createRw({ ...data, password: hashedPassword });
 
     return { data: { message: 'Data RW berhasil ditambahkan.' }, error: null };
