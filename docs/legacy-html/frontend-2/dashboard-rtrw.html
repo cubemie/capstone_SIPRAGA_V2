@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard RT/RW</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 flex min-h-screen">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-lg h-screen p-5">
+    <h2 class="text-xl font-bold text-gray-700 mb-6">🏘️ Dashboard RT/RW</h2>
+    <ul class="space-y-3">
+      <li>
+        <a href="ttdsurat-rtrw.html" class="flex items-center p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          ✍️ Tandatangani Surat
+        </a>
+      </li>
+      <li>
+        <a href="verifikasi-data-warga.html" class="flex items-center p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          👤 Verifikasi Data Diri Warga
+        </a>
+      </li>
+      <li>
+        <a href="lihatriwayatsurat-rtrw.html" class="flex items-center p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          📚 Lihat Riwayat Surat
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="flex-1">
+    <!-- Header -->
+    <header class="bg-blue-900 text-white p-4 flex justify-between items-center shadow-md">
+      <h1 class="text-lg font-semibold">Sistem Persuratan RT RW</h1>
+      <div class="relative">
+        <button id="profileBtn" class="flex items-center space-x-2 hover:bg-blue-700 px-3 py-2 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="7" r="4"></circle>
+            <path d="M5.5 21a8.38 8.38 0 0 1 13 0"></path>
+          </svg>
+          <span class="hidden md:inline">RT/RW</span>
+        </button>
+        <div id="profileMenu" class="hidden absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg overflow-hidden">
+          <a href="profil-rtrw.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">🔹 Profil</a>
+          <a href="logout.html" class="block px-4 py-2 text-gray-700 hover:bg-gray-200">🚪 Logout</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard KPI & Grafik -->
+    <main class="p-6 space-y-6">
+
+      <!-- KPI Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <div class="bg-white p-6 rounded-xl shadow text-center">
+      <h3 class="text-lg font-bold mb-2">📄 Surat Masuk</h3>
+      <p class="text-4xl font-bold text-blue-600">28</p>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow text-center">
+      <h3 class="text-lg font-bold mb-2">✅ Ditandatangani</h3>
+      <p class="text-4xl font-bold text-green-600">19</p>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow text-center">
+      <h3 class="text-lg font-bold mb-2">⌛ Menunggu TTD</h3>
+      <p class="text-4xl font-bold text-yellow-500">7</p>
+    </div>
+  </div>
+  
+  <!-- Grafik Surat -->
+  <div class="flex justify-center">
+    <div class="bg-white p-6 rounded-xl shadow w-full max-w-3xl">
+      <h3 class="text-xl font-bold text-center mb-4">📊 Surat Masuk Bulanan</h3>
+      <canvas id="chartSurat" class="mx-auto h-72"></canvas>
+    </div>
+  </div>
+  
+    </main>
+  </div>
+
+  <script>
+    // Toggle dropdown profil
+    document.getElementById("profileBtn").addEventListener("click", function () {
+      document.getElementById("profileMenu").classList.toggle("hidden");
+    });
+
+    document.addEventListener("click", function (e) {
+      const menu = document.getElementById("profileMenu");
+      const btn = document.getElementById("profileBtn");
+      if (!btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.add("hidden");
+      }
+    });
+
+    // Grafik
+    new Chart(document.getElementById("chartSurat"), {
+      type: 'line',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei'],
+        datasets: [{
+          label: 'Surat Masuk',
+          data: [12, 18, 15, 22, 28],
+          borderColor: '#3B82F6',
+          backgroundColor: '#93C5FD',
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            ticks: {
+              precision: 0
+            }
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

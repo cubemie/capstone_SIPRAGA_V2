@@ -1,8 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const { isLoggedIn } = require('../middlewares/authMiddleware');
+const express           = require('express');
+const router            = express.Router();
+const { verifyToken }   = require('../middlewares/authMiddleware');
+const { uploadKtp }     = require('../middlewares/upload');
+const WargaController   = require('../controllers/WargaController');
 
-const { getKelengkapanData } = require('../controllers/wargaController'); // atau ganti ke wargaController kalau dipisah
-router.get('/kelengkapan-data', isLoggedIn, getKelengkapanData);
+router.get('/profil',           verifyToken, WargaController.getProfile);
+router.get('/kelengkapan-data', verifyToken, WargaController.getKelengkapan);
+router.put('/lengkapi-data',    verifyToken, uploadKtp.single('foto_ktp'), WargaController.lengkapiData);
 
 module.exports = router;

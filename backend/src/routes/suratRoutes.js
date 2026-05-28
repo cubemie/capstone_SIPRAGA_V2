@@ -1,72 +1,31 @@
-const express = require('express');
-const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const express              = require('express');
+const router               = express.Router();
+const path                 = require('path');
+const fs                   = require('fs');
+const { verifyToken }      = require('../middlewares/authMiddleware');
+const { uploadSurat, uploadSuratSigned } = require('../middlewares/upload');
+const SuratController      = require('../controllers/SuratController');
 
-const { ajukanSurat, getSuratMilikSaya, getStatistikSurat, getSuratMenungguTTD, tandaTanganiSurat, tolakSurat, getRiwayatSuratRtRw, uploadTemplateSurat } = require('../controllers/suratController');
-const { isLoggedIn } = require('../middlewares/authMiddleware');
+// ─── Warga ────────────────────────────────────────────────────────────────────
+router.post('/ajukan',     verifyToken, uploadSurat.single('fileSurat'),       SuratController.ajukanSurat);
+router.get('/milik-saya',  verifyToken,                                         SuratController.getMySurat);
+router.get('/statistik',   verifyToken,                                         SuratController.getStatistik);
 
+// ─── RT / RW ──────────────────────────────────────────────────────────────────
+router.get('/masuk',                    verifyToken, SuratController.getSuratMasuk);
+router.get('/menunggu-ttd',             verifyToken, SuratController.getSuratMenungguTtd);
+router.post('/tanda-tangani/:id',       verifyToken, uploadSuratSigned.single('fileSurat'), SuratController.approveSurat);
+router.post('/tolak/:id',               verifyToken, SuratController.rejectSurat);
+router.get('/riwayat-rtrw',             verifyToken, SuratController.getRiwayat);
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const filename = Date.now() + ext;
-    cb(null, filename);
-  }
-});
-
-// Storage untuk template surat
-const templateStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/templates/');
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}${ext}`);
-  }
-});
-const uploadTemplate = multer({ storage: templateStorage });
-
-
-const upload = multer({ storage });
-
-router.get('/statistik', isLoggedIn, getStatistikSurat);
-
-router.post('/ajukan', isLoggedIn, upload.single('fileSurat'), ajukanSurat);
-router.get('/milik-saya', isLoggedIn, getSuratMilikSaya);
-
-router.get('/download/:filename', isLoggedIn, (req, res) => {
+// ─── Download file pengajuan ──────────────────────────────────────────────────
+router.get('/download/:filename', verifyToken, (req, res) => {
   const filename = req.params.filename;
-  const filePath = path.join(__dirname, '..', 'uploads', filename);
-
+  const filePath = path.join(__dirname, '..', '..', 'uploads', 'surat', filename);
   fs.access(filePath, fs.constants.F_OK, (err) => {
-    if (err) {
-      return res.status(404).json({ message: 'File tidak ditemukan' });
-    }
+    if (err) return res.status(404).json({ message: 'File tidak ditemukan.' });
     res.download(filePath, filename);
   });
 });
-
-router.get('/menunggu-ttd', isLoggedIn, getSuratMenungguTTD);
-// Tambahkan storage baru untuk signed files di luar controller
-const signedStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/signed/'),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `signed_${Date.now()}${ext}`);
-  }
-});
-
-const uploadSigned = multer({ storage: signedStorage });
-
-router.post('/tanda-tangani/:id', isLoggedIn, uploadSigned.single('fileSurat'), tandaTanganiSurat);
-router.post('/tolak/:id', isLoggedIn, tolakSurat);
-router.get('/riwayat-rtrw', isLoggedIn, getRiwayatSuratRtRw);
-router.post('/template/upload', isLoggedIn, uploadTemplate.single('fileTemplate'), uploadTemplateSurat);
-
 
 module.exports = router;

@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
-const { insertRt, insertRw } = require('../controllers/superAdminController');
+const AuthController = require('../controllers/AuthController');
 const requireSuperadmin = require('../middlewares/superAdminMiddleware');
 
-router.post('/rt', requireSuperadmin, insertRt);
-router.post('/rw', requireSuperadmin, insertRw);
+// Public — login superadmin
+router.post('/login', AuthController.loginSuperadmin);
+
+// Protected — hanya superadmin yang bisa insert RT/RW
+router.post('/rt', requireSuperadmin, AuthController.insertRt);
+router.post('/rw', requireSuperadmin, AuthController.insertRw);
 
 module.exports = router;

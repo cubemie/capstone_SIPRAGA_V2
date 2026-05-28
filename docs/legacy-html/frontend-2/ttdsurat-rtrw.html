@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tandatangani Surat - RT/RW</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-blue-900 text-white p-4 shadow-md flex justify-between items-center">
+    <h1 class="text-lg font-semibold">📄 Tandatangani Surat</h1>
+    <a href="dashboard-rtrw.html" class="text-sm hover:underline">⬅ Kembali ke Dashboard</a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="p-6">
+    <div class="bg-white p-6 rounded-lg shadow">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">Daftar Pengajuan Surat</h2>
+        <label class="flex items-center space-x-2">
+          <span class="text-sm">Tampilkan</span>
+          <select id="entriesPerPage" onchange="renderTable()" class="border rounded px-2 py-1 text-sm">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span class="text-sm">entri</span>
+        </label>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-sm" id="suratTable">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="px-6 py-3 text-left font-bold text-gray-700">Subjek</th>
+              <th class="px-6 py-3 text-left font-bold text-gray-700">Lampiran</th>
+              <th class="px-6 py-3 text-left font-bold text-gray-700">Tanggal</th>
+              <th class="px-6 py-3 text-center font-bold text-gray-700">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="bg-white divide-y divide-gray-200">
+            <!-- Data akan diisi via JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex justify-between items-center mt-4 text-sm">
+        <span id="pageInfo"></span>
+        <div class="space-x-2">
+          <button onclick="prevPage()" class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Sebelumnya</button>
+          <button onclick="nextPage()" class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Berikutnya</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Alasan Penolakan -->
+  <div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-lg w-full max-w-md p-6 shadow-lg">
+      <h3 class="text-lg font-bold mb-4">Alasan Penolakan</h3>
+      <textarea id="reason" rows="4" class="w-full border rounded p-2 focus:outline-none focus:ring" placeholder="Tulis alasan penolakan..."></textarea>
+      <div class="mt-4 flex justify-end space-x-2">
+        <button onclick="closeModal()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded">Batal</button>
+        <button onclick="submitRejection()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Kirim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script>
+    const dataSurat = Array.from({length: 42}, (_, i) => ({
+      subjek: `Pengajuan Surat ${i + 1}`,
+      lampiran: `surat_${i + 1}.pdf`,
+      tanggal: "7 Mei 2025"
+    }));
+
+    let currentPage = 1;
+    let entriesPerPage = 10;
+
+    function renderTable() {
+      entriesPerPage = parseInt(document.getElementById('entriesPerPage').value);
+      const start = (currentPage - 1) * entriesPerPage;
+      const end = start + entriesPerPage;
+      const rows = dataSurat.slice(start, end);
+
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = "";
+
+      rows.forEach(item => {
+        tbody.innerHTML += `
+          <tr>
+            <td class="px-6 py-3">${item.subjek}</td>
+            <td class="px-6 py-3"><a href="#" class="text-blue-600 hover:underline">${item.lampiran}</a></td>
+            <td class="px-6 py-3">${item.tanggal}</td>
+            <td class="px-6 py-3 text-center space-x-2">
+              <button class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded">Tandatangani</button>
+              <button onclick="openModal()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded">Tolak</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      const pageInfo = document.getElementById('pageInfo');
+      pageInfo.textContent = `Menampilkan ${start + 1}-${Math.min(end, dataSurat.length)} dari ${dataSurat.length} entri`;
+    }
+
+    function nextPage() {
+      const maxPage = Math.ceil(dataSurat.length / entriesPerPage);
+      if (currentPage < maxPage) {
+        currentPage++;
+        renderTable();
+      }
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderTable();
+      }
+    }
+
+    function openModal() {
+      document.getElementById('rejectModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('rejectModal').classList.add('hidden');
+    }
+
+    function submitRejection() {
+      const reason = document.getElementById('reason').value;
+      if (!reason.trim()) {
+        alert("Harap isi alasan penolakan.");
+        return;
+      }
+      alert("Surat ditolak dengan alasan: " + reason);
+      closeModal();
+    }
+
+    renderTable();
+  </script>
+
+</body>
+</html>

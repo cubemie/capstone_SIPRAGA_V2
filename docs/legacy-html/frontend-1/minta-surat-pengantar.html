@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minta Surat Pengantar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-blue-900 text-white p-4 flex justify-between items-center shadow-md">
+        <h1 class="text-lg font-semibold">📝 Minta Surat Pengantar </h1>
+        <a href="dash-warga.html" class="text-white hover:underline">⬅ Kembali ke Dashboard</a>
+    </header>
+
+    <!-- Form Pengajuan Surat Pengantar -->
+    <main class="p-6">
+        <div class="bg-white p-6 rounded-lg shadow-md max-w-3xl mx-auto">
+            <h2 class="text-lg font-bold mb-4">Form Pengajuan Surat Pengantar</h2>
+            <form id="pengajuan-form">
+                <!-- Upload Surat Pengantar -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">Upload Surat Pengantar (PDF/DOCX)</label>
+                    <input type="file" accept=".pdf,.doc,.docx" class="w-full p-2 border rounded" required>
+                </div>
+
+                <!-- Upload Lampiran Foto -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">Lampiran Foto (JPG/PNG)</label>
+                    <input type="file" accept="image/png, image/jpeg" class="w-full p-2 border rounded" required>
+                </div>
+
+                <!-- Input Data Diri -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">NIK</label>
+                    <input type="text" class="w-full p-2 border rounded" placeholder="Masukkan NIK" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">Nama</label>
+                    <input type="text" class="w-full p-2 border rounded" placeholder="Masukkan Nama" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">Alamat Sesuai KTP</label>
+                    <input type="text" class="w-full p-2 border rounded" placeholder="Masukkan Alamat" required>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Tempat Lahir</label>
+                        <input type="text" class="w-full p-2 border rounded" placeholder="Masukkan Tempat Lahir" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">Tanggal Lahir</label>
+                        <input type="date" class="w-full p-2 border rounded" required>
+                    </div>
+                </div>
+
+                <!-- Dropdown Berjenjang -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">Provinsi</label>
+                    <select id="provinsi" class="w-full p-2 border rounded" required>
+                        <option value="">Pilih Provinsi</option>
+                        <!-- Data provinsi akan di-load dari API -->
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">Kota/Kabupaten</label>
+                    <select id="kota" class="w-full p-2 border rounded" required>
+                        <option value="">Pilih Kota/Kabupaten</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">Kecamatan</label>
+                    <select id="kecamatan" class="w-full p-2 border rounded" required>
+                        <option value="">Pilih Kecamatan</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">Kelurahan</label>
+                    <select id="kelurahan" class="w-full p-2 border rounded" required>
+                        <option value="">Pilih Kelurahan</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">RW yang Dituju</label>
+                    <select id="rw" class="w-full p-2 border rounded" required>
+                        <option value="">Pilih RW</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 font-medium mb-2">RT yang Dituju</label>
+                    <select id="rt" class="w-full p-2 border rounded" required>
+                        <option value="">Pilih RT</option>
+                    </select>
+                </div>
+
+                <!-- Tombol Kirim -->
+                <button type="submit" class="w-full bg-blue-500 text-white p-3 rounded-lg font-bold">Kirim Pengajuan</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Pop-up Notifikasi -->
+    <div id="popup" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <p class="text-lg font-semibold mb-4">✅ Pengajuan surat pengantar berhasil dikirim!</p>
+            <button onclick="closePopup()" class="bg-blue-500 text-white px-4 py-2 rounded">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        // Simulasi API untuk dropdown berjenjang
+        document.getElementById('provinsi').addEventListener('change', function () {
+            document.getElementById('kota').disabled = false;
+        });
+
+        document.getElementById('kota').addEventListener('change', function () {
+            document.getElementById('kecamatan').disabled = false;
+        });
+
+        document.getElementById('kecamatan').addEventListener('change', function () {
+            document.getElementById('kelurahan').disabled = false;
+        });
+
+        document.getElementById('kelurahan').addEventListener('change', function () {
+            document.getElementById('rw').disabled = false;
+        });
+
+        document.getElementById('rw').addEventListener('change', function () {
+            document.getElementById('rt').disabled = false;
+        });
+
+        // Simulasi pengiriman form
+        document.getElementById('pengajuan-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            document.getElementById('popup').classList.remove('hidden');
+        });
+
+        function closePopup() {
+            document.getElementById('popup').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

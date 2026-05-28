@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Riwayat Surat - RT/RW</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-blue-900 text-white p-4 shadow-md flex justify-between items-center">
+    <h1 class="text-lg font-semibold">📄 Riwayat Surat</h1>
+    <a href="dashboard-rtrw.html" class="text-sm hover:underline">⬅ Kembali ke Dashboard</a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="p-6">
+    <div class="bg-white p-6 rounded-lg shadow">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">Daftar Surat yang Telah Diproses</h2>
+        <div>
+          <label for="entriesPerPage" class="text-sm mr-2">Tampilkan:</label>
+          <select id="entriesPerPage" class="border rounded px-2 py-1 text-sm">
+            <option value="5">5 entri</option>
+            <option value="10" selected>10 entri</option>
+            <option value="20">20 entri</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-sm">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="px-6 py-3 text-left font-bold text-gray-700">Subjek</th>
+              <th class="px-6 py-3 text-left font-bold text-gray-700">Tanggal Diajukan</th>
+              <th class="px-6 py-3 text-left font-bold text-gray-700">Status</th>
+              <th class="px-6 py-3 text-center font-bold text-gray-700">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200" id="riwayatBody">
+            <!-- Diisi via JavaScript -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex justify-between items-center mt-4 text-sm">
+        <span id="pageInfo" class="text-gray-600"></span>
+        <div class="space-x-2" id="paginationControls"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Script -->
+  <script>
+    const riwayatSurat = [];
+    for (let i = 1; i <= 42; i++) {
+      riwayatSurat.push({
+        subjek: `Surat ${i}`,
+        tanggalAjukan: `2025-05-${String(i % 30 + 1).padStart(2, '0')}`,
+        status: i % 3 === 0 ? 'ditolak' : 'ditandatangani',
+        tanggalProses: `2025-05-${String((i + 2) % 30 + 1).padStart(2, '0')}`,
+        fileOriginal: "#",
+        fileTtd: i % 3 === 0 ? null : "#"
+      });
+    }
+
+    const tbody = document.getElementById('riwayatBody');
+    const pagination = document.getElementById('paginationControls');
+    const pageInfo = document.getElementById('pageInfo');
+    const entriesSelect = document.getElementById('entriesPerPage');
+
+    let currentPage = 1;
+    let entriesPerPage = parseInt(entriesSelect.value);
+
+    function renderTable(data, page = 1, perPage = 10) {
+      tbody.innerHTML = '';
+      const start = (page - 1) * perPage;
+      const end = start + perPage;
+      const paginated = data.slice(start, end);
+
+      paginated.forEach(surat => {
+        const isDitandatangani = surat.status === "ditandatangani";
+        const statusBadge = isDitandatangani
+          ? `<span class="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">Ditandatangani (${surat.tanggalProses})</span>`
+          : `<span class="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">Ditolak (${surat.tanggalProses})</span>`;
+
+        const aksi = `
+          <div class="text-center space-x-2">
+            <a href="${surat.fileOriginal}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">Download Asli</a>
+            ${isDitandatangani
+              ? `<a href="${surat.fileTtd}" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded">Download TTD</a>`
+              : `<button class="bg-gray-300 text-gray-600 px-3 py-1 rounded cursor-not-allowed" disabled>Download TTD</button>`}
+          </div>
+        `;
+
+        tbody.innerHTML += `
+          <tr>
+            <td class="px-6 py-3">${surat.subjek}</td>
+            <td class="px-6 py-3">${surat.tanggalAjukan}</td>
+            <td class="px-6 py-3">${statusBadge}</td>
+            <td class="px-6 py-3">${aksi}</td>
+          </tr>
+        `;
+      });
+
+      renderPagination(data.length, page, perPage);
+    }
+
+    function renderPagination(totalItems, current, perPage) {
+      pagination.innerHTML = '';
+      const totalPages = Math.ceil(totalItems / perPage);
+
+      pageInfo.textContent = `Menampilkan ${Math.min((current - 1) * perPage + 1, totalItems)} - ${Math.min(current * perPage, totalItems)} dari ${totalItems} entri`;
+
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = i;
+        btn.className = `px-3 py-1 rounded ${i === current ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`;
+        btn.onclick = () => {
+          currentPage = i;
+          renderTable(riwayatSurat, currentPage, entriesPerPage);
+        };
+        pagination.appendChild(btn);
+      }
+    }
+
+    entriesSelect.addEventListener('change', () => {
+      entriesPerPage = parseInt(entriesSelect.value);
+      currentPage = 1;
+      renderTable(riwayatSurat, currentPage, entriesPerPage);
+    });
+
+    // Init render
+    renderTable(riwayatSurat, currentPage, entriesPerPage);
+  </script>
+
+</body>
+</html>
