@@ -1,0 +1,41 @@
+# ============================================================
+# docker-compose.yml — Production-like
+# Penggunaan:
+#   docker compose up --build -d
+#   docker compose down
+#   docker compose down -v   ← reset database (hapus volume)
+# ============================================================
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: coretax_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: capstone
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      # init.sql dijalankan SEKALI saat volume pertama kali dibuat
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: coretax_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file: ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
