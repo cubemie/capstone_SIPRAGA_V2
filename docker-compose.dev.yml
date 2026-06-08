@@ -1,0 +1,43 @@
+# ============================================================
+# docker-compose.dev.yml — Development dengan hot reload
+# Penggunaan:
+#   docker compose -f docker-compose.dev.yml up --build
+#   docker compose -f docker-compose.dev.yml down
+#   docker compose -f docker-compose.dev.yml down -v   ← reset DB
+# ============================================================
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: coretax_db_dev
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: capstone
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data_dev:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: coretax_backend_dev
+    ports:
+      - "3000:3000"
+    env_file: ./backend/.env
+    volumes:
+      # Mount src langsung → perubahan file langsung terefleksi tanpa rebuild image
+      - ./backend/src:/app/src
+    # Override CMD dari Dockerfile: pakai nodemon untuk hot reload
+    command: npx nodemon src/server.js
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data_dev:

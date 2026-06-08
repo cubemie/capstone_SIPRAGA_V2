@@ -11,6 +11,8 @@
  * }
  */
 
+const logger = require('../config/logger');
+
 module.exports = (err, req, res, next) => { // eslint-disable-line no-unused-vars
   // Multer error (file terlalu besar, format salah, dll)
   if (err.code === 'LIMIT_FILE_SIZE') {
@@ -21,8 +23,13 @@ module.exports = (err, req, res, next) => { // eslint-disable-line no-unused-var
     return res.status(415).json({ message: err.message });
   }
 
-  // Log error lengkap di server (tidak dikirim ke client)
-  console.error(`[${new Date().toISOString()}] ${req.method} ${req.path}`, err);
+  // Log error secara terstruktur via Winston
+  logger.error(`${req.method} ${req.path} — ${err.message}`, {
+    method: req.method,
+    path: req.path,
+    status: err.status || 500,
+    stack: err.stack,
+  });
 
   // Response ke client
   const isProduction = process.env.NODE_ENV === 'production';

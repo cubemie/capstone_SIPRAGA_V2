@@ -7,6 +7,7 @@
  */
 
 const AuthService = require('../services/AuthService');
+const { blacklistToken } = require('../middlewares/authMiddleware');
 
 class AuthController {
   /** POST /api/auth/register */
@@ -58,6 +59,10 @@ class AuthController {
 
   /** POST /api/auth/logout */
   static logout(req, res) {
+    // Blacklist token agar tidak bisa dipakai lagi setelah logout
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token) blacklistToken(token);
     res.json({ message: 'Logout berhasil.' });
   }
 
