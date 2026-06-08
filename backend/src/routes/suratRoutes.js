@@ -18,6 +18,9 @@ router.post('/tanda-tangani/:id',       verifyToken, uploadSuratSigned.single('f
 router.post('/tolak/:id',               verifyToken, SuratController.rejectSurat);
 router.get('/riwayat-rtrw',             verifyToken, SuratController.getRiwayat);
 
+// ─── Surat Offline (RT/RW buat surat untuk warga yang datang langsung) ────────
+router.post('/offline',                 verifyToken, SuratController.ajukanSuratOffline);
+
 // ─── Download file pengajuan ──────────────────────────────────────────────────
 router.get('/download/:filename', verifyToken, (req, res) => {
   const filename = req.params.filename;

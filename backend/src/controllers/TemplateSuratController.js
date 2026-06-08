@@ -6,8 +6,6 @@
  * Error fatal diteruskan ke global errorHandler via next(err).
  */
 
-const path                 = require('path');
-const fs                   = require('fs');
 const TemplateSuratService = require('../services/TemplateSuratService');
 
 class TemplateSuratController {

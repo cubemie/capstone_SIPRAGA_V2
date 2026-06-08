@@ -28,7 +28,7 @@ class SuratService {
     await SuratModel.create({
       id_warga,
       subjek,
-      file_path: file.filename,
+      file_path: file.path, // URL Cloudinary penuh
       provinsi,
       kota,
       kecamatan,
@@ -66,7 +66,7 @@ class SuratService {
    * @returns {{ data: Object|null, error: string|null }}
    */
   static async approveSurat(id, file) {
-    const filePath = file ? file.filename : null;
+    const filePath = file ? file.path : null; // URL Cloudinary penuh
     await SuratModel.approve(id, filePath);
     return { data: { message: 'Surat berhasil disetujui.' }, error: null };
   }
@@ -110,6 +110,37 @@ class SuratService {
       },
       error: null,
     };
+  }
+
+  /**
+   * Buat surat offline oleh RT/RW untuk warga yang datang langsung.
+   * @param {{ nik_warga: string, nama_warga: string, jenis_surat: string, alasan: string }} data
+   * @returns {{ data: Object|null, error: string|null }}
+   */
+  static async ajukanSuratOffline({ nik_warga, nama_warga, jenis_surat, alasan }) {
+    if (!nik_warga || !nama_warga || !jenis_surat) {
+      return { data: null, error: 'NIK warga, nama warga, dan jenis surat wajib diisi.' };
+    }
+
+    const WargaModel = require('../models/WargaModel');
+    const warga = await WargaModel.findByNik(nik_warga);
+    if (!warga) {
+      return { data: null, error: `Warga dengan NIK ${nik_warga} tidak ditemukan.` };
+    }
+
+    await SuratModel.create({
+      id_warga: warga.id_warga,
+      subjek: jenis_surat,
+      file_path: null,
+      provinsi: warga.provinsi || '',
+      kota: warga.kota || '',
+      kecamatan: warga.kecamatan || '',
+      kelurahan: warga.kelurahan_desa || '',
+      rt: warga.rt || '000',
+      rw: warga.rw || '000',
+    });
+
+    return { data: { message: 'Surat offline berhasil dibuat.' }, error: null };
   }
 }
 

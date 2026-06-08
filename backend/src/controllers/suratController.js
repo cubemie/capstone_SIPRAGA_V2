@@ -102,6 +102,23 @@ class SuratController {
       next(err);
     }
   }
+
+  /** POST /api/surat/offline — RT/RW buat surat untuk warga yang datang langsung */
+  static async ajukanSuratOffline(req, res, next) {
+    try {
+      const { nik_warga, nama_warga, jenis_surat, alasan } = req.body;
+      const { data, error } = await SuratService.ajukanSuratOffline({
+        nik_warga,
+        nama_warga,
+        jenis_surat,
+        alasan,
+      });
+      if (error) return res.status(400).json({ message: error });
+      res.status(201).json(data);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = SuratController;
