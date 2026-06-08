@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Logo from '../../components/Logo';
 import { User, Mail, Lock, CreditCard, MapPin, Calendar, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { authService } from '../../services/authService';
 
@@ -64,8 +65,12 @@ export default function RegisterWarga() {
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
-      <div className="sm:mx-auto sm:w-full sm:max-w-2xl text-center">
-        <Link to="/" className="text-3xl">📮</Link>
+      <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
+        <div className="mb-8 flex justify-center">
+          <Link to="/" className="inline-block hover:opacity-80 transition">
+            <Logo className="scale-125" />
+          </Link>
+        </div>
         <h2 className="mt-4 text-center text-3xl font-extrabold text-slate-900">
           Daftar Akun Warga Baru
         </h2>

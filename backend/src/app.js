@@ -3,6 +3,8 @@ const express       = require('express');
 const cors          = require('cors');
 const path          = require('path');
 const morgan        = require('morgan');
+const swaggerUi     = require('swagger-ui-express');
+const swaggerSpecs  = require('./config/swagger');
 const errorHandler  = require('./middlewares/errorHandler');
 
 const app = express();
@@ -38,6 +40,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'success', message: 'Server is running normally.' });
+});
+
 app.use('/api/auth',           authRoutes);
 app.use('/api/auth',           authRtRwRoutes);     // alias mundur /api/auth/login-rt-rw
 app.use('/api/surat',          suratRoutes);
@@ -47,9 +53,12 @@ app.use('/api',                dashboardRtRwRoutes);
 app.use('/api/superadmin',     superadminRoutes);
 app.use('/api/template-surat', templateSuratRoutes);
 
+// ─── Swagger Documentation ────────────────────────────────────────────────────
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).json({ message: `Route ${req.method} ${req.path} tidak ditemukan.` });
+  res.status(404).json({ status: 'error', message: `Route ${req.method} ${req.path} tidak ditemukan.` });
 });
 
 // ─── Global Error Handler — HARUS PALING AKHIR ───────────────────────────────

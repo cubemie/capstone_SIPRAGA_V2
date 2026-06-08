@@ -82,20 +82,14 @@ export default function AjukanSurat() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
-      {/* Header */}
-      <header className="bg-blue-900 text-white px-6 py-4 flex justify-between items-center shadow-md">
-        <div className="flex items-center space-x-4">
-          <Link to="/warga/dashboard" className="text-white hover:text-slate-200 transition">
-            <ArrowLeft className="w-6 h-6" />
-          </Link>
-          <h1 className="text-xl font-bold">📮 Ajukan Surat Baru</h1>
-        </div>
-      </header>
-
-      {/* Main Body */}
-      <main className="flex-1 max-w-4xl mx-auto w-full p-6">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+    <div className="max-w-4xl mx-auto w-full p-6">
+      <div className="flex items-center space-x-4 mb-6">
+        <Link to="/warga/dashboard" className="text-slate-400 hover:text-blue-600 transition p-2 bg-white rounded-full shadow-sm">
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <h1 className="text-2xl font-bold text-slate-800">Ajukan Surat Baru</h1>
+      </div>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
           {submitted ? (
             <div className="text-center py-12 space-y-4">
               <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
@@ -207,8 +201,7 @@ export default function AjukanSurat() {
               </div>
             </form>
           )}
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

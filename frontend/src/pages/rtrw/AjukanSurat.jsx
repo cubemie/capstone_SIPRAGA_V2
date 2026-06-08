@@ -37,19 +37,13 @@ export default function RtRwAjukanSurat() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
-      {/* Header */}
-      <header className="bg-slate-900 text-white px-6 py-4 flex justify-between items-center shadow-md">
-        <div className="flex items-center space-x-4">
-          <Link to="/rtrw/dashboard" className="text-white hover:text-slate-200 transition">
-            <ArrowLeft className="w-6 h-6" />
-          </Link>
-          <h1 className="text-xl font-bold">📮 Buat Surat Pengantar Offline</h1>
-        </div>
-      </header>
-
-      {/* Main Body */}
-      <main className="flex-1 max-w-4xl mx-auto w-full p-6">
+    <div className="max-w-4xl mx-auto w-full p-6">
+      <div className="flex items-center space-x-4 mb-6">
+        <Link to="/rtrw/dashboard" className="text-slate-400 hover:text-slate-900 transition p-2 bg-white rounded-full shadow-sm">
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <h1 className="text-2xl font-bold text-slate-800">Buat Surat Pengantar Offline</h1>
+      </div>
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
           {submitted ? (
             <div className="text-center py-12 space-y-4">
@@ -155,7 +149,6 @@ export default function RtRwAjukanSurat() {
             </form>
           )}
         </div>
-      </main>
     </div>
   );
 }

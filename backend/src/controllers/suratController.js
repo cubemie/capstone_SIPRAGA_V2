@@ -7,6 +7,7 @@
  */
 
 const SuratService = require('../services/SuratService');
+const { sendSuccess, sendError } = require('../utils/response');
 
 class SuratController {
   /** POST /api/surat/ajukan */
@@ -14,8 +15,8 @@ class SuratController {
     try {
       const id_warga = req.user.id_warga;
       const { data, error } = await SuratService.ajukanSurat(id_warga, req.body, req.file);
-      if (error) return res.status(400).json({ message: error });
-      res.status(201).json(data);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Surat berhasil diajukan', 201);
     } catch (err) {
       next(err);
     }
@@ -26,8 +27,8 @@ class SuratController {
     try {
       const id_warga = req.user.id_warga;
       const { data, error } = await SuratService.getMySurat(id_warga);
-      if (error) return res.status(400).json({ message: error });
-      res.json(data);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Data surat berhasil diambil');
     } catch (err) {
       next(err);
     }
@@ -37,8 +38,8 @@ class SuratController {
   static async getSuratMasuk(req, res, next) {
     try {
       const { data, error } = await SuratService.getSuratMasuk();
-      if (error) return res.status(400).json({ message: error });
-      res.json(data);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Data surat masuk berhasil diambil');
     } catch (err) {
       next(err);
     }
@@ -49,8 +50,8 @@ class SuratController {
     try {
       const id = req.params.id;
       const { data, error } = await SuratService.approveSurat(id, req.file);
-      if (error) return res.status(400).json({ message: error });
-      res.json(data);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Surat berhasil disetujui');
     } catch (err) {
       next(err);
     }
@@ -62,8 +63,8 @@ class SuratController {
       const id = req.params.id;
       const { alasan } = req.body;
       const { data, error } = await SuratService.rejectSurat(id, alasan);
-      if (error) return res.status(400).json({ message: error });
-      res.json(data);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Surat berhasil ditolak');
     } catch (err) {
       next(err);
     }
@@ -73,8 +74,8 @@ class SuratController {
   static async getRiwayat(req, res, next) {
     try {
       const { data, error } = await SuratService.getRiwayat();
-      if (error) return res.status(400).json({ message: error });
-      res.json(data);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Riwayat surat berhasil diambil');
     } catch (err) {
       next(err);
     }
@@ -85,8 +86,8 @@ class SuratController {
     try {
       const id_warga = req.user.id_warga;
       const { data, error } = await SuratService.getStatistik(id_warga);
-      if (error) return res.status(400).json({ message: error });
-      res.json(data);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Statistik surat berhasil diambil');
     } catch (err) {
       next(err);
     }
@@ -96,8 +97,8 @@ class SuratController {
   static async getSuratMenungguTtd(req, res, next) {
     try {
       const { data, error } = await SuratService.getSuratMasuk();
-      if (error) return res.status(400).json({ message: error });
-      res.json(data);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Data surat menunggu TTD berhasil diambil');
     } catch (err) {
       next(err);
     }
@@ -113,8 +114,8 @@ class SuratController {
         jenis_surat,
         alasan,
       });
-      if (error) return res.status(400).json({ message: error });
-      res.status(201).json(data);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Surat offline berhasil diajukan', 201);
     } catch (err) {
       next(err);
     }
