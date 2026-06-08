@@ -37,83 +37,83 @@ capstone_RT-RW_CORETAX/
 └── docker-compose.yml  # Konfigurasi orkestrasi container Docker
 ```
 
-## Cara Instalasi
+## Panduan Setup untuk Tim
 
-### Prasyarat
-- **Docker & Docker Compose** (Disarankan, untuk menjalankan backend & database dengan mudah)
-- **Node.js** (Minimal versi 18, untuk menjalankan frontend dan/atau backend manual)
-- **Git**
+Untuk rekan-rekan tim, silakan ikuti langkah berikut untuk menjalankan aplikasi di komputer masing-masing. **Kalian tidak perlu menginstal Docker**, cukup gunakan Node.js dan MySQL lokal (seperti XAMPP).
 
-### Clone Repository
-```bash
-git clone <URL_REPOSITORY_ANDA>
-cd capstone_RT-RW_CORETAX
-```
+### 1. Persiapan Awal (Prasyarat)
+- **Node.js**: Wajib diinstal (minimal v18) untuk menjalankan backend dan frontend.
+- **MySQL / XAMPP**: Pastikan server database MySQL lokal sudah terinstal dan menyala.
+- **Git**: Untuk proses pull/push kode.
 
-## Cara Menjalankan Backend & Database
+### 2. Setup Database Lokal
+1. Buka MySQL kalian (lewat phpMyAdmin atau DBeaver).
+2. Buat database baru dengan nama `capstone`.
+3. Import file `database/init.sql` ke dalam database `capstone` tersebut agar tabel-tabelnya otomatis terbuat.
 
-Backend dan database MySQL dijalankan menggunakan Docker untuk memudahkan environment setup.
-
-1. Pastikan Docker Desktop atau Docker Engine sudah berjalan.
-2. Buka terminal/command prompt di direktori root proyek (`capstone_RT-RW_CORETAX`).
-3. Jalankan perintah berikut untuk mem-build dan menyalakan container:
-   ```bash
-   docker compose up --build -d
-   ```
-4. Tunggu beberapa saat. Database akan otomatis diinisialisasi (tabel dan data awal dari `database/init.sql`).
-5. Backend (API) kini berjalan di `http://localhost:3000`.
-
-### Perintah Docker yang Berguna
-- **Melihat Log secara Real-time**: `docker compose logs -f`
-- **Mematikan Server (Container)**: `docker compose down`
-- **Mereset Database (Menghapus Data)**: `docker compose down -v`
-- **Restart Backend Saja**: `docker compose restart backend`
-
-### Penjelasan Container Docker
-Aplikasi ini berjalan menggunakan dua layanan di dalam `docker-compose.yml`:
-1. **Service `db` (`coretax_db`)**: Menggunakan image MySQL 8.0. Data disimpan secara persisten di dalam Docker Volume bernama `db_data`. Script `database/init.sql` akan otomatis tereksekusi pada saat container database pertama kali dibuat.
-2. **Service `backend` (`coretax_backend`)**: Node.js Backend API. Aplikasi di-build menggunakan `Dockerfile` yang ada di dalam folder `/backend`. Container backend terhubung ke container database melalui jaringan internal docker, dan diekspos ke Host pada port `3000`.
-
-## Cara Menjalankan Backend (Manual / Tanpa Docker)
-
-Jika Anda ingin menjalankan backend secara lokal tanpa menggunakan Docker, ikuti langkah berikut:
-
-1. Pastikan Anda memiliki server MySQL lokal yang berjalan dan sudah membuat database `capstone`.
-2. Buka file `backend/.env` dan ubah host database menjadi localhost:
-   `DB_HOST=localhost`
-3. Buka tab terminal baru dan masuk ke folder `backend`:
+### 3. Cara Menjalankan Backend (Manual)
+1. Buka terminal dan masuk ke folder `backend`:
    ```bash
    cd backend
    ```
-4. Instal semua dependencies backend:
+2. Pastikan file `.env` sudah ada dan konfigurasinya mengarah ke MySQL lokal kalian:
+   `DB_HOST=localhost`
+   `DB_PORT=3306` (atau sesuaikan dengan port MySQL kalian)
+3. Instal dependencies backend:
    ```bash
    npm install
    ```
-5. Jalankan backend menggunakan nodemon (untuk development):
+4. Jalankan backend:
    ```bash
    npm run dev
    ```
-   Atau untuk menjalankan secara standar: `npm start` (atau `node src/server.js`)
+   Backend akan berjalan di `http://localhost:3000`.
+
+### 4. Cara Menjalankan Frontend
+1. Buka tab terminal baru, lalu masuk ke folder `frontend`:
+   ```bash
+   cd frontend
+   ```
+2. Instal dependencies frontend:
+   ```bash
+   npm install
+   ```
+3. Jalankan server frontend:
+   ```bash
+   npm run dev
+   ```
+4. Buka browser dan ketik alamat: `http://localhost:5173`
 
 ---
 
-## Cara Menjalankan Frontend
+## Cara Menjalankan Menggunakan Docker (Khusus Setup / PIC Server)
+Bagian ini **opsional** dan utamanya digunakan oleh PIC yang mengatur environment Docker (tidak wajib untuk anggota tim lain).
 
-Frontend aplikasi ini dibangun menggunakan React + Vite.
+1. Pastikan Docker Desktop menyala.
+2. Buka terminal di root proyek, jalankan:
+   ```bash
+   docker compose up --build -d
+   ```
+*(Untuk menggunakan Docker, pastikan `DB_HOST=db` di dalam `.env` backend).*
+
+---
+
+### 4. Menjalankan Frontend
+Frontend tetap kita jalankan secara lokal menggunakan Vite.
 
 1. Buka tab terminal baru, lalu masuk ke folder `frontend`:
    ```bash
    cd frontend
    ```
-2. Instal semua dependencies (hanya perlu dilakukan sekali atau saat ada pembaruan package):
+2. Instal *library/dependencies* (cukup dilakukan sekali diawal, atau saat ada update package dari member lain):
    ```bash
    npm install
    ```
-3. Jalankan server lokal untuk development:
+3. Jalankan server frontend:
    ```bash
    npm run dev
    ```
-4. Buka browser dan akses alamat yang tertera di terminal (biasanya `http://localhost:5173`).
+4. Buka browser dan ketik alamat: `http://localhost:5173`
 
 ## API Endpoint
 Berikut adalah rute dasar (*base URL*) untuk masing-masing layanan yang tersedia di Backend:
