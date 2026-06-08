@@ -91,8 +91,9 @@ class WargaService {
       return { data: null, error: 'Tanda tangan belum diunggah.' };
     }
 
+    // ttd_digital berisi URL Cloudinary penuh (setelah migrasi)
     return {
-      data: { ttd_url: `/uploads/ttd/${record.ttd_digital}` },
+      data: { ttd_url: record.ttd_digital },
       error: null,
     };
   }
@@ -111,16 +112,19 @@ class WargaService {
       return { data: null, error: 'Role tidak valid.' };
     }
 
+    // file.path berisi URL Cloudinary penuh (e.g. https://res.cloudinary.com/...)
+    const cloudinaryUrl = file.path;
+
     if (user.role === 'rt') {
-      await RtRwModel.updateTtdRt(user.id, file.filename);
+      await RtRwModel.updateTtdRt(user.id, cloudinaryUrl);
     } else {
-      await RtRwModel.updateTtdRw(user.id, file.filename);
+      await RtRwModel.updateTtdRw(user.id, cloudinaryUrl);
     }
 
     return {
       data: {
         message: 'Tanda tangan berhasil disimpan.',
-        ttd_url: `/uploads/ttd/${file.filename}`,
+        ttd_url: cloudinaryUrl,
       },
       error: null,
     };

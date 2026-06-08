@@ -2,7 +2,7 @@
  * wargaService
  *
  * Mengelola operasi terkait data profil warga.
- * Siap digunakan untuk fitur berikutnya (edit profil, daftar warga, dll).
+ * Semua endpoint diselaraskan dengan backend routes: /api/warga/*
  */
 
 import { api } from '../utils/api';
@@ -10,14 +10,23 @@ import { api } from '../utils/api';
 export const wargaService = {
   /**
    * Ambil profil warga yang sedang login.
+   * BE route: GET /api/warga/profil
    */
-  getProfile: () =>
-    api.get('/warga/profile'),
+  getProfil: () =>
+    api.get('/warga/profil'),
 
   /**
-   * Update profil warga yang sedang login.
-   * @param {{ nama?: string, email?: string, alamat?: string }} data
+   * Cek apakah data warga sudah lengkap.
+   * BE route: GET /api/warga/kelengkapan-data
    */
-  updateProfile: (data) =>
-    api.put('/warga/profile', data),
+  getKelengkapanData: () =>
+    api.get('/warga/kelengkapan-data'),
+
+  /**
+   * Lengkapi / update data warga + upload foto KTP.
+   * BE route: PUT /api/warga/lengkapi-data  (multipart/form-data)
+   * @param {FormData} formData — berisi semua field data warga + foto_ktp
+   */
+  lengkapiData: (formData) =>
+    api.putFormData('/warga/lengkapi-data', formData),
 };

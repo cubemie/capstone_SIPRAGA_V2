@@ -3,14 +3,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Send, ArrowLeft, Upload, FileText, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { suratService } from '../../services/suratService';
 import { templateService } from '../../services/templateService';
+import { wargaService } from '../../services/wargaService';
 
 export default function AjukanSurat() {
   const [subjek, setSubjek] = useState('');
-  const [templateId, setTemplateId] = useState('');
   const [file, setFile] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Profil warga untuk auto-fill alamat
+  const [profil, setProfil] = useState(null);
 
   // Fetch daftar template dari backend
   const [templates, setTemplates] = useState([]);
@@ -19,27 +22,51 @@ export default function AjukanSurat() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    async function fetchTemplates() {
-      const { data, error: err } = await templateService.getAll();
+    async function fetchData() {
+      const [templateRes, profilRes] = await Promise.all([
+        templateService.getAll(),
+        wargaService.getProfil(),
+      ]);
+
       setLoadingTemplates(false);
-      if (!err && data) {
-        const list = Array.isArray(data) ? data : data?.data ?? [];
+
+      if (!templateRes.error && templateRes.data) {
+        const list = Array.isArray(templateRes.data) ? templateRes.data : templateRes.data?.data ?? [];
         setTemplates(list);
-        if (list.length > 0) setTemplateId(list[0].id);
+      }
+
+      if (!profilRes.error && profilRes.data) {
+        const p = profilRes.data?.data ?? profilRes.data;
+        setProfil(p);
       }
     }
-    fetchTemplates();
+    fetchData();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!file) {
+      setError('Mohon unggah dokumen pendukung (PDF/DOCX).');
+      return;
+    }
+
     setLoading(true);
 
     const formData = new FormData();
     formData.append('subjek', subjek);
-    formData.append('template_id', templateId);
-    if (file) formData.append('dokumen', file);
+    // Field file HARUS 'fileSurat' sesuai backend: uploadSurat.single('fileSurat')
+    formData.append('fileSurat', file);
+    // Data alamat diambil dari profil warga yang sudah login
+    if (profil) {
+      formData.append('provinsi', profil.provinsi || '');
+      formData.append('kota', profil.kota || '');
+      formData.append('kecamatan', profil.kecamatan || '');
+      formData.append('kelurahan', profil.kelurahan_desa || '');
+      formData.append('rt', profil.rt || '');
+      formData.append('rw', profil.rw || '');
+    }
 
     const { error: err } = await suratService.ajukanSurat(formData);
 

@@ -1,46 +1,55 @@
 /**
- * upload.js  —  Centralized Multer Configuration
+ * upload.js  —  Centralized Multer Configuration (Cloudinary)
  *
- * Semua konfigurasi upload file ada di sini.
- * Import named export yang sesuai di route masing-masing.
+ * File disimpan ke Cloudinary agar tidak hilang saat Railway restart.
+ * Semua file dikelompokkan di folder `rt-rw/<subfolder>` di Cloudinary.
  *
  * Named exports:
- *   uploadSurat      → /uploads/surat/          (PDF, DOCX — maks 5 MB)
- *   uploadSuratSigned → /uploads/signed/         (PDF, DOCX — maks 10 MB)
- *   uploadKtp        → /uploads/ktp/             (JPG, PNG — maks 3 MB)
- *   uploadTtd        → /uploads/ttd/             (JPG, PNG — maks 2 MB)
- *   uploadTemplate   → /uploads/template_surat/  (PDF, DOCX — maks 10 MB)
+ *   uploadSurat       → rt-rw/surat          (PDF, DOCX — maks 5 MB)
+ *   uploadSuratSigned → rt-rw/signed         (PDF, DOCX — maks 10 MB)
+ *   uploadKtp         → rt-rw/ktp            (JPG, PNG  — maks 3 MB)
+ *   uploadTtd         → rt-rw/ttd            (JPG, PNG  — maks 2 MB)
+ *   uploadTemplate    → rt-rw/template_surat (PDF, DOCX — maks 10 MB)
  */
 
-const multer = require('multer');
-const path   = require('path');
+const multer             = require('multer');
+const cloudinary         = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// ─── Helper ──────────────────────────────────────────────────────────────────
+// ─── Konfigurasi Cloudinary ───────────────────────────────────────────────────
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key:    process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
- * Buat diskStorage multer dengan folder dan prefix nama file tertentu.
- * @param {string} destFolder - Relatif terhadap root backend
- * @param {string} prefix     - Prefix nama file (e.g. 'surat', 'ttd')
+ * Buat CloudinaryStorage untuk folder tertentu.
+ * @param {string}   folder          - Subfolder di Cloudinary (di bawah rt-rw/)
+ * @param {string[]} allowedFormats  - Ekstensi yang diizinkan (tanpa titik)
  */
-function makeStorage(destFolder, prefix) {
-  return multer.diskStorage({
-    destination: (req, file, cb) => cb(null, destFolder),
-    filename:    (req, file, cb) => {
-      const ext      = path.extname(file.originalname).toLowerCase();
-      const unique   = `${prefix}_${Date.now()}_${Math.round(Math.random() * 1e6)}`;
-      cb(null, unique + ext);
+function makeCloudinaryStorage(folder, allowedFormats) {
+  return new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder:           `rt-rw/${folder}`,
+      allowed_formats:  allowedFormats,
+      resource_type:    'auto', // otomatis deteksi image/video/raw (untuk PDF/DOCX)
     },
   });
 }
 
 /**
  * File filter berdasarkan daftar ekstensi yang diizinkan.
- * @param {string[]} allowedExts - Array ekstensi tanpa titik, lowercase (e.g. ['pdf', 'docx'])
+ * @param {string[]} allowedExts - Array ekstensi tanpa titik, lowercase
  * @param {string}   label       - Label untuk pesan error
  */
 function makeExtFilter(allowedExts, label) {
   return (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase().replace('.', '');
+    const ext = file.originalname.split('.').pop().toLowerCase();
     if (allowedExts.includes(ext)) {
       cb(null, true);
     } else {
@@ -64,47 +73,46 @@ function makeMimeFilter(allowedMimes, label) {
   };
 }
 
-// ─── Dokumen Surat (PDF / DOCX, maks 5 MB) ───────────────────────────────────
+// ─── Filters ──────────────────────────────────────────────────────────────────
 
-const docFilter = makeExtFilter(['pdf', 'docx'], 'PDF atau DOCX');
-
-/** Upload surat pengajuan warga */
-const uploadSurat = multer({
-  storage:    makeStorage('uploads/surat', 'surat'),
-  fileFilter: docFilter,
-  limits:     { fileSize: 5 * 1024 * 1024 }, // 5 MB
-});
-
-/** Upload surat yang sudah ditandatangani RT/RW */
-const uploadSuratSigned = multer({
-  storage:    makeStorage('uploads/signed', 'signed'),
-  fileFilter: docFilter,
-  limits:     { fileSize: 10 * 1024 * 1024 }, // 10 MB
-});
-
-/** Upload template surat (superadmin) */
-const uploadTemplate = multer({
-  storage:    makeStorage('uploads/template_surat', 'template'),
-  fileFilter: docFilter,
-  limits:     { fileSize: 10 * 1024 * 1024 }, // 10 MB
-});
-
-// ─── Gambar / Foto ────────────────────────────────────────────────────────────
-
+const docFilter   = makeExtFilter(['pdf', 'docx'], 'PDF atau DOCX');
 const imageFilter = makeMimeFilter(['image/jpeg', 'image/png'], 'JPG atau PNG');
 
-/** Upload foto KTP warga */
-const uploadKtp = multer({
-  storage:    makeStorage('uploads/ktp', 'ktp'),
-  fileFilter: imageFilter,
-  limits:     { fileSize: 3 * 1024 * 1024 }, // 3 MB
+// ─── Multer Instances ─────────────────────────────────────────────────────────
+
+/** Upload surat pengajuan warga (PDF/DOCX, maks 5 MB) */
+const uploadSurat = multer({
+  storage:    makeCloudinaryStorage('surat', ['pdf', 'docx']),
+  fileFilter: docFilter,
+  limits:     { fileSize: 5 * 1024 * 1024 },
 });
 
-/** Upload tanda tangan digital RT/RW */
-const uploadTtd = multer({
-  storage:    makeStorage('uploads/ttd', 'ttd'),
+/** Upload surat yang sudah ditandatangani RT/RW (PDF/DOCX, maks 10 MB) */
+const uploadSuratSigned = multer({
+  storage:    makeCloudinaryStorage('signed', ['pdf', 'docx']),
+  fileFilter: docFilter,
+  limits:     { fileSize: 10 * 1024 * 1024 },
+});
+
+/** Upload template surat oleh superadmin (PDF/DOCX, maks 10 MB) */
+const uploadTemplate = multer({
+  storage:    makeCloudinaryStorage('template_surat', ['pdf', 'docx']),
+  fileFilter: docFilter,
+  limits:     { fileSize: 10 * 1024 * 1024 },
+});
+
+/** Upload foto KTP warga (JPG/PNG, maks 3 MB) */
+const uploadKtp = multer({
+  storage:    makeCloudinaryStorage('ktp', ['jpg', 'jpeg', 'png']),
   fileFilter: imageFilter,
-  limits:     { fileSize: 2 * 1024 * 1024 }, // 2 MB
+  limits:     { fileSize: 3 * 1024 * 1024 },
+});
+
+/** Upload tanda tangan digital RT/RW (JPG/PNG, maks 2 MB) */
+const uploadTtd = multer({
+  storage:    makeCloudinaryStorage('ttd', ['jpg', 'jpeg', 'png']),
+  fileFilter: imageFilter,
+  limits:     { fileSize: 2 * 1024 * 1024 },
 });
 
 // ─── Exports ──────────────────────────────────────────────────────────────────

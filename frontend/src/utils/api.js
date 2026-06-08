@@ -62,4 +62,8 @@ export const api = {
   /** Khusus untuk upload file (FormData) */
   postFormData: (endpoint, formData) =>
     request(endpoint, { method: 'POST', body: formData }),
+
+  /** Khusus untuk update file (FormData) via PUT */
+  putFormData: (endpoint, formData) =>
+    request(endpoint, { method: 'PUT', body: formData }),
 };

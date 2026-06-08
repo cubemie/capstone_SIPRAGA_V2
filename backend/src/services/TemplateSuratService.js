@@ -28,7 +28,7 @@ class TemplateSuratService {
       return { data: null, error: 'Nama template dan file wajib diisi.' };
     }
 
-    await TemplateSuratModel.create({ nama, file_path: file.filename });
+    await TemplateSuratModel.create({ nama, file_path: file.path }); // URL Cloudinary penuh
 
     return { data: { message: 'Template surat berhasil ditambahkan.' }, error: null };
   }
