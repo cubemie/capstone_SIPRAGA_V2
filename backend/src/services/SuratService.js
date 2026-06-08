@@ -8,7 +8,8 @@
  * - Statistik surat
  */
 
-const SuratModel = require('../models/SuratModel');
+const SuratModel            = require('../models/SuratModel');
+const NotificationService   = require('./NotificationService');
 
 class SuratService {
   /**
@@ -25,7 +26,7 @@ class SuratService {
 
     const { subjek, provinsi, kota, kecamatan, kelurahan, rt, rw } = body;
 
-    await SuratModel.create({
+    const created = await SuratModel.create({
       id_warga,
       subjek,
       file_path: file.path, // URL Cloudinary penuh
@@ -36,6 +37,20 @@ class SuratService {
       rt,
       rw,
     });
+
+    // Kirim notifikasi konfirmasi ke warga (non-blocking)
+    try {
+      const WargaModel = require('../models/WargaModel');
+      const warga = await WargaModel.findById(id_warga);
+      if (warga && warga.email) {
+        NotificationService.kirimNotifikasi({
+          email: warga.email,
+          no_hp: warga.no_hp || null,
+          event: 'DIAJUKAN',
+          data: { nama: warga.nama, subjek },
+        }).catch(err => console.error('[SuratService] Notif error:', err.message));
+      }
+    } catch (_) { /* notif gagal tidak block flow */ }
 
     return { data: { message: 'Surat berhasil diajukan.' }, error: null };
   }
@@ -68,6 +83,20 @@ class SuratService {
   static async approveSurat(id, file) {
     const filePath = file ? file.path : null; // URL Cloudinary penuh
     await SuratModel.approve(id, filePath);
+
+    // Kirim notifikasi ke warga (non-blocking)
+    try {
+      const surat = await SuratModel.findById(id);
+      if (surat && surat.email_warga) {
+        NotificationService.kirimNotifikasi({
+          email: surat.email_warga,
+          no_hp: surat.no_hp_warga || null,
+          event: 'DISETUJUI',
+          data: { nama: surat.nama_warga, subjek: surat.subjek },
+        }).catch(err => console.error('[SuratService] Notif approve error:', err.message));
+      }
+    } catch (_) { /* notif gagal tidak block flow */ }
+
     return { data: { message: 'Surat berhasil disetujui.' }, error: null };
   }
 
@@ -82,6 +111,20 @@ class SuratService {
       return { data: null, error: 'Alasan penolakan harus diisi.' };
     }
     await SuratModel.reject(id, alasan);
+
+    // Kirim notifikasi ke warga (non-blocking)
+    try {
+      const surat = await SuratModel.findById(id);
+      if (surat && surat.email_warga) {
+        NotificationService.kirimNotifikasi({
+          email: surat.email_warga,
+          no_hp: surat.no_hp_warga || null,
+          event: 'DITOLAK',
+          data: { nama: surat.nama_warga, subjek: surat.subjek, alasan },
+        }).catch(err => console.error('[SuratService] Notif reject error:', err.message));
+      }
+    } catch (_) { /* notif gagal tidak block flow */ }
+
     return { data: { message: 'Surat berhasil ditolak.' }, error: null };
   }
 

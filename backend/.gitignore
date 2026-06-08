@@ -11,6 +11,7 @@ uploads/*
 # Logs
 *.log
 npm-debug.log*
+logs/
 
 # OS files
 .DS_Store

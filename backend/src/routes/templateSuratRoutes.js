@@ -8,16 +8,17 @@ const TemplateSuratController    = require('../controllers/TemplateSuratControll
 // GET semua template — PUBLIC (warga butuh ini saat ajukan surat)
 router.get('/', TemplateSuratController.getAll);
 
-// POST upload template baru — SUPERADMIN ONLY
+// POST upload template baru — SUPERADMIN ONLY (verifyToken wajib sebelum role check)
 router.post(
   '/',
+  verifyToken,
   requireSuperadmin,
   uploadTemplate.single('file'),
   TemplateSuratController.upload
 );
 
 // DELETE template berdasarkan ID — SUPERADMIN ONLY
-router.delete('/:id', requireSuperadmin, TemplateSuratController.deleteById);
+router.delete('/:id', verifyToken, requireSuperadmin, TemplateSuratController.deleteById);
 
 // GET download template — perlu login minimal
 router.get('/:id/download', verifyToken, TemplateSuratController.download);

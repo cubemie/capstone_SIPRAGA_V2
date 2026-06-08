@@ -3,23 +3,29 @@ const router               = express.Router();
 const path                 = require('path');
 const fs                   = require('fs');
 const { verifyToken }      = require('../middlewares/authMiddleware');
+const requireRtRw          = require('../middlewares/authRtRwMiddleware');
 const { uploadSurat, uploadSuratSigned } = require('../middlewares/upload');
 const SuratController      = require('../controllers/SuratController');
+const {
+  validateAjukanSurat,
+  validateRejectSurat,
+  validateSuratOffline,
+} = require('../middlewares/validateSurat');
 
 // ─── Warga ────────────────────────────────────────────────────────────────────
-router.post('/ajukan',     verifyToken, uploadSurat.single('fileSurat'),       SuratController.ajukanSurat);
+router.post('/ajukan',     verifyToken, validateAjukanSurat, uploadSurat.single('fileSurat'), SuratController.ajukanSurat);
 router.get('/milik-saya',  verifyToken,                                         SuratController.getMySurat);
 router.get('/statistik',   verifyToken,                                         SuratController.getStatistik);
 
 // ─── RT / RW ──────────────────────────────────────────────────────────────────
-router.get('/masuk',                    verifyToken, SuratController.getSuratMasuk);
-router.get('/menunggu-ttd',             verifyToken, SuratController.getSuratMenungguTtd);
-router.post('/tanda-tangani/:id',       verifyToken, uploadSuratSigned.single('fileSurat'), SuratController.approveSurat);
-router.post('/tolak/:id',               verifyToken, SuratController.rejectSurat);
-router.get('/riwayat-rtrw',             verifyToken, SuratController.getRiwayat);
+router.get('/masuk',                    verifyToken, requireRtRw, SuratController.getSuratMasuk);
+router.get('/menunggu-ttd',             verifyToken, requireRtRw, SuratController.getSuratMenungguTtd);
+router.post('/tanda-tangani/:id',       verifyToken, requireRtRw, uploadSuratSigned.single('fileSurat'), SuratController.approveSurat);
+router.post('/tolak/:id',               verifyToken, requireRtRw, validateRejectSurat, SuratController.rejectSurat);
+router.get('/riwayat-rtrw',             verifyToken, requireRtRw, SuratController.getRiwayat);
 
 // ─── Surat Offline (RT/RW buat surat untuk warga yang datang langsung) ────────
-router.post('/offline',                 verifyToken, SuratController.ajukanSuratOffline);
+router.post('/offline',                 verifyToken, requireRtRw, validateSuratOffline, SuratController.ajukanSuratOffline);
 
 // ─── Download file pengajuan ──────────────────────────────────────────────────
 router.get('/download/:filename', verifyToken, (req, res) => {
