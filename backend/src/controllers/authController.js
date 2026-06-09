@@ -80,6 +80,17 @@ class AuthController {
     }
   }
 
+  /** POST /api/superadmin/register */
+  static async registerSuperadmin(req, res, next) {
+    try {
+      const { data, error } = await AuthService.registerSuperadmin(req.body);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Registrasi superadmin berhasil', 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
   /** POST /api/auth/logout */
   static logout(req, res) {
     // Blacklist token agar tidak bisa dipakai lagi setelah logout

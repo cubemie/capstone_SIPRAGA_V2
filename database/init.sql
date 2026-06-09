@@ -116,9 +116,10 @@ CREATE TABLE IF NOT EXISTS pengajuan_surat (
 
 -- ----------------------------------------------------------------------------
 -- Seed: superadmin default
--- Password = bcrypt('admin123', 10)
+-- Username : superadmin
+-- Password : admin123
 -- ⚠️  GANTI HASH INI sebelum deploy ke production!
 -- Cara generate: node -e "const b=require('bcryptjs');b.hash('passwordBaru',10).then(console.log)"
 -- ----------------------------------------------------------------------------
 INSERT IGNORE INTO superadmin (username, password)
-VALUES ('superadmin', '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy');
+VALUES ('superadmin', '$2b$10$VZo7pSVfZUprjQwnFszsh.4BIKGwUkPOmv.aQqlTJoeF6sn.lE7lu');

@@ -150,6 +150,34 @@ class AuthService {
   // ─── Superadmin ──────────────────────────────────────────────────────────
 
   /**
+   * Registrasi akun superadmin baru.
+   * @param {{ username, password, confirm_password }} data
+   * @returns {{ data: Object|null, error: string|null }}
+   */
+  static async registerSuperadmin({ username, password, confirm_password }) {
+    if (!username || !password || !confirm_password) {
+      return { data: null, error: 'Semua field wajib diisi.' };
+    }
+    if (username.length < 3) {
+      return { data: null, error: 'Username minimal 3 karakter.' };
+    }
+    if (password.length < 6) {
+      return { data: null, error: 'Password minimal 6 karakter.' };
+    }
+    if (password !== confirm_password) {
+      return { data: null, error: 'Konfirmasi password tidak cocok.' };
+    }
+
+    const taken = await RtRwModel.isSuperadminUsernameTaken(username);
+    if (taken) return { data: null, error: 'Username sudah digunakan.' };
+
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    await RtRwModel.createSuperadmin({ username, password: hashedPassword });
+
+    return { data: { message: 'Akun superadmin berhasil dibuat. Silakan login.' }, error: null };
+  }
+
+  /**
    * Login superadmin.
    * @param {string} username
    * @param {string} password

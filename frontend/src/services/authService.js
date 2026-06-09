@@ -32,6 +32,13 @@ export const authService = {
     api.post('/superadmin/login', { username, password }),
 
   /**
+   * Registrasi akun superadmin baru.
+   * @param {{ username: string, password: string, confirm_password: string }} data
+   */
+  registerSuperadmin: (data) =>
+    api.post('/superadmin/register', data),
+
+  /**
    * Registrasi mandiri Ketua RW baru.
    */
   registerRw: (data) =>

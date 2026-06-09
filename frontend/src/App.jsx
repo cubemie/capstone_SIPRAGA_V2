@@ -10,6 +10,7 @@ import LoginWarga from './pages/auth/LoginWarga';
 import RegisterWarga from './pages/auth/RegisterWarga';
 import LoginRtRw from './pages/auth/LoginRtRw';
 import RegisterRtRw from './pages/auth/RegisterRtRw';
+import RegisterSuperadmin from './pages/auth/RegisterSuperadmin';
 import WargaDashboard from './pages/warga/Dashboard';
 import AjukanSurat from './pages/warga/AjukanSurat';
 import StatusSurat from './pages/warga/StatusSurat';
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/register-warga" element={<RegisterWarga />} />
           <Route path="/login-rtrw" element={<LoginRtRw />} />
           <Route path="/register-rtrw" element={<RegisterRtRw />} />
+          <Route path="/register-superadmin" element={<RegisterSuperadmin />} />
 
           {/* Dashboard Layout wrapper */}
           <Route element={<DashboardLayout />}>
