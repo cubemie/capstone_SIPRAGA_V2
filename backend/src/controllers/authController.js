@@ -22,6 +22,28 @@ class AuthController {
     }
   }
 
+  /** POST /api/auth/register-rw */
+  static async registerRw(req, res, next) {
+    try {
+      const { data, error } = await AuthService.registerRw(req.body);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Registrasi RW berhasil', 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** POST /api/auth/register-rt */
+  static async registerRt(req, res, next) {
+    try {
+      const { data, error } = await AuthService.registerRt(req.body);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Registrasi RT berhasil', 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
   /** POST /api/auth/login */
   static async loginWarga(req, res, next) {
     try {

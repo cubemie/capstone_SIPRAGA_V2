@@ -171,6 +171,76 @@ class AuthService {
     return { data: { message: 'Login superadmin berhasil', token, role: 'superadmin' }, error: null };
   }
 
+  // ─── Registrasi mandiri RT / RW ───────────────────────────────────────────
+
+  /**
+   * Registrasi mandiri akun RW baru.
+   * RW bisa daftar sendiri tanpa perlu superadmin.
+   */
+  static async registerRw(data) {
+    const { rw_id, no_rw, nama_ketua, username, password, confirm_password,
+            provinsi, kota, kecamatan, kelurahan_desa } = data;
+
+    if (!rw_id || !no_rw || !nama_ketua || !username || !password || !confirm_password) {
+      return { data: null, error: 'Semua field wajib diisi.' };
+    }
+    if (password !== confirm_password) {
+      return { data: null, error: 'Konfirmasi password tidak cocok.' };
+    }
+    if (password.length < 6) {
+      return { data: null, error: 'Password minimal 6 karakter.' };
+    }
+
+    const usernameTaken = await RtRwModel.isRwUsernameTaken(username);
+    if (usernameTaken) return { data: null, error: 'Username sudah digunakan.' };
+
+    const rwExists = await RtRwModel.isRwExists(rw_id);
+    if (rwExists) return { data: null, error: 'ID RW sudah terdaftar.' };
+
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    await RtRwModel.createRw({
+      rw_id, no_rw, nama_ketua, username, password: hashedPassword,
+      provinsi: provinsi || '', kota: kota || '',
+      kecamatan: kecamatan || '', kelurahan_desa: kelurahan_desa || '',
+    });
+
+    return { data: { message: 'Akun RW berhasil didaftarkan. Silakan login.' }, error: null };
+  }
+
+  /**
+   * Registrasi mandiri akun RT baru.
+   * RT perlu memasukkan rw_id yang sudah ada (RW mereka).
+   */
+  static async registerRt(data) {
+    const { no_rt, rw_id, nama_ketua, username, password, confirm_password,
+            provinsi, kota, kecamatan, kelurahan_desa } = data;
+
+    if (!no_rt || !rw_id || !nama_ketua || !username || !password || !confirm_password) {
+      return { data: null, error: 'Semua field wajib diisi.' };
+    }
+    if (password !== confirm_password) {
+      return { data: null, error: 'Konfirmasi password tidak cocok.' };
+    }
+    if (password.length < 6) {
+      return { data: null, error: 'Password minimal 6 karakter.' };
+    }
+
+    const rwExists = await RtRwModel.isRwExists(rw_id);
+    if (!rwExists) return { data: null, error: 'ID RW tidak ditemukan. Pastikan RW Anda sudah terdaftar terlebih dahulu.' };
+
+    const usernameTaken = await RtRwModel.isRtUsernameTaken(username);
+    if (usernameTaken) return { data: null, error: 'Username sudah digunakan.' };
+
+    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    await RtRwModel.createRt({
+      no_rt, rw_id, nama_ketua, username, password: hashedPassword,
+      provinsi: provinsi || '', kota: kota || '',
+      kecamatan: kecamatan || '', kelurahan_desa: kelurahan_desa || '',
+    });
+
+    return { data: { message: 'Akun RT berhasil didaftarkan. Silakan login.' }, error: null };
+  }
+
   // ─── Manajemen RT/RW oleh Superadmin ─────────────────────────────────────
 
   /**

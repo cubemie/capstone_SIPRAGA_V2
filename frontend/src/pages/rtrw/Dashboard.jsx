@@ -12,7 +12,8 @@ export default function RtRwDashboard() {
 
   const handleApprove = async (id) => {
     setActionLoading(id);
-    const { error: err } = await suratService.approveSurat(id);
+    const formData = new FormData(); // backend bisa terima approve tanpa file TTD dari dashboard
+    const { error: err } = await suratService.approveSurat(id, formData);
     setActionLoading(null);
     if (!err) refetch();
   };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../../components/Logo';
-import { User, Mail, Lock, CreditCard, MapPin, Calendar, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { User, Mail, Lock, CreditCard, MapPin, Calendar, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../../services/authService';
 
 export default function RegisterWarga() {
@@ -9,6 +9,8 @@ export default function RegisterWarga() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [formData, setFormData] = useState({
     nik: '',
     nama: '',
@@ -164,13 +166,18 @@ export default function RegisterWarga() {
                   </div>
                   <input
                     name="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                    className="block w-full pl-10 pr-10 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                     placeholder="••••••••"
                   />
+                  <button type="button" tabIndex={-1}
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition">
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -183,13 +190,18 @@ export default function RegisterWarga() {
                   </div>
                   <input
                     name="confirm_password"
-                    type="password"
+                    type={showConfirm ? 'text' : 'password'}
                     required
                     value={formData.confirm_password}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                    className="block w-full pl-10 pr-10 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
                     placeholder="••••••••"
                   />
+                  <button type="button" tabIndex={-1}
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition">
+                    {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
               </div>
 

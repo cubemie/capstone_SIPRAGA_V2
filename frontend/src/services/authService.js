@@ -32,6 +32,18 @@ export const authService = {
     api.post('/superadmin/login', { username, password }),
 
   /**
+   * Registrasi mandiri Ketua RW baru.
+   */
+  registerRw: (data) =>
+    api.post('/auth/register-rw', data),
+
+  /**
+   * Registrasi mandiri Ketua RT baru.
+   */
+  registerRt: (data) =>
+    api.post('/auth/register-rt', data),
+
+  /**
    * Registrasi akun warga baru.
    * @param {{ nik, nama, email, password, confirm_password, jenis_kelamin, tanggal_lahir }} data
    */

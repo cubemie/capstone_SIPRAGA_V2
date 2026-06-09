@@ -7,6 +7,7 @@ import { wargaService } from '../../services/wargaService';
 
 export default function AjukanSurat() {
   const [subjek, setSubjek] = useState('');
+  const [templateId, setTemplateId] = useState('');
   const [file, setFile] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,6 +57,7 @@ export default function AjukanSurat() {
 
     const formData = new FormData();
     formData.append('subjek', subjek);
+    formData.append('template_id', templateId);
     // Field file HARUS 'fileSurat' sesuai backend: uploadSurat.single('fileSurat')
     formData.append('fileSurat', file);
     // Data alamat diambil dari profil warga yang sudah login
