@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { CreditCard, Lock, UserCheck, Loader2, AlertCircle } from 'lucide-react';
+import Logo from '../../components/Logo';
+import { CreditCard, Lock, UserCheck, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../../services/authService';
 import { useAuth } from '../../context/AuthContext';
 
@@ -9,6 +10,7 @@ export default function LoginWarga() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -26,14 +28,24 @@ export default function LoginWarga() {
       return;
     }
 
-    login(data.token);
+    const token = data?.data?.token;
+    if (!token) {
+      setError('Login gagal: token tidak ditemukan.');
+      return;
+    }
+
+    login(token);
     navigate('/warga/dashboard');
   };
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link to="/" className="text-3xl">📮</Link>
+        <div className="mb-8 flex justify-center">
+          <Link to="/" className="inline-block hover:opacity-80 transition">
+            <Logo className="scale-125" />
+          </Link>
+        </div>
         <h2 className="mt-4 text-center text-3xl font-extrabold text-slate-900">
           Login Akun Warga
         </h2>
@@ -89,14 +101,22 @@ export default function LoginWarga() {
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  className="block w-full pl-10 pr-10 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 

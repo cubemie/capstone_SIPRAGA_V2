@@ -32,9 +32,37 @@ export const authService = {
     api.post('/superadmin/login', { username, password }),
 
   /**
+   * Registrasi akun superadmin baru.
+   * @param {{ username: string, password: string, confirm_password: string }} data
+   */
+  registerSuperadmin: (data) =>
+    api.post('/superadmin/register', data),
+
+  /**
+   * Registrasi mandiri Ketua RW baru.
+   */
+  registerRw: (data) =>
+    api.post('/auth/register-rw', data),
+
+  /**
+   * Registrasi mandiri Ketua RT baru.
+   */
+  registerRt: (data) =>
+    api.post('/auth/register-rt', data),
+
+  /**
    * Registrasi akun warga baru.
    * @param {{ nik, nama, email, password, confirm_password, jenis_kelamin, tanggal_lahir }} data
    */
   registerWarga: (data) =>
     api.post('/auth/register', data),
+
+  /**
+   * Logout — kirim token ke backend agar di-blacklist di server.
+   * Token yang di-blacklist tidak bisa dipakai lagi meski belum expire.
+   * Tidak perlu menunggu response; hapus token di client tetap dilakukan
+   * bahkan jika request gagal (network error, dsb).
+   */
+  logout: () =>
+    api.post('/auth/logout', {}),
 };

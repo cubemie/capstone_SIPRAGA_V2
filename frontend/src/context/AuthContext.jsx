@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext(null);
 
@@ -8,9 +9,14 @@ const AuthContext = createContext(null);
  */
 function decodeToken(token) {
   try {
-    const payload = token.split('.')[1];
-    return JSON.parse(atob(payload));
-  } catch {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error("Failed to decode token:", error);
     return null;
   }
 }
@@ -41,9 +47,17 @@ export function AuthProvider({ children }) {
 
   function login(newToken) {
     setToken(newToken);
+    const decoded = decodeToken(newToken);
+    if (decoded && decoded.exp * 1000 > Date.now()) {
+      setUser(decoded);
+      localStorage.setItem('token', newToken);
+    }
   }
 
   function logout() {
+    // Kirim token ke backend untuk di-blacklist (fire-and-forget).
+    // Hapus token di client tetap dilakukan meski request backend gagal.
+    authService.logout().catch(() => { /* abaikan network error saat logout */ });
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');

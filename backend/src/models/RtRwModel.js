@@ -146,6 +146,27 @@ class RtRwModel {
     const [rows] = await db.query('SELECT * FROM superadmin WHERE username = ?', [username]);
     return rows[0] || null;
   }
+
+  /**
+   * Cek apakah username superadmin sudah digunakan.
+   * @param {string} username
+   * @returns {boolean}
+   */
+  static async isSuperadminUsernameTaken(username) {
+    const [rows] = await db.query('SELECT id FROM superadmin WHERE username = ?', [username]);
+    return rows.length > 0;
+  }
+
+  /**
+   * Buat akun superadmin baru.
+   * @param {{ username: string, password: string }} data
+   */
+  static async createSuperadmin({ username, password }) {
+    await db.query(
+      'INSERT INTO superadmin (username, password) VALUES (?, ?)',
+      [username, password]
+    );
+  }
 }
 
 module.exports = RtRwModel;

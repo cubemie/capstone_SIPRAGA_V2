@@ -7,6 +7,7 @@
  */
 
 const WargaService = require('../services/WargaService');
+const { sendSuccess, sendError } = require('../utils/response');
 
 class WargaController {
   /** GET /api/warga/profil */
@@ -14,8 +15,8 @@ class WargaController {
     try {
       const id = req.user.id_warga;
       const { data, error } = await WargaService.getProfile(id);
-      if (error) return res.status(404).json({ message: error });
-      res.json(data);
+      if (error) return sendError(res, error, 404);
+      sendSuccess(res, data, 'Profil warga berhasil diambil');
     } catch (err) {
       next(err);
     }
@@ -26,8 +27,8 @@ class WargaController {
     try {
       const id = req.user.id_warga;
       const { data, error } = await WargaService.getKelengkapan(id);
-      if (error) return res.status(404).json({ message: error });
-      res.json(data);
+      if (error) return sendError(res, error, 404);
+      sendSuccess(res, data, 'Kelengkapan data warga berhasil diambil');
     } catch (err) {
       next(err);
     }
@@ -38,8 +39,8 @@ class WargaController {
     try {
       const id = req.user.id_warga;
       const { data, error } = await WargaService.lengkapiData(id, req.body, req.file);
-      if (error) return res.status(400).json({ message: error });
-      res.json(data);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Data warga berhasil dilengkapi');
     } catch (err) {
       next(err);
     }
@@ -51,8 +52,8 @@ class WargaController {
   static async getTtd(req, res, next) {
     try {
       const { data, error } = await WargaService.getTtd(req.user);
-      if (error) return res.status(404).json({ message: error });
-      res.json(data);
+      if (error) return sendError(res, error, 404);
+      sendSuccess(res, data, 'Data TTD berhasil diambil');
     } catch (err) {
       next(err);
     }
@@ -62,8 +63,8 @@ class WargaController {
   static async uploadTtd(req, res, next) {
     try {
       const { data, error } = await WargaService.uploadTtd(req.user, req.file);
-      if (error) return res.status(400).json({ message: error });
-      res.json(data);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'TTD berhasil diupload');
     } catch (err) {
       next(err);
     }

@@ -22,20 +22,14 @@ export default function StatusSurat() {
   const { data: letters, loading, error } = useSurat('my');
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
-      {/* Header */}
-      <header className="bg-blue-900 text-white px-6 py-4 flex justify-between items-center shadow-md">
-        <div className="flex items-center space-x-4">
-          <Link to="/warga/dashboard" className="text-white hover:text-slate-200 transition">
-            <ArrowLeft className="w-6 h-6" />
-          </Link>
-          <h1 className="text-xl font-bold">📮 Status Pengajuan Surat Anda</h1>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-1 max-w-5xl mx-auto w-full p-6 space-y-6">
-        <div className="flex justify-between items-center">
+    <div className="max-w-5xl mx-auto w-full p-6 space-y-6">
+      <div className="flex items-center space-x-4 mb-2">
+        <Link to="/warga/dashboard" className="text-slate-400 hover:text-blue-600 transition p-2 bg-white rounded-full shadow-sm">
+          <ArrowLeft className="w-5 h-5" />
+        </Link>
+        <h1 className="text-2xl font-bold text-slate-800">Status Pengajuan Surat Anda</h1>
+      </div>
+      <div className="flex justify-between items-center">
           <div>
             <h2 className="text-lg font-bold text-slate-900">Daftar Pengajuan</h2>
             <p className="text-slate-500 text-xs">Lacak progres persetujuan surat pengantar RT dan RW Anda di sini.</p>
@@ -130,7 +124,6 @@ export default function StatusSurat() {
             })}
           </div>
         )}
-      </main>
     </div>
   );
 }

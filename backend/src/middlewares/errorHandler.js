@@ -33,8 +33,12 @@ module.exports = (err, req, res, next) => { // eslint-disable-line no-unused-var
 
   // Response ke client
   const isProduction = process.env.NODE_ENV === 'production';
-  res.status(err.status || 500).json({
-    message: err.message && !isProduction ? err.message : 'Terjadi kesalahan pada server.',
+  const statusCode = err.status || 500;
+  const message = err.message && !isProduction ? err.message : 'Terjadi kesalahan pada server.';
+
+  res.status(statusCode).json({
+    status: 'error',
+    message: message,
     ...(isProduction ? {} : { detail: err.stack }),
   });
 };

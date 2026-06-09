@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, FileText, CheckCircle, Users } from 'lucide-react';
+import Logo from '../components/Logo';
 
 export default function LandingPage() {
   return (
@@ -8,10 +9,7 @@ export default function LandingPage() {
       {/* Header */}
       <header className="bg-blue-900 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl">📮</span>
-            <span className="text-xl font-bold tracking-wide">RT-RW CORETAX</span>
-          </div>
+          <Logo className="text-white [&_svg]:text-white [&_span]:text-white" />
           <nav className="flex space-x-4">
             <Link to="/login-warga" className="bg-white text-blue-900 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition shadow">
               Login Warga

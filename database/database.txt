@@ -1,3 +1,8 @@
+superadmin
+id int(11) AI PK
+username varchar(255) UNIQUE NOT NULL
+password varchar(255) NOT NULL
+
 pengajuan_surat
 id int(11) AI PK 
 id_warga int(11) 
@@ -50,6 +55,7 @@ NIK char(16)
 nama varchar(255) 
 email varchar(255) 
 password varchar(255) 
+no_hp varchar(15)
 tempat_lahir varchar(255) 
 tanggal_lahir date 
 jenis_kelamin enum('Laki-laki','Perempuan') 

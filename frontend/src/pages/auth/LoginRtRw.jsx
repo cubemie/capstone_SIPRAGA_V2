@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, ShieldAlert, Loader2, AlertCircle } from 'lucide-react';
+import Logo from '../../components/Logo';
+import { Lock, ShieldAlert, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../../services/authService';
 import { useAuth } from '../../context/AuthContext';
 
@@ -10,6 +11,7 @@ export default function LoginRtRw() {
   const [role, setRole] = useState('rt'); // 'rt', 'rw', 'superadmin'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -33,10 +35,16 @@ export default function LoginRtRw() {
       return;
     }
 
-    login(data.token);
+    const token = data?.data?.token;
+    if (!token) {
+      setError('Login gagal: token tidak ditemukan.');
+      return;
+    }
+
+    login(token);
 
     // Navigasi berdasarkan role yang dikembalikan server
-    const userRole = data.role;
+    const userRole = data?.data?.role;
     if (userRole === 'superadmin') {
       navigate('/superadmin/dashboard');
     } else {
@@ -47,7 +55,11 @@ export default function LoginRtRw() {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link to="/" className="text-3xl">📮</Link>
+        <div className="mb-8 flex justify-center">
+          <Link to="/" className="inline-block hover:opacity-80 transition">
+            <Logo className="scale-125" />
+          </Link>
+        </div>
         <h2 className="mt-4 text-center text-3xl font-extrabold text-slate-900">
           Login Staff &amp; Administrasi
         </h2>
@@ -127,13 +139,21 @@ export default function LoginRtRw() {
                 </div>
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="block w-full pl-10 pr-10 py-2 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 
@@ -151,13 +171,28 @@ export default function LoginRtRw() {
             </div>
           </form>
 
-          <div className="mt-6 border-t border-slate-200 pt-6">
+          <div className="mt-6 border-t border-slate-200 pt-6 space-y-3">
             <Link
               to="/login-warga"
               className="w-full flex justify-center items-center py-2 px-4 border border-slate-300 rounded-xl shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition"
             >
               Login sebagai Warga
             </Link>
+            {role === 'superadmin' ? (
+              <p className="text-center text-sm text-slate-500">
+                Belum punya akun Super Admin?{' '}
+                <Link to="/register-superadmin" className="font-semibold text-blue-600 hover:text-blue-500 transition">
+                  Daftar di sini
+                </Link>
+              </p>
+            ) : (
+              <p className="text-center text-sm text-slate-500">
+                Belum punya akun pengurus?{' '}
+                <Link to="/register-rtrw" className="font-semibold text-blue-600 hover:text-blue-500 transition">
+                  Daftar di sini
+                </Link>
+              </p>
+            )}
           </div>
         </div>
       </div>

@@ -2,12 +2,15 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import DashboardLayout from './components/layout/DashboardLayout';
 
 // Import Pages
 import LandingPage from './pages/LandingPage';
 import LoginWarga from './pages/auth/LoginWarga';
 import RegisterWarga from './pages/auth/RegisterWarga';
 import LoginRtRw from './pages/auth/LoginRtRw';
+import RegisterRtRw from './pages/auth/RegisterRtRw';
+import RegisterSuperadmin from './pages/auth/RegisterSuperadmin';
 import WargaDashboard from './pages/warga/Dashboard';
 import AjukanSurat from './pages/warga/AjukanSurat';
 import StatusSurat from './pages/warga/StatusSurat';
@@ -28,48 +31,53 @@ export default function App() {
           <Route path="/login-warga" element={<LoginWarga />} />
           <Route path="/register-warga" element={<RegisterWarga />} />
           <Route path="/login-rtrw" element={<LoginRtRw />} />
+          <Route path="/register-rtrw" element={<RegisterRtRw />} />
+          <Route path="/register-superadmin" element={<RegisterSuperadmin />} />
 
-          {/* Warga Dashboard & Actions */}
-          <Route
-            path="/warga/dashboard"
-            element={<ProtectedRoute allowedRoles={['warga']}><WargaDashboard /></ProtectedRoute>}
-          />
-          <Route
-            path="/warga/ajukan"
-            element={<ProtectedRoute allowedRoles={['warga']}><AjukanSurat /></ProtectedRoute>}
-          />
-          <Route
-            path="/warga/status"
-            element={<ProtectedRoute allowedRoles={['warga']}><StatusSurat /></ProtectedRoute>}
-          />
+          {/* Dashboard Layout wrapper */}
+          <Route element={<DashboardLayout />}>
+            {/* Warga Dashboard & Actions */}
+            <Route
+              path="/warga/dashboard"
+              element={<ProtectedRoute allowedRoles={['warga']}><WargaDashboard /></ProtectedRoute>}
+            />
+            <Route
+              path="/warga/ajukan"
+              element={<ProtectedRoute allowedRoles={['warga']}><AjukanSurat /></ProtectedRoute>}
+            />
+            <Route
+              path="/warga/status"
+              element={<ProtectedRoute allowedRoles={['warga']}><StatusSurat /></ProtectedRoute>}
+            />
 
-          {/* RT/RW Dashboard & Actions */}
-          <Route
-            path="/rtrw/dashboard"
-            element={<ProtectedRoute allowedRoles={['rt', 'rw']}><RtRwDashboard /></ProtectedRoute>}
-          />
-          <Route
-            path="/rtrw/ajukan"
-            element={<ProtectedRoute allowedRoles={['rt', 'rw']}><RtRwAjukanSurat /></ProtectedRoute>}
-          />
-          <Route
-            path="/rtrw/ttd"
-            element={<ProtectedRoute allowedRoles={['rt', 'rw']}><TtdSurat /></ProtectedRoute>}
-          />
-          <Route
-            path="/rtrw/riwayat"
-            element={<ProtectedRoute allowedRoles={['rt', 'rw']}><RiwayatSurat /></ProtectedRoute>}
-          />
+            {/* RT/RW Dashboard & Actions */}
+            <Route
+              path="/rtrw/dashboard"
+              element={<ProtectedRoute allowedRoles={['rt', 'rw']}><RtRwDashboard /></ProtectedRoute>}
+            />
+            <Route
+              path="/rtrw/ajukan"
+              element={<ProtectedRoute allowedRoles={['rt', 'rw']}><RtRwAjukanSurat /></ProtectedRoute>}
+            />
+            <Route
+              path="/rtrw/ttd"
+              element={<ProtectedRoute allowedRoles={['rt', 'rw']}><TtdSurat /></ProtectedRoute>}
+            />
+            <Route
+              path="/rtrw/riwayat"
+              element={<ProtectedRoute allowedRoles={['rt', 'rw']}><RiwayatSurat /></ProtectedRoute>}
+            />
 
-          {/* Super Admin Dashboard & Actions */}
-          <Route
-            path="/superadmin/dashboard"
-            element={<ProtectedRoute allowedRoles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>}
-          />
-          <Route
-            path="/superadmin/template"
-            element={<ProtectedRoute allowedRoles={['superadmin']}><TemplateSurat /></ProtectedRoute>}
-          />
+            {/* Super Admin Dashboard & Actions */}
+            <Route
+              path="/superadmin/dashboard"
+              element={<ProtectedRoute allowedRoles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>}
+            />
+            <Route
+              path="/superadmin/template"
+              element={<ProtectedRoute allowedRoles={['superadmin']}><TemplateSurat /></ProtectedRoute>}
+            />
+          </Route>
         </Routes>
       </Router>
     </AuthProvider>

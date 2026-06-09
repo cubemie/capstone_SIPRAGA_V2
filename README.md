@@ -56,14 +56,18 @@ Untuk rekan-rekan tim, silakan ikuti langkah berikut untuk menjalankan aplikasi 
    ```bash
    cd backend
    ```
-2. Pastikan file `.env` sudah ada dan konfigurasinya mengarah ke MySQL lokal kalian:
+2. Buat file `.env` dengan menyalin template yang ada:
+   ```bash
+   cp .env.example .env
+   ```
+3. Buka file `.env` yang baru dibuat dan pastikan konfigurasinya mengarah ke MySQL lokal kalian:
    `DB_HOST=localhost`
    `DB_PORT=3306` (atau sesuaikan dengan port MySQL kalian)
-3. Instal dependencies backend:
+4. Instal dependencies backend:
    ```bash
    npm install
    ```
-4. Jalankan backend:
+5. Jalankan backend:
    ```bash
    npm run dev
    ```
@@ -96,24 +100,7 @@ Bagian ini **opsional** dan utamanya digunakan oleh PIC yang mengatur environmen
    ```
 *(Untuk menggunakan Docker, pastikan `DB_HOST=db` di dalam `.env` backend).*
 
----
 
-### 4. Menjalankan Frontend
-Frontend tetap kita jalankan secara lokal menggunakan Vite.
-
-1. Buka tab terminal baru, lalu masuk ke folder `frontend`:
-   ```bash
-   cd frontend
-   ```
-2. Instal *library/dependencies* (cukup dilakukan sekali diawal, atau saat ada update package dari member lain):
-   ```bash
-   npm install
-   ```
-3. Jalankan server frontend:
-   ```bash
-   npm run dev
-   ```
-4. Buka browser dan ketik alamat: `http://localhost:5173`
 
 ## API Endpoint
 Berikut adalah rute dasar (*base URL*) untuk masing-masing layanan yang tersedia di Backend:
@@ -128,7 +115,13 @@ Berikut adalah rute dasar (*base URL*) untuk masing-masing layanan yang tersedia
 | `/api/superadmin` | Manajemen platform level atas untuk Super Admin |
 | `/api/dashboard-rt-rw` | Endpoint khusus analitik/statistik untuk dashboard Pengurus |
 
-*(Note: Endpoint spesifik seperti POST/GET/PUT/DELETE dapat dilihat selengkapnya di direktori `backend/src/routes` atau via Postman Collection).*
+*(Note: Detail dokumentasi endpoint, request body, dan response JSON dapat dilihat selengkapnya di [API_REFERENCE.md](docs/API_REFERENCE.md)).*
+
+## Strategi Migrasi Database
+Untuk meminimalisir masalah perubahan schema database antar tim, gunakan folder `database/migrations/`:
+- **Jangan pernah merubah skema** `init.sql` jika fitur tersebut baru.
+- Buat file `.sql` baru di folder `database/migrations/` (misal: `001_add_no_hp_to_warga.sql`) dan komunikasikan ke grup tim agar semua menjalankan file SQL tersebut.
+- Baca detail selengkapnya di [database/migrations/README.md](database/migrations/README.md).
 
 ## Deployment
 [Akan ditambahkan nanti]
