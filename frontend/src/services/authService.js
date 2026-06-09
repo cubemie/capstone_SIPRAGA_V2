@@ -56,4 +56,13 @@ export const authService = {
    */
   registerWarga: (data) =>
     api.post('/auth/register', data),
+
+  /**
+   * Logout — kirim token ke backend agar di-blacklist di server.
+   * Token yang di-blacklist tidak bisa dipakai lagi meski belum expire.
+   * Tidak perlu menunggu response; hapus token di client tetap dilakukan
+   * bahkan jika request gagal (network error, dsb).
+   */
+  logout: () =>
+    api.post('/auth/logout', {}),
 };

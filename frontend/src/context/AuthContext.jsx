@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext(null);
 
@@ -54,6 +55,9 @@ export function AuthProvider({ children }) {
   }
 
   function logout() {
+    // Kirim token ke backend untuk di-blacklist (fire-and-forget).
+    // Hapus token di client tetap dilakukan meski request backend gagal.
+    authService.logout().catch(() => { /* abaikan network error saat logout */ });
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
