@@ -39,19 +39,45 @@ export default function TtdSurat() {
   };
 
   const handleSaveDrawing = async () => {
-    if (sigCanvas.current.isEmpty()) {
+    // Debug: log isi sigCanvas ref
+    console.log('[TTD] sigCanvas.current:', sigCanvas.current);
+    console.log('[TTD] isEmpty:', sigCanvas.current?.isEmpty?.());
+
+    // Cek apakah canvas kosong — gunakan fallback jika isEmpty tidak tersedia
+    const isEmpty = typeof sigCanvas.current?.isEmpty === 'function'
+      ? sigCanvas.current.isEmpty()
+      : false;
+
+    if (isEmpty) {
       setError('Tanda tangan masih kosong.');
       return;
     }
     setError('');
     setSaving(true);
     
-    // Get dataURL and convert to Blob
-    const dataURL = sigCanvas.current.getTrimmedCanvas().toDataURL('image/png');
-    
     try {
-      const res = await fetch(dataURL);
-      const blob = await res.blob();
+      // Dapatkan raw canvas — getTrimmedCanvas() broken di react-signature-canvas@1.1.0-alpha.2
+      // Gunakan getCanvas() sebagai gantinya
+      let canvas;
+      if (typeof sigCanvas.current?.getCanvas === 'function') {
+        canvas = sigCanvas.current.getCanvas();
+      } else {
+        throw new Error('Canvas method tidak ditemukan pada ref.');
+      }
+
+      console.log('[TTD] canvas dimensions:', canvas.width, 'x', canvas.height);
+
+      // Encode canvas sebagai PNG agar background tetap transparan (karena JPEG tidak dukung transparan)
+      const dataURL = canvas.toDataURL('image/png');
+      
+      // Konversi dataURL → Blob
+      const byteString = atob(dataURL.split(',')[1]);
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([ab], { type: 'image/png' });
       
       const formData = new FormData();
       formData.append('ttdImage', blob, 'signature.png');
@@ -72,6 +98,7 @@ export default function TtdSurat() {
       setIsDrawing(false);
       setTimeout(() => setIsSaved(false), 3000);
     } catch (e) {
+      console.error('[TTD] Gagal simpan tanda tangan:', e);
       setSaving(false);
       setError('Gagal memproses gambar tanda tangan.');
     }
@@ -175,7 +202,11 @@ export default function TtdSurat() {
                   <SignatureCanvas 
                     ref={sigCanvas}
                     penColor="black"
-                    canvasProps={{className: 'w-full h-48 md:h-64 cursor-crosshair'}} 
+                    canvasProps={{
+                      width: 600,
+                      height: 250,
+                      style: { width: '100%', height: 'auto', display: 'block' },
+                    }} 
                   />
                 </div>
                 
