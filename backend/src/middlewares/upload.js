@@ -1,8 +1,8 @@
 /**
- * upload.js  —  Centralized Multer Configuration (Cloudinary)
+ * upload.js  —  Centralized Multer Configuration (Supabase)
  *
- * File disimpan ke Cloudinary agar tidak hilang saat Railway restart.
- * Semua file dikelompokkan di folder `rt-rw/<subfolder>` di Cloudinary.
+ * File disimpan ke Supabase Storage.
+ * Semua file dikelompokkan di folder `rt-rw/<subfolder>` di Supabase.
  *
  * Named exports:
  *   uploadSurat       → rt-rw/surat          (PDF, DOCX — maks 5 MB)
@@ -12,35 +12,68 @@
  *   uploadTemplate    → rt-rw/template_surat (PDF, DOCX — maks 10 MB)
  */
 
-const multer             = require('multer');
-const cloudinary         = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
+const { createClient } = require('@supabase/supabase-js');
 
-// ─── Konfigurasi Cloudinary ───────────────────────────────────────────────────
+// ─── Konfigurasi Supabase ────────────────────────────────────────────────────
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key:    process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Kita gunakan env jika ada, fallback ke hardcoded info dari user
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://avlwwbkhsrubhsfwbgpr.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bHd3Ymtoc3J1YmhzZndiZ3ByIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTA4MTgxOSwiZXhwIjoyMDk2NjU3ODE5fQ.dJRzNTWroMDCkJ3Zd9PXxsJklG02XzwjT6iHdlt_-yc';
+const BUCKET_NAME = process.env.SUPABASE_BUCKET || 'sipraga-storage';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ─── Custom Multer Storage untuk Supabase ───────────────────────────────────
+
+function SupabaseStorage(opts) {
+  this.folder = opts.folder;
+}
+
+SupabaseStorage.prototype._handleFile = function _handleFile(req, file, cb) {
+  const ext = file.originalname.split('.').pop();
+  const filename = `rt-rw/${this.folder}/${Date.now()}-${Math.round(Math.random() * 1E9)}.${ext}`;
+  
+  const chunks = [];
+  file.stream.on('data', (chunk) => chunks.push(chunk));
+  file.stream.on('end', async () => {
+    const buffer = Buffer.concat(chunks);
+    try {
+      const { data, error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(filename, buffer, {
+          contentType: file.mimetype,
+          upsert: false
+        });
+        
+      if (error) {
+        return cb(error);
+      }
+      
+      const publicUrl = supabase.storage.from(BUCKET_NAME).getPublicUrl(filename).data.publicUrl;
+      
+      cb(null, {
+        path: publicUrl, // Semua controller menggunakan req.file.path
+        size: buffer.length,
+        filename: filename
+      });
+    } catch (err) {
+      cb(err);
+    }
+  });
+  file.stream.on('error', (err) => cb(err));
+};
+
+SupabaseStorage.prototype._removeFile = function _removeFile(req, file, cb) {
+  // Not implemented for simplicity
+  cb(null);
+};
+
+function makeSupabaseStorage(folder) {
+  return new SupabaseStorage({ folder });
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/**
- * Buat CloudinaryStorage untuk folder tertentu.
- * @param {string}   folder          - Subfolder di Cloudinary (di bawah rt-rw/)
- * @param {string[]} allowedFormats  - Ekstensi yang diizinkan (tanpa titik)
- */
-function makeCloudinaryStorage(folder, allowedFormats) {
-  return new CloudinaryStorage({
-    cloudinary,
-    params: {
-      folder:           `rt-rw/${folder}`,
-      allowed_formats:  allowedFormats,
-      resource_type:    'auto', // otomatis deteksi image/video/raw (untuk PDF/DOCX)
-    },
-  });
-}
 
 /**
  * File filter berdasarkan daftar ekstensi yang diizinkan.
@@ -76,41 +109,41 @@ function makeMimeFilter(allowedMimes, label) {
 // ─── Filters ──────────────────────────────────────────────────────────────────
 
 const docFilter   = makeExtFilter(['pdf', 'docx'], 'PDF atau DOCX');
-const imageFilter = makeMimeFilter(['image/jpeg', 'image/png'], 'JPG atau PNG');
+const imageFilter = makeMimeFilter(['image/jpeg', 'image/png', 'image/jpg'], 'JPG atau PNG');
 
 // ─── Multer Instances ─────────────────────────────────────────────────────────
 
 /** Upload surat pengajuan warga (PDF/DOCX, maks 5 MB) */
 const uploadSurat = multer({
-  storage:    makeCloudinaryStorage('surat', ['pdf', 'docx']),
+  storage:    makeSupabaseStorage('surat'),
   fileFilter: docFilter,
   limits:     { fileSize: 5 * 1024 * 1024 },
 });
 
 /** Upload surat yang sudah ditandatangani RT/RW (PDF/DOCX, maks 10 MB) */
 const uploadSuratSigned = multer({
-  storage:    makeCloudinaryStorage('signed', ['pdf', 'docx']),
+  storage:    makeSupabaseStorage('signed'),
   fileFilter: docFilter,
   limits:     { fileSize: 10 * 1024 * 1024 },
 });
 
 /** Upload template surat oleh superadmin (PDF/DOCX, maks 10 MB) */
 const uploadTemplate = multer({
-  storage:    makeCloudinaryStorage('template_surat', ['pdf', 'docx']),
+  storage:    makeSupabaseStorage('template_surat'),
   fileFilter: docFilter,
   limits:     { fileSize: 10 * 1024 * 1024 },
 });
 
 /** Upload foto KTP warga (JPG/PNG, maks 3 MB) */
 const uploadKtp = multer({
-  storage:    makeCloudinaryStorage('ktp', ['jpg', 'jpeg', 'png']),
+  storage:    makeSupabaseStorage('ktp'),
   fileFilter: imageFilter,
   limits:     { fileSize: 3 * 1024 * 1024 },
 });
 
 /** Upload tanda tangan digital RT/RW (JPG/PNG, maks 2 MB) */
 const uploadTtd = multer({
-  storage:    makeCloudinaryStorage('ttd', ['jpg', 'jpeg', 'png']),
+  storage:    makeSupabaseStorage('ttd'),
   fileFilter: imageFilter,
   limits:     { fileSize: 2 * 1024 * 1024 },
 });
