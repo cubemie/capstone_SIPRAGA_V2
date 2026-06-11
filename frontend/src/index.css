@@ -1,1 +1,34 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Palet utama — navy government + emerald accent */
+  --color-primary:       #1e3a5f;
+  --color-primary-dark:  #152d4a;
+  --color-primary-light: #2d5282;
+
+  --color-accent:        #059669;
+  --color-accent-dark:   #047857;
+
+  --color-surface:       #f8fafc;
+  --color-surface-card:  #ffffff;
+
+  /* Status colors */
+  --color-status-menunggu-bg:   #fefce8;
+  --color-status-menunggu-text: #92400e;
+  --color-status-disetujui-bg:  #dcfce7;
+  --color-status-disetujui-text:#15803d;
+  --color-status-ditolak-bg:    #fee2e2;
+  --color-status-ditolak-text:  #b91c1c;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-800 font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-semibold tracking-tight;
+  }
+}

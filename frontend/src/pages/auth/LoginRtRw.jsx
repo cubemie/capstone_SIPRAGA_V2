@@ -4,6 +4,7 @@ import Logo from '../../components/Logo';
 import { Lock, ShieldAlert, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../../services/authService';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from 'sonner';
 
 export default function LoginRtRw() {
   const [username, setUsername] = useState('');
@@ -32,6 +33,7 @@ export default function LoginRtRw() {
 
     if (err) {
       setError(err);
+      toast.error(err);
       return;
     }
 

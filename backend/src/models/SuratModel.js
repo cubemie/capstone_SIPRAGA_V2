@@ -5,7 +5,7 @@
  * Tidak mengandung logika bisnis — hanya query SQL.
  */
 
-const db          = require('../config/db');
+const db           = require('../config/db');
 const SURAT_STATUS = require('../constants/suratStatus');
 
 /** Padding angka RT/RW ke 3 digit: "1" → "001" */
@@ -27,6 +27,24 @@ class SuratModel {
   }
 
   /**
+   * Ambil satu surat berdasarkan ID (beserta data warga untuk notifikasi).
+   * @param {number} id
+   * @returns {Object|null}
+   */
+  static async findById(id) {
+    const [rows] = await db.query(
+      `SELECT ps.id, ps.subjek, ps.status, ps.alasan_penolakan,
+              ps.file_path, ps.file_path_signed,
+              w.nama AS nama_warga, w.email AS email_warga, w.no_hp AS no_hp_warga
+       FROM pengajuan_surat ps
+       JOIN warga w ON ps.id_warga = w.id_warga
+       WHERE ps.id = ?`,
+      [id]
+    );
+    return rows[0] || null;
+  }
+
+  /**
    * Ambil semua surat milik warga tertentu.
    * @param {number} id_warga
    * @returns {Array}
@@ -44,19 +62,46 @@ class SuratModel {
   }
 
   /**
-   * Ambil semua surat yang masuk dan menunggu verifikasi.
+   * Ambil semua surat yang masuk dan menunggu verifikasi,
+   * difilter berdasarkan RT/RW yang sedang login.
+   * @param {number|string} id   — rt_id atau rw_id dari JWT
+   * @param {string}        role — 'rt' atau 'rw'
    * @returns {Array}
    */
-  static async findMasuk() {
-    const [rows] = await db.query(
-      `SELECT ps.id, ps.subjek, ps.file_path, ps.tanggal_ajuan AS created_at,
+  static async findMasuk(id, role) {
+    let query = `SELECT ps.id, ps.subjek, ps.file_path, ps.tanggal_ajuan AS created_at,
               ps.status, w.nama AS nama_warga, w.NIK AS nik_warga
        FROM pengajuan_surat ps
        JOIN warga w ON ps.id_warga = w.id_warga
-       WHERE ps.status = ?
-       ORDER BY ps.tanggal_ajuan ASC`,
-      [SURAT_STATUS.MENUNGGU]
-    );
+       WHERE ps.status = ?`;
+    const params = [SURAT_STATUS.MENUNGGU];
+
+    if (role === 'rt') {
+      const [rtRows] = await db.query(
+        'SELECT no_rt, rw.no_rw FROM rt JOIN rw ON rt.rw_id = rw.rw_id WHERE rt_id = ?',
+        [id]
+      );
+      if (rtRows.length > 0) {
+        query += ` AND ps.rt = ? AND ps.rw = ?`;
+        params.push(padRtRw(rtRows[0].no_rt), padRtRw(rtRows[0].no_rw));
+      } else {
+        query += ` AND 1=0`; // RT tidak ditemukan, return kosong
+      }
+    } else if (role === 'rw') {
+      const [rwRows] = await db.query(
+        'SELECT no_rw FROM rw WHERE rw_id = ?',
+        [id]
+      );
+      if (rwRows.length > 0) {
+        query += ` AND ps.rw = ?`;
+        params.push(padRtRw(rwRows[0].no_rw));
+      } else {
+        query += ` AND 1=0`; // RW tidak ditemukan, return kosong
+      }
+    }
+
+    query += ` ORDER BY ps.tanggal_ajuan ASC`;
+    const [rows] = await db.query(query, params);
     return rows;
   }
 

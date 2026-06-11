@@ -5,7 +5,7 @@ const fs                   = require('fs');
 const { verifyToken }      = require('../middlewares/authMiddleware');
 const requireRtRw          = require('../middlewares/authRtRwMiddleware');
 const { uploadSurat, uploadSuratSigned } = require('../middlewares/upload');
-const SuratController      = require('../controllers/SuratController');
+const SuratController      = require('../controllers/suratController');
 const {
   validateAjukanSurat,
   validateRejectSurat,

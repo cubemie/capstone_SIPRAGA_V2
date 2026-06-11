@@ -4,6 +4,7 @@ import Logo from '../../components/Logo';
 import { CreditCard, Lock, UserCheck, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../../services/authService';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from 'sonner';
 
 export default function LoginWarga() {
   const [nik, setNik] = useState('');
@@ -25,6 +26,7 @@ export default function LoginWarga() {
 
     if (err) {
       setError(err);
+      toast.error(err);
       return;
     }
 

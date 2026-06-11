@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../../components/Logo';
 import { User, Mail, Lock, CreditCard, MapPin, Calendar, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { authService } from '../../services/authService';
+import { toast } from 'sonner';
 
 export default function RegisterWarga() {
   const navigate = useNavigate();
@@ -58,6 +59,7 @@ export default function RegisterWarga() {
 
     if (err) {
       setError(err);
+      toast.error(err);
       return;
     }
 

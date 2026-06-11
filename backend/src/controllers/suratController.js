@@ -37,9 +37,22 @@ class SuratController {
   /** GET /api/surat/masuk */
   static async getSuratMasuk(req, res, next) {
     try {
-      const { data, error } = await SuratService.getSuratMasuk();
+      const { id, role } = req.user;
+      const { data, error } = await SuratService.getSuratMasuk(id, role);
       if (error) return sendError(res, error, 400);
       sendSuccess(res, data, 'Data surat masuk berhasil diambil');
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** GET /api/surat/menunggu-ttd — alias getSuratMasuk */
+  static async getSuratMenungguTtd(req, res, next) {
+    try {
+      const { id, role } = req.user;
+      const { data, error } = await SuratService.getSuratMasuk(id, role);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Data surat menunggu TTD berhasil diambil');
     } catch (err) {
       next(err);
     }
@@ -88,17 +101,6 @@ class SuratController {
       const { data, error } = await SuratService.getStatistik(id_warga);
       if (error) return sendError(res, error, 400);
       sendSuccess(res, data, 'Statistik surat berhasil diambil');
-    } catch (err) {
-      next(err);
-    }
-  }
-
-  /** GET /api/surat/menunggu-ttd */
-  static async getSuratMenungguTtd(req, res, next) {
-    try {
-      const { data, error } = await SuratService.getSuratMasuk();
-      if (error) return sendError(res, error, 400);
-      sendSuccess(res, data, 'Data surat menunggu TTD berhasil diambil');
     } catch (err) {
       next(err);
     }

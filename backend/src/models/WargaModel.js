@@ -63,7 +63,19 @@ class WargaModel {
       [nik, nama, jenis_kelamin, tanggal_lahir, email, password]
     );
   }
-
+/**
+   * Ambil data warga berdasarkan id_warga.
+   * @param {number} id_warga
+   * @returns {Object|null}
+   */
+  static async findById(id_warga) {
+    const [rows] = await db.query(
+      'SELECT id_warga, nama, email, no_hp FROM warga WHERE id_warga = ?',
+      [id_warga]
+    );
+    return rows[0] || null;
+  }
+  
   /**
    * Update data profil warga.
    * @param {number} id
@@ -85,5 +97,7 @@ class WargaModel {
     );
   }
 }
+
+
 
 module.exports = WargaModel;
