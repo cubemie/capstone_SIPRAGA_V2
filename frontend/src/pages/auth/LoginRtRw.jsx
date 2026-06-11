@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../../components/Logo';
 import { Lock, ShieldAlert, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
-import { authService } from '../../services/authService';
+import { authService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 
 export default function LoginRtRw() {

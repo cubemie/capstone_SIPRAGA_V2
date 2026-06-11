@@ -11,7 +11,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { authService } from '../../services/authService';
+import { authService } from "../../services";
 
 export default function RegisterSuperadmin() {
   const [form, setForm] = useState({

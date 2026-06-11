@@ -6,7 +6,7 @@ import {
   Hash, Loader2, AlertCircle, CheckCircle, ChevronRight, ChevronLeft,
   Eye, EyeOff, Info
 } from 'lucide-react';
-import { authService } from '../../services/authService';
+import { authService } from "../../services";
 
 const STEP_ROLE   = 0;
 const STEP_FORM   = 1;

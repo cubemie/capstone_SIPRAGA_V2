@@ -1,154 +1,79 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Send, ArrowLeft, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
-import { suratService } from '../../services/suratService';
+import { useState } from 'react';
+import { suratService } from '../../services';
+import PageHeader from '../../components/ui/PageHeader';
+import { useNavigate } from 'react-router-dom';
 
-export default function RtRwAjukanSurat() {
+export default function AjukanSurat() {
   const navigate = useNavigate();
-  const [wargaNik, setWargaNik] = useState('');
-  const [wargaNama, setWargaNama] = useState('');
-  const [jenisSurat, setJenisSurat] = useState('');
-  const [alasan, setAlasan] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [form, setForm] = useState({ nik_warga: '', nama_warga: '', jenis_surat: '', alasan: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const handleChange = (e) => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
-
-    const { error: err } = await suratService.ajukanSuratOffline({
-      nik_warga: wargaNik,
-      nama_warga: wargaNama,
-      jenis_surat: jenisSurat,
-      alasan,
-    });
-
-    setLoading(false);
-
-    if (err) {
-      setError(err);
-      return;
+    setError('');
+    try {
+      const fd = new FormData();
+      Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+      await suratService.ajukanOffline(fd);
+      alert('Surat berhasil dibuat secara offline!');
+      navigate('/rtrw/dashboard');
+    } catch (err) {
+      setError(err?.message || 'Gagal mengajukan surat offline');
+    } finally {
+      setLoading(false);
     }
-
-    setSubmitted(true);
-    setTimeout(() => navigate('/rtrw/dashboard'), 2000);
   };
 
   return (
-    <div className="max-w-4xl mx-auto w-full p-6">
-      <div className="flex items-center space-x-4 mb-6">
-        <Link to="/rtrw/dashboard" className="text-slate-400 hover:text-slate-900 transition p-2 bg-white rounded-full shadow-sm">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <h1 className="text-2xl font-bold text-slate-800">Buat Surat Pengantar Offline</h1>
-      </div>
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
-          {submitted ? (
-            <div className="text-center py-12 space-y-4">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-10 h-10" />
-              </div>
-              <h3 className="text-2xl font-bold text-slate-900">Surat Pengantar Berhasil Dibuat!</h3>
-              <p className="text-slate-500 max-w-md mx-auto text-sm">
-                Surat Pengantar Offline berhasil digenerate dan didaftarkan pada sistem. Dialihkan kembali ke Dashboard...
-              </p>
+    <div className="max-w-3xl mx-auto">
+      <PageHeader 
+        title="Buat Surat Offline" 
+        subtitle="Buat surat pengantar secara manual untuk warga yang datang langsung ke lokasi." 
+      />
+
+      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        {error && <div className="mb-4 bg-red-50 text-red-800 p-3 rounded text-sm">{error}</div>}
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">NIK Warga</label>
+              <input required name="nik_warga" value={form.nik_warga} onChange={handleChange} maxLength={16}
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2">Formulir Pembuatan Surat Pengantar (Manual/Offline)</h3>
-                <p className="text-slate-500 text-sm">
-                  Gunakan form ini jika ada warga yang meminta surat secara langsung (offline) agar data surat tetap terdigitalisasi.
-                </p>
-              </div>
-
-              {error && (
-                <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* NIK Warga */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700">NIK Warga Pemohon</label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={16}
-                    value={wargaNik}
-                    onChange={(e) => setWargaNik(e.target.value)}
-                    className="mt-1 block w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-                    placeholder="320xxxxxxxxxxxxx"
-                  />
-                </div>
-
-                {/* Nama Warga */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700">Nama Lengkap Warga Pemohon</label>
-                  <input
-                    type="text"
-                    required
-                    value={wargaNama}
-                    onChange={(e) => setWargaNama(e.target.value)}
-                    className="mt-1 block w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-                    placeholder="Sesuai KTP Warga"
-                  />
-                </div>
-              </div>
-
-              {/* Jenis Surat */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700">Jenis Surat Pengantar</label>
-                <select
-                  value={jenisSurat}
-                  onChange={(e) => setJenisSurat(e.target.value)}
-                  required
-                  className="mt-1 block w-full px-4 py-2 border border-slate-300 bg-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-                >
-                  <option value="">-- Pilih Jenis Surat --</option>
-                  <option value="surat_domisili">Surat Pengantar Domisili</option>
-                  <option value="surat_usaha">Surat Keterangan Usaha (SKU)</option>
-                  <option value="surat_tidak_mampu">Surat Keterangan Tidak Mampu (SKTM)</option>
-                  <option value="surat_kematian">Surat Keterangan Kematian</option>
-                </select>
-              </div>
-
-              {/* Alasan / Keperluan */}
-              <div>
-                <label className="block text-sm font-semibold text-slate-700">Alasan / Keperluan Keterangan</label>
-                <textarea
-                  required
-                  rows={4}
-                  value={alasan}
-                  onChange={(e) => setAlasan(e.target.value)}
-                  className="mt-1 block w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-                  placeholder="Contoh: Digunakan untuk persyaratan administrasi pendaftaran sekolah anak..."
-                />
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
-                <Link to="/rtrw/dashboard" className="px-5 py-2.5 bg-slate-100 text-slate-700 font-semibold rounded-xl hover:bg-slate-200 transition text-sm">
-                  Batalkan
-                </Link>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-5 py-2.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition text-sm flex items-center shadow disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Menyimpan...</>
-                  ) : (
-                    <><Send className="w-4 h-4 mr-2" /> Terbitkan &amp; Simpan Surat</>
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label>
+              <input required name="nama_warga" value={form.nama_warga} onChange={handleChange}
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Jenis Surat</label>
+            <select required name="jenis_surat" value={form.jenis_surat} onChange={handleChange}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Pilih Jenis Surat</option>
+              <option value="Surat Pengantar Domisili">Surat Pengantar Domisili</option>
+              <option value="Surat Keterangan Usaha">Surat Keterangan Usaha</option>
+              <option value="Surat Keterangan Tidak Mampu">Surat Keterangan Tidak Mampu</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Alasan / Keperluan</label>
+            <textarea required name="alasan" value={form.alasan} onChange={handleChange} rows={3}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div className="pt-4 text-right">
+            <button type="submit" disabled={loading}
+              className="px-6 py-2.5 bg-[#1A4A8A] text-white rounded text-sm font-semibold shadow-sm hover:bg-[#0F2D5C] disabled:opacity-50">
+              {loading ? 'Menyimpan...' : 'Terbitkan Surat'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

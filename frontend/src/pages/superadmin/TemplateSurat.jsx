@@ -1,204 +1,144 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Upload, FileText, Download, Trash2, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
-import { useTemplate } from '../../hooks/useTemplate';
-import { templateService } from '../../services/templateService';
+import { useEffect, useState } from 'react';
+import { templateService } from '../../services';
+import PageHeader from '../../components/ui/PageHeader';
+import FileDropzone from '../../components/ui/FileDropzone';
+import EmptyState from '../../components/ui/EmptyState';
 
 export default function TemplateSurat() {
-  const { data: templates, loading, error, refetch } = useTemplate();
+  const [templates, setTemplates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  const [nama, setNama] = useState('');
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [message, setMessage] = useState('');
 
-  const [newTemplateName, setNewTemplateName] = useState('');
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [submitted, setSubmitted] = useState(false);
-  const [uploadLoading, setUploadLoading] = useState(false);
-  const [uploadError, setUploadError] = useState('');
-  const [deletingId, setDeletingId] = useState(null);
-
-  const handleUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) setUploadedFile(file);
+  const fetchTemplates = () => {
+    setLoading(true);
+    templateService.getAll()
+      .then(res => setTemplates(res.data ?? res))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   };
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    fetchTemplates();
+  }, []);
+
+  const handleUpload = async (e) => {
     e.preventDefault();
-    if (!newTemplateName || !uploadedFile) return;
+    if (!nama || !file) return;
+    setUploading(true);
+    setMessage('');
 
-    setUploadError('');
-    setUploadLoading(true);
-
-    const formData = new FormData();
-    formData.append('nama_template', newTemplateName);
-    formData.append('file', uploadedFile);
-
-    const { error: err } = await templateService.upload(formData);
-
-    setUploadLoading(false);
-
-    if (err) {
-      setUploadError(err);
-      return;
+    try {
+      const fd = new FormData();
+      fd.append('nama_template', nama);
+      fd.append('file', file);
+      await templateService.upload(fd);
+      setMessage('Template berhasil diunggah.');
+      setNama('');
+      setFile(null);
+      fetchTemplates();
+    } catch (err) {
+      setMessage(err?.message || 'Gagal mengunggah template.');
+    } finally {
+      setUploading(false);
     }
-
-    setNewTemplateName('');
-    setUploadedFile(null);
-    setSubmitted(true);
-    refetch(); // refresh daftar template
-
-    setTimeout(() => setSubmitted(false), 3000);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Yakin ingin menghapus template ini?')) return;
-    setDeletingId(id);
-    const { error: err } = await templateService.deleteById(id);
-    setDeletingId(null);
-    if (!err) refetch();
+    if (!window.confirm('Hapus template ini?')) return;
+    try {
+      await templateService.hapus(id);
+      fetchTemplates();
+    } catch (err) {
+      alert(err?.message || 'Gagal menghapus template');
+    }
   };
 
   return (
-    <div className="max-w-5xl mx-auto w-full p-6 space-y-6">
-      <div className="flex items-center space-x-4 mb-2">
-        <Link to="/superadmin/dashboard" className="text-slate-400 hover:text-slate-900 transition p-2 bg-white rounded-full shadow-sm">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <h1 className="text-2xl font-bold text-slate-800">Pengelolaan Template Surat Resmi</h1>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="space-y-6">
+      <PageHeader 
+        title="Pengelolaan Template Surat" 
+        subtitle="Kelola dokumen template acuan (.docx/.pdf) untuk digunakan di sistem." 
+      />
 
-          {/* List of Templates */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-              <h3 className="font-bold text-slate-900 mb-4">Daftar Dokumen Template Aktif</h3>
+      {message && (
+        <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm border border-blue-200">
+          ℹ️ {message}
+        </div>
+      )}
 
-              {/* Loading */}
-              {loading && (
-                <div className="flex items-center justify-center py-10 gap-2 text-slate-400">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  <span className="text-sm">Memuat template...</span>
-                </div>
-              )}
-
-              {/* Error */}
-              {!loading && error && (
-                <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
-
-              {/* Empty */}
-              {!loading && !error && templates.length === 0 && (
-                <p className="text-slate-400 text-sm text-center py-8">Belum ada template yang diunggah.</p>
-              )}
-
-              {/* Template List */}
-              {!loading && !error && templates.length > 0 && (
-                <div className="divide-y divide-slate-100">
-                  {templates.map((template) => (
-                    <div key={template.id} className="py-4 flex items-center justify-between gap-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="p-2.5 bg-blue-50 text-blue-900 rounded-xl">
-                          <FileText className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-slate-800">
-                            {template.nama_template || template.nama}
-                          </h4>
-                          <p className="text-slate-400 text-xs mt-0.5">
-                            {template.filename || template.file_name || '—'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <a
-                          href={templateService.getDownloadUrl(template.id)}
-                          className="p-2 text-slate-400 hover:text-blue-600 bg-slate-50 rounded-lg hover:bg-blue-50 transition"
-                          title="Unduh"
-                        >
-                          <Download className="w-4 h-4" />
-                        </a>
-                        <button
-                          onClick={() => handleDelete(template.id)}
-                          disabled={deletingId === template.id}
-                          className="p-2 text-slate-400 hover:text-rose-600 bg-slate-50 rounded-lg hover:bg-rose-50 transition disabled:opacity-60"
-                          title="Hapus"
-                        >
-                          {deletingId === template.id
-                            ? <Loader2 className="w-4 h-4 animate-spin" />
-                            : <Trash2 className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+      <div className="grid lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
+            <h3 className="text-base font-semibold text-gray-800">Daftar Template Aktif</h3>
           </div>
-
-          {/* Upload Form */}
-          <div className="space-y-4">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-              <h3 className="font-bold text-slate-900 mb-4">Unggah Template Baru</h3>
-
-              {submitted && (
-                <div className="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-xl flex items-center space-x-2 text-xs">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Template baru berhasil ditambahkan!</span>
-                </div>
-              )}
-
-              {uploadError && (
-                <div className="mb-4 flex items-center gap-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl px-3 py-3">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{uploadError}</span>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase">Nama Template</label>
-                  <input
-                    type="text"
-                    required
-                    value={newTemplateName}
-                    onChange={(e) => setNewTemplateName(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-                    placeholder="Contoh: Surat Pengantar Nikah"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase">File Template (DOCX/PDF)</label>
-                  <div className="mt-1 border-2 border-dashed border-slate-200 rounded-xl px-4 py-6 text-center bg-slate-50 hover:bg-slate-100 transition cursor-pointer relative">
-                    <input
-                      type="file"
-                      required
-                      accept=".docx,.pdf"
-                      onChange={handleUpload}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                    <span className="text-xs font-semibold text-blue-600 block">Klik untuk memilih file</span>
-                    <span className="text-[10px] text-slate-400 mt-1 block">DOCX atau PDF maks. 10MB</span>
-                    {uploadedFile && (
-                      <span className="mt-3 block text-emerald-600 text-xs font-bold">{uploadedFile.name}</span>
-                    )}
+          
+          {loading ? (
+            <div className="p-5 space-y-3">
+              {[...Array(3)].map((_, i) => <div key={i} className="animate-pulse flex h-12 bg-gray-100 rounded" />)}
+            </div>
+          ) : templates.length === 0 ? (
+            <EmptyState icon="📄" title="Belum ada template" description="Silakan unggah template pertama Anda di sebelah kanan." />
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {templates.map(t => (
+                <div key={t.id} className="p-5 flex items-center justify-between hover:bg-blue-50 transition-colors">
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{t.nama_template || t.nama}</h4>
+                    <p className="text-xs text-gray-500 mt-0.5">{t.filename || t.file_name || '—'}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <a 
+                      href={templateService.getDownloadUrl(t.id)} 
+                      target="_blank" rel="noopener noreferrer"
+                      className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded"
+                    >
+                      Unduh
+                    </a>
+                    <button 
+                      onClick={() => handleDelete(t.id)}
+                      className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded"
+                    >
+                      Hapus
+                    </button>
                   </div>
                 </div>
-
-                <button
-                  type="submit"
-                  disabled={uploadLoading}
-                  className="w-full py-2.5 bg-slate-950 text-white rounded-xl text-xs font-bold hover:bg-slate-900 transition shadow disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {uploadLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {uploadLoading ? 'Mengunggah...' : 'Tambah Template Surat'}
-                </button>
-              </form>
+              ))}
             </div>
-          </div>
-
+          )}
         </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 self-start">
+          <h3 className="text-base font-semibold text-gray-800 mb-4">Unggah Template</h3>
+          <form onSubmit={handleUpload} className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Nama / Deskripsi</label>
+              <input required value={nama} onChange={e => setNama(e.target.value)}
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">File Dokumen</label>
+              <FileDropzone 
+                accept=".docx,.pdf" 
+                maxMB={5} 
+                value={file} 
+                onChange={setFile} 
+                hint="Maksimal 5MB"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={!nama || !file || uploading}
+              className="w-full py-2.5 bg-[#1A4A8A] hover:bg-[#0F2D5C] text-white text-sm font-semibold rounded shadow-sm disabled:opacity-50 transition-colors"
+            >
+              {uploading ? 'Mengunggah...' : 'Unggah & Simpan'}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

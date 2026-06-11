@@ -1,77 +1,56 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '../services/authService';
+import { createContext, useContext, useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext(null);
 
-/**
- * Decode payload JWT tanpa library (simple base64 decode)
- * Tidak memverifikasi signature — hanya untuk membaca data di client
- */
-function decodeToken(token) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error("Failed to decode token:", error);
-    return null;
-  }
-}
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('token'));
-  const [user, setUser] = useState(() => {
-    const t = localStorage.getItem('token');
-    return t ? decodeToken(t) : null;
-  });
-
-  // Sinkronisasi state jika token berubah
   useEffect(() => {
-    if (token) {
-      const decoded = decodeToken(token);
-      // Cek apakah token sudah expire
-      if (decoded && decoded.exp * 1000 > Date.now()) {
-        setUser(decoded);
-        localStorage.setItem('token', token);
-      } else {
-        logout();
+    const savedToken = localStorage.getItem('token');
+    if (savedToken) {
+      try {
+        const decoded = jwtDecode(savedToken);
+        // Check if token is expired
+        if (decoded.exp * 1000 > Date.now()) {
+          setToken(savedToken);
+          setUser(decoded);
+        } else {
+          localStorage.removeItem('token');
+        }
+      } catch {
+        localStorage.removeItem('token');
       }
-    } else {
-      setUser(null);
-      localStorage.removeItem('token');
     }
-  }, [token]);
+    setLoading(false);
+  }, []);
 
-  function login(newToken) {
+  const login = (newToken) => {
+    localStorage.setItem('token', newToken);
+    const decoded = jwtDecode(newToken);
     setToken(newToken);
-    const decoded = decodeToken(newToken);
-    if (decoded && decoded.exp * 1000 > Date.now()) {
-      setUser(decoded);
-      localStorage.setItem('token', newToken);
-    }
-  }
+    setUser(decoded);
+  };
 
-  function logout() {
-    // Kirim token ke backend untuk di-blacklist (fire-and-forget).
-    // Hapus token di client tetap dilakukan meski request backend gagal.
-    authService.logout().catch(() => { /* abaikan network error saat logout */ });
+  const logout = () => {
+    localStorage.removeItem('token');
     setToken(null);
     setUser(null);
-    localStorage.removeItem('token');
-  }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
+export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth harus digunakan di dalam <AuthProvider>');
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
-}
+};
+
+export default AuthContext;
