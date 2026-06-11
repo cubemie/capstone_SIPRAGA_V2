@@ -4,6 +4,7 @@ const path                 = require('path');
 const fs                   = require('fs');
 const { verifyToken }      = require('../middlewares/authMiddleware');
 const requireRtRw          = require('../middlewares/authRtRwMiddleware');
+const requireSuperadmin    = require('../middlewares/superAdminMiddleware');
 const { uploadSurat, uploadSuratSigned } = require('../middlewares/upload');
 const SuratController      = require('../controllers/SuratController');
 const {
@@ -26,6 +27,9 @@ router.get('/riwayat-rtrw',             verifyToken, requireRtRw, SuratControlle
 
 // ─── Surat Offline (RT/RW buat surat untuk warga yang datang langsung) ────────
 router.post('/offline',                 verifyToken, requireRtRw, validateSuratOffline, SuratController.ajukanSuratOffline);
+
+// ─── Superadmin ────────────────────────────────────────────────────
+router.get('/semua',                    verifyToken, requireSuperadmin, SuratController.getAllSurat);
 
 // ─── Download file pengajuan ──────────────────────────────────────────────────
 router.get('/download/:filename', verifyToken, (req, res) => {

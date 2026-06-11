@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Send, ArrowLeft, Upload, FileText, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
-import { suratService } from '../../services/suratService';
-import { templateService } from '../../services/templateService';
-import { wargaService } from '../../services/wargaService';
+import { suratService, templateService, wargaService } from '../../services';
 
 export default function AjukanSurat() {
   const [subjek, setSubjek] = useState('');

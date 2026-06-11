@@ -122,6 +122,17 @@ class SuratController {
       next(err);
     }
   }
+
+  /** GET /api/surat/semua — superadmin global monitoring */
+  static async getAllSurat(req, res, next) {
+    try {
+      const { data, error } = await SuratService.getAllSurat();
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Semua surat berhasil diambil');
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = SuratController;

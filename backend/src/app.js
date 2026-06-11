@@ -36,13 +36,10 @@ app.use('/api/', rateLimit({
   message: { status: 'error', message: 'Terlalu banyak request. Coba lagi nanti.' }
 }));
 
-const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173').split(',');
+const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173').split(',').map(url => url.trim());
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error('CORS: Origin tidak diizinkan'));
-  },
+  origin: allowedOrigins,
   methods:        ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials:    true,

@@ -139,6 +139,23 @@ class SuratModel {
     );
     return rows[0];
   }
+
+  /**
+   * Ambil semua surat dari semua warga (superadmin global view).
+   * @returns {Array}
+   */
+  static async findAll() {
+    const [rows] = await db.query(
+      `SELECT ps.id, ps.subjek, ps.tanggal_ajuan, ps.status,
+              ps.rt, ps.rw, ps.file_path, ps.file_path_signed,
+              ps.alasan_penolakan,
+              w.nama AS nama_warga, w.NIK AS nik_warga
+       FROM pengajuan_surat ps
+       JOIN warga w ON ps.id_warga = w.id_warga
+       ORDER BY ps.tanggal_ajuan DESC`
+    );
+    return rows;
+  }
 }
 
 module.exports = SuratModel;
