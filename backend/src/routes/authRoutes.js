@@ -1,7 +1,7 @@
 const express      = require('express');
 const router       = express.Router();
 const rateLimit    = require('express-rate-limit');
-const AuthController = require('../controllers/AuthController');
+const AuthController = require('../controllers/authController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 
 /**
@@ -18,9 +18,11 @@ const loginLimiter = rateLimit({
   },
 });
 
-router.post('/register', AuthController.register);
-router.post('/register-rw', AuthController.registerRw);
-router.post('/register-rt', AuthController.registerRt);
+const { validateRegister, validateRegisterRtRw } = require('../middlewares/validateAuth');
+
+router.post('/register', validateRegister, AuthController.register);
+router.post('/register-rw', validateRegisterRtRw, AuthController.registerRw);
+router.post('/register-rt', validateRegisterRtRw, AuthController.registerRt);
 router.post('/login',      loginLimiter, AuthController.loginWarga);
 router.post('/login-rtrw', loginLimiter, AuthController.loginRtRw);
 router.post('/logout', AuthController.logout);

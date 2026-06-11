@@ -37,7 +37,8 @@ class SuratController {
   /** GET /api/surat/masuk */
   static async getSuratMasuk(req, res, next) {
     try {
-      const { data, error } = await SuratService.getSuratMasuk();
+      const { id, role } = req.user;
+      const { data, error } = await SuratService.getSuratMasuk(id, role);
       if (error) return sendError(res, error, 400);
       sendSuccess(res, data, 'Data surat masuk berhasil diambil');
     } catch (err) {
@@ -96,7 +97,8 @@ class SuratController {
   /** GET /api/surat/menunggu-ttd */
   static async getSuratMenungguTtd(req, res, next) {
     try {
-      const { data, error } = await SuratService.getSuratMasuk();
+      const { id, role } = req.user;
+      const { data, error } = await SuratService.getSuratMasuk(id, role);
       if (error) return sendError(res, error, 400);
       sendSuccess(res, data, 'Data surat menunggu TTD berhasil diambil');
     } catch (err) {
@@ -116,6 +118,17 @@ class SuratController {
       });
       if (error) return sendError(res, error, 400);
       sendSuccess(res, data, 'Surat offline berhasil diajukan', 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** GET /api/surat/semua — superadmin global monitoring */
+  static async getAllSurat(req, res, next) {
+    try {
+      const { data, error } = await SuratService.getAllSurat();
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Semua surat berhasil diambil');
     } catch (err) {
       next(err);
     }

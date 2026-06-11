@@ -1,69 +1,67 @@
-/**
- * HTTP Client terpusat untuk semua request ke backend.
- *
- * Fitur:
- * - Auto-inject Authorization: Bearer <token> dari localStorage
- * - Kembalikan { data, error } agar mudah di-handle di service/komponen
- * - Support JSON dan FormData (untuk upload file)
- */
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-const BASE_URL = '/api';
+const getToken = () => localStorage.getItem('token');
 
-function getToken() {
-  return localStorage.getItem('token');
-}
-
-async function request(endpoint, options = {}) {
-  const token = getToken();
-
-  const isFormData = options.body instanceof FormData;
-
-  const headers = {
-    // Jangan set Content-Type jika FormData — browser akan set otomatis dengan boundary
-    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
-  };
-
-  try {
-    const res = await fetch(`${BASE_URL}${endpoint}`, {
-      ...options,
-      headers,
+const api = {
+  get: async (path) => {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        'Content-Type': 'application/json',
+      },
     });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  },
 
-    const data = await res.json();
+  post: async (path, body) => {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  },
 
-    if (!res.ok) {
-      return { data: null, error: data.message || 'Terjadi kesalahan.' };
-    }
+  postForm: async (path, formData) => {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: formData,
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  },
 
-    return { data, error: null };
-  } catch (err) {
-    return { data: null, error: 'Tidak dapat terhubung ke server.' };
-  }
-}
+  putForm: async (path, formData) => {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: formData,
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  },
 
-export const api = {
-  get: (endpoint) =>
-    request(endpoint, { method: 'GET' }),
-
-  post: (endpoint, body) =>
-    request(endpoint, { method: 'POST', body: JSON.stringify(body) }),
-
-  put: (endpoint, body) =>
-    request(endpoint, { method: 'PUT', body: JSON.stringify(body) }),
-
-  patch: (endpoint, body) =>
-    request(endpoint, { method: 'PATCH', body: JSON.stringify(body) }),
-
-  delete: (endpoint) =>
-    request(endpoint, { method: 'DELETE' }),
-
-  /** Khusus untuk upload file (FormData) */
-  postFormData: (endpoint, formData) =>
-    request(endpoint, { method: 'POST', body: formData }),
-
-  /** Khusus untuk update file (FormData) via PUT */
-  putFormData: (endpoint, formData) =>
-    request(endpoint, { method: 'PUT', body: formData }),
+  delete: async (path) => {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!res.ok) throw await res.json();
+    return res.json();
+  },
 };
+
+export default api;

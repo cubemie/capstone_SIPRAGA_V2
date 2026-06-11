@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Send, ArrowLeft, Upload, FileText, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
-import { suratService } from '../../services/suratService';
-import { templateService } from '../../services/templateService';
-import { wargaService } from '../../services/wargaService';
+import { suratService, templateService, wargaService } from '../../services';
 
 export default function AjukanSurat() {
   const [subjek, setSubjek] = useState('');
@@ -86,7 +84,7 @@ export default function AjukanSurat() {
   return (
     <div className="max-w-4xl mx-auto w-full p-6">
       <div className="flex items-center space-x-4 mb-6">
-        <Link to="/warga/dashboard" className="text-slate-400 hover:text-blue-600 transition p-2 bg-white rounded-full shadow-sm">
+        <Link to="/warga/dashboard" className="text-slate-400 hover:text-primary-light transition p-2 bg-white rounded-full shadow-sm">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <h1 className="text-2xl font-bold text-slate-800">Ajukan Surat Baru</h1>
@@ -112,7 +110,7 @@ export default function AjukanSurat() {
               </div>
 
               {error && (
-                <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-2 text-sm text-error bg-error/10 border border-error/20 rounded-xl px-4 py-3">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{error}</span>
                 </div>
@@ -164,7 +162,7 @@ export default function AjukanSurat() {
                   <div className="space-y-2">
                     <Upload className="mx-auto h-12 w-12 text-slate-400" />
                     <div className="flex justify-center text-sm text-slate-600">
-                      <label className="relative cursor-pointer bg-white rounded-md font-semibold text-blue-600 hover:text-blue-500">
+                      <label className="relative cursor-pointer bg-white rounded-md font-semibold text-primary-light hover:text-blue-500">
                         <span>Pilih file dokumen</span>
                         <input
                           type="file"
@@ -192,7 +190,7 @@ export default function AjukanSurat() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-5 py-2.5 bg-blue-900 text-white font-semibold rounded-xl hover:bg-blue-800 transition text-sm flex items-center disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="px-5 py-2.5 bg-primary-dark text-white font-semibold rounded-xl hover:bg-primary-dark transition text-sm flex items-center disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Mengirim...</>

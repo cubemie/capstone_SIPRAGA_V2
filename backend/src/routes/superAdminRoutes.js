@@ -4,8 +4,10 @@ const AuthController  = require('../controllers/AuthController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 const requireSuperadmin = require('../middlewares/superAdminMiddleware');
 
-// Public — register superadmin baru
-router.post('/register', AuthController.registerSuperadmin);
+// Public — register superadmin baru (non-production only)
+if (process.env.NODE_ENV !== 'production') {
+  router.post('/register', AuthController.registerSuperadmin);
+}
 
 // Public — login superadmin
 router.post('/login', AuthController.loginSuperadmin);

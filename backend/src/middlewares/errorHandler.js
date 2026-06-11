@@ -24,11 +24,12 @@ module.exports = (err, req, res, next) => { // eslint-disable-line no-unused-var
   }
 
   // Log error secara terstruktur via Winston
-  logger.error(`${req.method} ${req.path} — ${err.message}`, {
+  logger.error(`${req.method} ${req.path} — ${err.message || 'Unknown Error'}`, {
     method: req.method,
     path: req.path,
     status: err.status || 500,
     stack: err.stack,
+    fullError: err
   });
 
   // Response ke client

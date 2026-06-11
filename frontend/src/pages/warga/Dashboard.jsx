@@ -1,143 +1,171 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Send, User, Bell, CheckCircle2, Clock, XCircle, Loader2 } from 'lucide-react';
+import { FileText, Clock, CheckCircle, XCircle, AlertTriangle, Pencil, FileSignature, ClipboardList, Mailbox } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useSurat } from '../../hooks/useSurat';
+import { suratService, wargaService } from '../../services';
+import StatCard from '../../components/ui/StatCard';
+import StatusBadge from '../../components/ui/StatusBadge';
+import PageHeader from '../../components/ui/PageHeader';
 
-/** Hitung jumlah surat per status dari array data */
-function countByStatus(suratList, statusMatch) {
-  return suratList.filter((s) => statusMatch.includes(s.status)).length;
-}
+const fmt = (dt) =>
+  dt
+    ? new Date(dt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+    : '—';
 
-/** Format tanggal ISO ke format "DD Mon YYYY" */
-function formatDate(dateStr) {
-  if (!dateStr) return '-';
-  return new Date(dateStr).toLocaleDateString('id-ID', {
-    day: 'numeric', month: 'long', year: 'numeric',
+const Dashboard = () => {
+  const { user } = useAuth();
+  const [stats, setStats] = useState(null);
+  const [recentSurat, setRecentSurat] = useState([]);
+  const [dataLengkap, setDataLengkap] = useState(true);
+  const [loading, setLoading] = useState(true);
+
+  const today = new Date().toLocaleDateString('id-ID', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
-}
 
-/** Label + warna badge status */
-const STATUS_MAP = {
-  pending_rt: { text: 'Menunggu RT', color: 'bg-amber-100 text-amber-800' },
-  pending_rw: { text: 'Menunggu RW', color: 'bg-indigo-100 text-indigo-800' },
-  approved:   { text: 'Disetujui RW', color: 'bg-emerald-100 text-emerald-800' },
-  rejected:   { text: 'Ditolak', color: 'bg-rose-100 text-rose-800' },
-};
-
-export default function WargaDashboard() {
-  const { data: suratList, loading } = useSurat('my');
-
-  // Stats dihitung dari data real
-  const pending = countByStatus(suratList, ['pending_rt', 'pending_rw']);
-  const approved = countByStatus(suratList, ['approved']);
-  const rejected = countByStatus(suratList, ['rejected']);
-
-  // 3 surat terakhir
-  const recentSurat = suratList.slice(0, 3);
+  useEffect(() => {
+    Promise.all([
+      suratService.getStatistik(),
+      suratService.getSuratSaya(),
+      wargaService.checkKelengkapan(),
+    ])
+      .then(([statRes, suratRes, kelengkapanRes]) => {
+        setStats(statRes.data ?? statRes);
+        const list = suratRes.data ?? suratRes;
+        setRecentSurat(
+          [...list]
+            .sort((a, b) => new Date(b.tanggal_ajuan) - new Date(a.tanggal_ajuan))
+            .slice(0, 5)
+        );
+        setDataLengkap(kelengkapanRes.lengkap ?? kelengkapanRes.data?.lengkap ?? true);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h3 className="text-xl font-bold mb-2">Butuh Surat Pengantar RT/RW?</h3>
-          <p className="text-slate-200 text-sm max-w-xl">
-            Ajukan surat pengantar resmi secara digital sekarang. Proses verifikasi langsung dipantau oleh ketua RT &amp; RW setempat.
-          </p>
+    <div>
+      {/* Incomplete data banner */}
+      {!dataLengkap && (
+        <div
+          role="alert"
+          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-warning/10 border border-warning/20 text-warning p-4 rounded-lg mb-5"
+        >
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5" />
+            <span className="text-sm font-medium">
+              Data profil Anda belum lengkap. Lengkapi data untuk dapat mengajukan surat.
+            </span>
+          </div>
+          <Link
+            to="/warga/profil"
+            className="text-sm font-semibold text-warning underline underline-offset-2 hover:text-yellow-700 whitespace-nowrap"
+          >
+            Lengkapi Sekarang →
+          </Link>
         </div>
-        <Link to="/warga/ajukan" className="bg-white text-blue-900 px-6 py-2.5 rounded-xl font-bold hover:bg-slate-100 transition shadow self-start md:self-auto">
-          + Ajukan Surat Baru
+      )}
+
+      <PageHeader
+        title={`Selamat datang, ${user?.nama ?? 'Warga'} 👋`}
+        subtitle={today}
+      />
+
+      {/* Stat cards */}
+      {loading ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white border border-neutral-100 rounded-lg p-5 animate-pulse h-28" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <StatCard icon={<FileText />} label="Total Pengajuan" value={stats?.total ?? 0} colorClass="text-primary" />
+          <StatCard icon={<Clock />} label="Menunggu" value={stats?.menunggu ?? 0} colorClass="text-warning" />
+          <StatCard icon={<CheckCircle />} label="Disetujui" value={stats?.disetujui ?? 0} colorClass="text-success" />
+          <StatCard icon={<XCircle />} label="Ditolak" value={stats?.ditolak ?? 0} colorClass="text-error" />
+        </div>
+      )}
+
+      {/* Quick actions */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <Link
+          to="/warga/buat-surat"
+          className="bg-primary hover:bg-primary-dark text-white rounded-lg p-4 flex items-center gap-3 transition-colors"
+        >
+          <Pencil className="w-8 h-8 mb-2" />
+          <div>
+            <p className="font-semibold text-sm">Buat Surat</p>
+            <p className="text-xs text-white/70">Dari template atau manual</p>
+          </div>
+        </Link>
+        <Link
+          to="/warga/ajukan-ttd"
+          className="bg-green-700 hover:bg-green-800 text-white rounded-lg p-4 flex items-center gap-3 transition-colors"
+        >
+          <FileSignature className="w-8 h-8 mb-2" />
+          <div>
+            <p className="font-semibold text-sm">Ajukan TTD</p>
+            <p className="text-xs text-white/70">Kirim surat ke RT/RW</p>
+          </div>
+        </Link>
+        <Link
+          to="/warga/status"
+          className="bg-white border border-neutral-100 hover:border-primary/30 hover:bg-primary-light/10 rounded-lg p-4 flex items-center gap-3 transition-colors"
+        >
+          <ClipboardList className="w-8 h-8 mb-2" />
+          <div>
+            <p className="font-semibold text-sm text-gray-800">Status Surat</p>
+            <p className="text-xs text-gray-500">Lacak pengajuan Anda</p>
+          </div>
         </Link>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
-            <Clock className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-sm text-slate-500 font-medium">Menunggu Persetujuan</span>
-            <p className="text-2xl font-bold text-slate-800">{loading ? '—' : pending}</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-sm text-slate-500 font-medium">Disetujui &amp; Selesai</span>
-            <p className="text-2xl font-bold text-slate-800">{loading ? '—' : approved}</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-rose-50 text-rose-600 rounded-xl">
-            <XCircle className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-sm text-slate-500 font-medium">Pengajuan Ditolak</span>
-            <p className="text-2xl font-bold text-slate-800">{loading ? '—' : rejected}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Letters Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h4 className="font-bold text-slate-800">Status Pengajuan Terakhir</h4>
-          <Link to="/warga/status" className="text-xs text-blue-600 font-bold hover:underline">
-            Lihat Semua
+      {/* Recent letters */}
+      <div className="bg-white border border-neutral-100 rounded-lg shadow-sm">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
+          <h2 className="text-base font-semibold text-gray-800">Pengajuan Terakhir</h2>
+          <Link to="/warga/status" className="text-sm text-primary-light hover:underline">
+            Lihat semua →
           </Link>
         </div>
-        <div className="overflow-x-auto">
-          {loading ? (
-            <div className="flex items-center justify-center py-12 gap-2 text-slate-400">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm">Memuat data surat...</span>
-            </div>
-          ) : recentSurat.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 text-sm">
-              Belum ada pengajuan surat.{' '}
-              <Link to="/warga/ajukan" className="text-blue-600 font-semibold hover:underline">
-                Ajukan sekarang
-              </Link>
-            </div>
-          ) : (
-            <table className="w-full text-left text-sm text-slate-500">
-              <thead className="bg-slate-50 text-slate-700 uppercase font-semibold text-xs border-b border-slate-150">
-                <tr>
-                  <th className="px-6 py-3">Tanggal</th>
-                  <th className="px-6 py-3">Jenis Surat</th>
-                  <th className="px-6 py-3">Keperluan</th>
-                  <th className="px-6 py-3">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {recentSurat.map((s) => {
-                  const statusInfo = STATUS_MAP[s.status] || { text: s.status, color: 'bg-slate-100 text-slate-700' };
-                  return (
-                    <tr key={s.id} className="hover:bg-slate-50/55 transition">
-                      <td className="px-6 py-4 whitespace-nowrap font-medium text-slate-900">
-                        {formatDate(s.created_at || s.tanggal)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">{s.jenis_surat || s.subjek}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{s.keperluan || '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`${statusInfo.color} text-xs px-2.5 py-1 rounded-full font-bold`}>
-                          {statusInfo.text}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
+
+        {loading ? (
+          <div className="p-5 space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="animate-pulse flex gap-4">
+                <div className="h-4 bg-gray-200 rounded flex-1" />
+                <div className="h-4 bg-neutral-50 rounded w-24" />
+              </div>
+            ))}
+          </div>
+        ) : recentSurat.length === 0 ? (
+          <div className="py-12 text-center text-gray-400">
+            <Mailbox className="w-10 h-10 mb-2 mx-auto text-gray-400" />
+            <p className="text-sm">Belum ada surat yang diajukan.</p>
+            <Link
+              to="/warga/buat-surat"
+              className="mt-3 inline-block text-sm text-primary-light hover:underline"
+            >
+              Buat surat pertama Anda →
+            </Link>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {recentSurat.map((s) => (
+              <div key={s.id} className="flex items-center justify-between px-5 py-3 hover:bg-neutral-50 transition-colors">
+                <div>
+                  <p className="text-sm font-medium text-neutral-900 line-clamp-1">{s.subjek}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{fmt(s.tanggal_ajuan)}</p>
+                </div>
+                <StatusBadge status={s.status} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
-}
+};
+
+export default Dashboard;
