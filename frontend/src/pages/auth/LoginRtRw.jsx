@@ -76,7 +76,7 @@ export default function LoginRtRw() {
               type="button"
               onClick={() => { setRole('rt'); setError(''); }}
               className={`py-2 text-xs font-semibold rounded-lg transition ${
-                role === 'rt' ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                role === 'rt' ? 'bg-white text-primary-dark shadow-sm' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               Ketua RT
@@ -85,7 +85,7 @@ export default function LoginRtRw() {
               type="button"
               onClick={() => { setRole('rw'); setError(''); }}
               className={`py-2 text-xs font-semibold rounded-lg transition ${
-                role === 'rw' ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                role === 'rw' ? 'bg-white text-primary-dark shadow-sm' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               Ketua RW
@@ -94,7 +94,7 @@ export default function LoginRtRw() {
               type="button"
               onClick={() => { setRole('superadmin'); setError(''); }}
               className={`py-2 text-xs font-semibold rounded-lg transition ${
-                role === 'superadmin' ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                role === 'superadmin' ? 'bg-white text-primary-dark shadow-sm' : 'text-slate-500 hover:text-slate-800'
               }`}
             >
               Super Admin
@@ -102,7 +102,7 @@ export default function LoginRtRw() {
           </div>
 
           {error && (
-            <div className="mb-4 flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <div className="mb-4 flex items-center gap-2 text-sm text-error bg-error/10 border border-error/20 rounded-xl px-4 py-3">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -161,7 +161,7 @@ export default function LoginRtRw() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full flex justify-center items-center gap-2 py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-primary-dark hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {loading
@@ -181,14 +181,14 @@ export default function LoginRtRw() {
             {role === 'superadmin' ? (
               <p className="text-center text-sm text-slate-500">
                 Belum punya akun Super Admin?{' '}
-                <Link to="/register-superadmin" className="font-semibold text-blue-600 hover:text-blue-500 transition">
+                <Link to="/register-superadmin" className="font-semibold text-primary-light hover:text-blue-500 transition">
                   Daftar di sini
                 </Link>
               </p>
             ) : (
               <p className="text-center text-sm text-slate-500">
                 Belum punya akun pengurus?{' '}
-                <Link to="/register-rtrw" className="font-semibold text-blue-600 hover:text-blue-500 transition">
+                <Link to="/register-rtrw" className="font-semibold text-primary-light hover:text-blue-500 transition">
                   Daftar di sini
                 </Link>
               </p>

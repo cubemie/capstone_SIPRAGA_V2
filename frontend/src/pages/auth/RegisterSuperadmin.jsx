@@ -69,7 +69,7 @@ export default function RegisterSuperadmin() {
           </Link>
         </div>
         <div className="flex justify-center mb-3">
-          <div className="bg-blue-900 text-white rounded-full p-3 shadow-md">
+          <div className="bg-primary-dark text-white rounded-full p-3 shadow-md">
             <ShieldCheck className="w-7 h-7" />
           </div>
         </div>
@@ -86,7 +86,7 @@ export default function RegisterSuperadmin() {
 
           {/* Error */}
           {error && (
-            <div className="mb-5 flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <div className="mb-5 flex items-center gap-2 text-sm text-error bg-error/10 border border-error/20 rounded-xl px-4 py-3">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -94,7 +94,7 @@ export default function RegisterSuperadmin() {
 
           {/* Success */}
           {success && (
-            <div className="mb-5 flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+            <div className="mb-5 flex items-center gap-2 text-sm text-success bg-success/10 border border-success/20 rounded-xl px-4 py-3">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{success} Mengarahkan ke halaman login...</span>
             </div>
@@ -187,7 +187,7 @@ export default function RegisterSuperadmin() {
               {/* Indikator kesesuaian password */}
               {form.confirm_password && (
                 <p className={`mt-1 text-xs font-medium ${
-                  form.password === form.confirm_password ? 'text-green-600' : 'text-red-500'
+                  form.password === form.confirm_password ? 'text-success' : 'text-error'
                 }`}>
                   {form.password === form.confirm_password ? '✓ Password cocok' : '✗ Password tidak cocok'}
                 </p>
@@ -198,7 +198,7 @@ export default function RegisterSuperadmin() {
             <button
               type="submit"
               disabled={loading || !!success}
-              className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+              className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-primary-dark hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed mt-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? 'Memproses...' : 'Buat Akun Super Admin'}
@@ -210,7 +210,7 @@ export default function RegisterSuperadmin() {
               Sudah punya akun?{' '}
               <Link
                 to="/login-rtrw"
-                className="font-semibold text-blue-600 hover:text-blue-500 transition"
+                className="font-semibold text-primary-light hover:text-blue-500 transition"
               >
                 Login di sini
               </Link>

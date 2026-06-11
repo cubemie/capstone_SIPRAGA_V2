@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { CheckCircle, FileText, Pencil, Info } from 'lucide-react';
 import { suratService, templateService, wargaService } from '../../services';
 import FileDropzone from '../../components/ui/FileDropzone';
 import PageHeader from '../../components/ui/PageHeader';
@@ -87,8 +88,8 @@ const BuatSurat = () => {
   if (success) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <span className="text-6xl mb-4">✅</span>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
+        <CheckCircle className="w-16 h-16 text-success mb-4" />
+        <h2 className="text-xl font-semibold text-neutral-900 mb-2">
           {mode === 'manual' ? 'Permintaan terkirim!' : 'Surat berhasil diajukan!'}
         </h2>
         <p className="text-sm text-gray-500 mb-6 max-w-sm">
@@ -99,13 +100,13 @@ const BuatSurat = () => {
         <div className="flex gap-3">
           <button
             onClick={() => navigate('/warga/status')}
-            className="px-4 py-2 bg-[#1A4A8A] text-white rounded text-sm font-medium hover:bg-[#0F2D5C]"
+            className="px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-dark"
           >
             Lihat Status
           </button>
           <button
             onClick={() => { setSuccess(false); setMode(null); setSelectedTemplate(null); setFile(null); setForm(INITIAL_FORM); }}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-gray-50"
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-neutral-50"
           >
             Buat Lagi
           </button>
@@ -122,7 +123,7 @@ const BuatSurat = () => {
         {loadingTemplates ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white border border-gray-200 rounded-lg p-5 animate-pulse h-28" />
+              <div key={i} className="bg-white border border-neutral-100 rounded-lg p-5 animate-pulse h-28" />
             ))}
           </div>
         ) : (
@@ -135,18 +136,18 @@ const BuatSurat = () => {
                 <button
                   key={t.id_template}
                   onClick={() => { setSelectedTemplate(t); setMode('template'); }}
-                  className="bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50 rounded-lg p-5 text-left transition-all group"
+                  className="bg-white border border-neutral-100 hover:border-primary/40 hover:bg-primary-light/10 rounded-lg p-5 text-left transition-all group"
                 >
                   <div className="flex items-start gap-3">
-                    <span className="text-2xl group-hover:scale-110 transition-transform" aria-hidden="true">📄</span>
+                    <FileText className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
                     <div>
-                      <p className="font-medium text-gray-900 text-sm leading-snug">{t.nama}</p>
+                      <p className="font-medium text-neutral-900 text-sm leading-snug">{t.nama}</p>
                       <a
                         href={templateService.getDownloadUrl(t.id_template)}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                        className="text-xs text-primary-light hover:underline mt-1 inline-block"
                       >
                         ↓ Unduh template
                       </a>
@@ -157,17 +158,17 @@ const BuatSurat = () => {
             </div>
 
             <div className="relative mb-6">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200" /></div>
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-neutral-100" /></div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-gray-100 px-3 text-gray-400">atau</span>
+                <span className="bg-neutral-50 px-3 text-gray-400">atau</span>
               </div>
             </div>
 
             <button
               onClick={() => setMode('manual')}
-              className="w-full bg-white border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 rounded-lg p-5 flex items-center gap-4 transition-all"
+              className="w-full bg-white border-2 border-dashed border-gray-300 hover:border-primary/40 hover:bg-primary-light/10 rounded-lg p-5 flex items-center gap-4 transition-all"
             >
-              <span className="text-3xl">📝</span>
+              <Pencil className="w-8 h-8 text-primary" />
               <div className="text-left">
                 <p className="font-semibold text-gray-800 text-sm">Template tidak tersedia?</p>
                 <p className="text-xs text-gray-500 mt-0.5">
@@ -203,11 +204,11 @@ const BuatSurat = () => {
       />
 
       {mode === 'template' && (
-        <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg mb-5 flex items-start gap-2">
-          <span>ℹ️</span>
+        <div className="bg-primary-light/10 border border-primary/20 text-primary-dark p-4 rounded-lg mb-5 flex items-start gap-2">
+          <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <div className="text-sm">
             <p className="font-medium mb-0.5">Cara menggunakan template:</p>
-            <ol className="list-decimal list-inside space-y-0.5 text-blue-700">
+            <ol className="list-decimal list-inside space-y-0.5 text-primary">
               <li><a href={templateService.getDownloadUrl(selectedTemplate.id_template)} target="_blank" rel="noopener noreferrer" className="underline">Unduh template</a> di atas</li>
               <li>Isi template sesuai data Anda</li>
               <li>Unggah kembali file yang sudah diisi di bawah</li>
@@ -217,7 +218,7 @@ const BuatSurat = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+        <div className="bg-white border border-neutral-100 rounded-lg p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">Alamat Tujuan Surat</h3>
           <div className="grid sm:grid-cols-2 gap-4">
             {[
@@ -241,11 +242,11 @@ const BuatSurat = () => {
         </div>
 
         {mode === 'manual' && (
-          <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+          <div className="bg-white border border-neutral-100 rounded-lg p-5 shadow-sm">
             <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">Keterangan Surat</h3>
             <div>
               <label htmlFor="keterangan" className="block text-sm font-medium text-gray-700 mb-1">
-                Jelaskan surat yang dibutuhkan <span className="text-red-500">*</span>
+                Jelaskan surat yang dibutuhkan <span className="text-error">*</span>
               </label>
               <textarea
                 id="keterangan" name="keterangan" rows={4}
@@ -258,7 +259,7 @@ const BuatSurat = () => {
           </div>
         )}
 
-        <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+        <div className="bg-white border border-neutral-100 rounded-lg p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
             {mode === 'manual' ? 'Dokumen Pendukung (opsional)' : 'Unggah Template yang Sudah Diisi'}
           </h3>
@@ -269,20 +270,20 @@ const BuatSurat = () => {
         </div>
 
         {error && (
-          <div role="alert" className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg text-sm">{error}</div>
+          <div role="alert" className="bg-error/10 border border-error/20 text-error p-4 rounded-lg text-sm">{error}</div>
         )}
 
         <div className="flex gap-3 justify-end">
           <button
             type="button"
             onClick={() => { setMode(null); setSelectedTemplate(null); setFile(null); }}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-gray-50"
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-neutral-50"
           >
             Batal
           </button>
           <button
             type="submit" disabled={submitting}
-            className="px-5 py-2 bg-[#1A4A8A] hover:bg-[#0F2D5C] text-white rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+            className="px-5 py-2 bg-primary hover:bg-primary-dark text-white rounded text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
           >
             {submitting && (
               <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">

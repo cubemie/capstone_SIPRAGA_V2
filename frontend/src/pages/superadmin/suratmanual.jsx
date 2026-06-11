@@ -7,7 +7,7 @@ export default function SuratManual() {
         title="Surat Manual" 
         subtitle="Pemrosesan surat manual." 
       />
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm text-sm text-gray-500">
+      <div className="bg-white border border-neutral-100 rounded-lg p-6 shadow-sm text-sm text-gray-500">
         Modul surat manual akan segera tersedia.
       </div>
     </div>

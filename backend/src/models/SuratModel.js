@@ -45,18 +45,38 @@ class SuratModel {
 
   /**
    * Ambil semua surat yang masuk dan menunggu verifikasi.
+   * @param {number|string} id
+   * @param {string} role
    * @returns {Array}
    */
-  static async findMasuk() {
-    const [rows] = await db.query(
-      `SELECT ps.id, ps.subjek, ps.file_path, ps.tanggal_ajuan AS created_at,
+  static async findMasuk(id, role) {
+    let query = `SELECT ps.id, ps.subjek, ps.file_path, ps.tanggal_ajuan AS created_at,
               ps.status, w.nama AS nama_warga, w.NIK AS nik_warga
        FROM pengajuan_surat ps
        JOIN warga w ON ps.id_warga = w.id_warga
-       WHERE ps.status = ?
-       ORDER BY ps.tanggal_ajuan ASC`,
-      [SURAT_STATUS.MENUNGGU]
-    );
+       WHERE ps.status = ?`;
+    const params = [SURAT_STATUS.MENUNGGU];
+
+    if (role === 'rt') {
+      const [rtRows] = await db.query('SELECT no_rt, rw.no_rw FROM rt JOIN rw ON rt.rw_id = rw.rw_id WHERE rt_id = ?', [id]);
+      if (rtRows.length > 0) {
+        query += ` AND ps.rt = ? AND ps.rw = ?`;
+        params.push(padRtRw(rtRows[0].no_rt), padRtRw(rtRows[0].no_rw));
+      } else {
+        query += ` AND 1=0`;
+      }
+    } else if (role === 'rw') {
+      const [rwRows] = await db.query('SELECT no_rw FROM rw WHERE rw_id = ?', [id]);
+      if (rwRows.length > 0) {
+        query += ` AND ps.rw = ?`;
+        params.push(padRtRw(rwRows[0].no_rw));
+      } else {
+        query += ` AND 1=0`;
+      }
+    }
+
+    query += ` ORDER BY ps.tanggal_ajuan ASC`;
+    const [rows] = await db.query(query, params);
     return rows;
   }
 

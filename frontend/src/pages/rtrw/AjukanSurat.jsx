@@ -35,8 +35,8 @@ export default function AjukanSurat() {
         subtitle="Buat surat pengantar secara manual untuk warga yang datang langsung ke lokasi." 
       />
 
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        {error && <div className="mb-4 bg-red-50 text-red-800 p-3 rounded text-sm">{error}</div>}
+      <div className="bg-white border border-neutral-100 rounded-lg p-6 shadow-sm">
+        {error && <div className="mb-4 bg-error/10 text-error p-3 rounded text-sm">{error}</div>}
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
@@ -68,7 +68,7 @@ export default function AjukanSurat() {
           </div>
           <div className="pt-4 text-right">
             <button type="submit" disabled={loading}
-              className="px-6 py-2.5 bg-[#1A4A8A] text-white rounded text-sm font-semibold shadow-sm hover:bg-[#0F2D5C] disabled:opacity-50">
+              className="px-6 py-2.5 bg-primary text-white rounded text-sm font-semibold shadow-sm hover:bg-primary-dark disabled:opacity-50">
               {loading ? 'Menyimpan...' : 'Terbitkan Surat'}
             </button>
           </div>

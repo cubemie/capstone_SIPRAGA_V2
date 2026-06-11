@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Landmark, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authService } from '../../services';
 
@@ -32,11 +33,11 @@ export const LoginRTRW = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm bg-white border border-gray-200 rounded-xl shadow-md p-7">
+    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-sm bg-white border border-neutral-100 rounded-xl shadow-md p-7">
         <div className="text-center mb-6">
-          <span className="text-3xl">🏛️</span>
-          <h1 className="text-xl font-bold text-[#0F2D5C] mt-2">SIPRAGA</h1>
+          <Landmark className="w-12 h-12 text-white mb-4 opacity-80" />
+          <h1 className="text-xl font-bold text-primary-dark mt-2">SIPRAGA</h1>
           <p className="text-sm text-gray-500 mt-0.5">Masuk sebagai Pengurus RT/RW</p>
         </div>
 
@@ -60,10 +61,10 @@ export const LoginRTRW = () => {
             </div>
           </div>
 
-          {error && <div role="alert" className="bg-red-50 border border-red-200 text-red-800 p-3 rounded text-sm">{error}</div>}
+          {error && <div role="alert" className="bg-error/10 border border-error/20 text-error p-3 rounded text-sm">{error}</div>}
 
           <button type="submit" disabled={loading}
-            className="w-full py-2.5 bg-[#1A4A8A] hover:bg-[#0F2D5C] text-white rounded text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
+            className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white rounded text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
             {loading && <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>}
             {loading ? 'Memproses...' : 'Masuk'}
           </button>
@@ -72,7 +73,7 @@ export const LoginRTRW = () => {
         <div className="mt-5 text-center">
           <p className="text-xs text-gray-400">
             Warga?{' '}
-            <Link to="/login-warga" className="text-blue-600 hover:underline">Login Warga</Link>
+            <Link to="/login-warga" className="text-primary-light hover:underline">Login Warga</Link>
           </p>
         </div>
       </div>
@@ -108,11 +109,11 @@ export const LoginSuperadmin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F2D5C] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-primary-dark flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-white rounded-xl shadow-xl p-7">
         <div className="text-center mb-6">
-          <span className="text-3xl">🏛️</span>
-          <h1 className="text-xl font-bold text-[#0F2D5C] mt-2">SIPRAGA</h1>
+          <Landmark className="w-12 h-12 text-white mb-4 opacity-80" />
+          <h1 className="text-xl font-bold text-primary-dark mt-2">SIPRAGA</h1>
           <p className="text-sm text-gray-500 mt-0.5">Panel Superadmin</p>
         </div>
 
@@ -128,10 +129,10 @@ export const LoginSuperadmin = () => {
               className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
 
-          {error && <div role="alert" className="bg-red-50 border border-red-200 text-red-800 p-3 rounded text-sm">{error}</div>}
+          {error && <div role="alert" className="bg-error/10 border border-error/20 text-error p-3 rounded text-sm">{error}</div>}
 
           <button type="submit" disabled={loading}
-            className="w-full py-2.5 bg-[#1A4A8A] hover:bg-[#0F2D5C] text-white rounded text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
+            className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white rounded text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
             {loading && <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>}
             {loading ? 'Memproses...' : 'Masuk'}
           </button>
@@ -176,29 +177,29 @@ export const RegisterWarga = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 py-8">
-      <div className="w-full max-w-lg bg-white border border-gray-200 rounded-xl shadow-md p-7">
+    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4 py-8">
+      <div className="w-full max-w-lg bg-white border border-neutral-100 rounded-xl shadow-md p-7">
         <div className="text-center mb-6">
-          <span className="text-3xl">🏛️</span>
-          <h1 className="text-xl font-bold text-[#0F2D5C] mt-2">Buat Akun Warga</h1>
+          <Landmark className="w-12 h-12 text-white mb-4 opacity-80" />
+          <h1 className="text-xl font-bold text-primary-dark mt-2">Buat Akun Warga</h1>
           <p className="text-sm text-gray-500 mt-0.5">SIPRAGA — Sistem Administrasi RT/RW</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
-              <label htmlFor="NIK" className="block text-sm font-medium text-gray-700 mb-1">NIK <span className="text-red-500">*</span></label>
+              <label htmlFor="NIK" className="block text-sm font-medium text-gray-700 mb-1">NIK <span className="text-error">*</span></label>
               <input id="NIK" name="NIK" value={form.NIK} onChange={handleChange} maxLength={16} inputMode="numeric" required
                 placeholder="16 digit Nomor Induk Kependudukan"
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="sm:col-span-2">
-              <label htmlFor="nama" className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap <span className="text-red-500">*</span></label>
+              <label htmlFor="nama" className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap <span className="text-error">*</span></label>
               <input id="nama" name="nama" value={form.nama} onChange={handleChange} required
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div className="sm:col-span-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-error">*</span></label>
               <input id="email" name="email" type="email" value={form.email} onChange={handleChange} required
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
@@ -222,7 +223,7 @@ export const RegisterWarga = () => {
               </select>
             </div>
             <div>
-              <label htmlFor="reg-password" className="block text-sm font-medium text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
+              <label htmlFor="reg-password" className="block text-sm font-medium text-gray-700 mb-1">Password <span className="text-error">*</span></label>
               <div className="relative">
                 <input id="reg-password" name="password" type={showPass ? 'text' : 'password'}
                   value={form.password} onChange={handleChange} required placeholder="Min. 8 karakter"
@@ -232,16 +233,16 @@ export const RegisterWarga = () => {
               </div>
             </div>
             <div>
-              <label htmlFor="konfirmasi" className="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password <span className="text-red-500">*</span></label>
+              <label htmlFor="konfirmasi" className="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password <span className="text-error">*</span></label>
               <input id="konfirmasi" name="konfirmasi" type="password" value={form.konfirmasi} onChange={handleChange} required
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
           </div>
 
-          {error && <div role="alert" className="bg-red-50 border border-red-200 text-red-800 p-3 rounded text-sm">{error}</div>}
+          {error && <div role="alert" className="bg-error/10 border border-error/20 text-error p-3 rounded text-sm">{error}</div>}
 
           <button type="submit" disabled={loading}
-            className="w-full py-2.5 bg-[#1A4A8A] hover:bg-[#0F2D5C] text-white rounded text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
+            className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white rounded text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2 transition-colors">
             {loading && <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>}
             {loading ? 'Mendaftar...' : 'Daftar Sekarang'}
           </button>
@@ -249,7 +250,7 @@ export const RegisterWarga = () => {
 
         <p className="text-center text-xs text-gray-500 mt-5">
           Sudah punya akun?{' '}
-          <Link to="/login-warga" className="text-blue-600 hover:underline font-medium">Masuk di sini</Link>
+          <Link to="/login-warga" className="text-primary-light hover:underline font-medium">Masuk di sini</Link>
         </p>
       </div>
     </div>

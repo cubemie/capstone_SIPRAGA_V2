@@ -7,7 +7,7 @@ export default function RTRWProfil() {
         title="Profil RT/RW" 
         subtitle="Kelola informasi profil akun Anda." 
       />
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+      <div className="bg-white border border-neutral-100 rounded-lg p-6 shadow-sm">
         <p className="text-gray-500 text-sm">Pengaturan profil akan tersedia pada pembaruan berikutnya.</p>
       </div>
     </div>

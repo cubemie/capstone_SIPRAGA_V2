@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Clock, Info, FileSignature, CheckCircle, XCircle, FileText } from 'lucide-react';
 import { suratService } from '../../services';
 import StatusBadge from '../../components/ui/StatusBadge';
 import EmptyState from '../../components/ui/EmptyState';
@@ -57,7 +58,7 @@ const AjukanTTD = () => {
         actions={
           <Link
             to="/warga/buat-surat"
-            className="px-4 py-2 bg-[#1A4A8A] hover:bg-[#0F2D5C] text-white rounded text-sm font-medium transition-colors"
+            className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded text-sm font-medium transition-colors"
           >
             + Buat Surat Baru
           </Link>
@@ -65,17 +66,17 @@ const AjukanTTD = () => {
       />
 
       {!loading && pending > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 p-4 rounded-lg mb-5 flex items-center gap-2">
-          <span className="text-lg">🕐</span>
+        <div className="bg-warning/10 border border-warning/20 text-warning p-4 rounded-lg mb-5 flex items-center gap-2">
+          <Clock className="w-5 h-5 text-warning" />
           <p className="text-sm">
             <span className="font-semibold">{pending} surat</span> sedang menunggu tanda tangan dari pengurus RT/RW.
           </p>
         </div>
       )}
 
-      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-5">
-        <p className="text-sm text-blue-800 font-medium mb-1">📌 Cara Kerja TTD</p>
-        <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
+      <div className="bg-primary-light/10 border border-blue-100 rounded-lg p-4 mb-5">
+        <p className="text-sm text-primary-dark font-medium mb-1 flex items-center gap-1.5"><Info className="w-4 h-4"/> Cara Kerja TTD</p>
+        <ol className="text-xs text-primary space-y-1 list-decimal list-inside">
           <li>Buat surat melalui menu <strong>Buat Surat</strong></li>
           <li>Surat otomatis masuk ke antrian TTD RT/RW wilayah Anda</li>
           <li>RT/RW akan menandatangani dan mengunggah surat yang sudah di-TTD</li>
@@ -90,8 +91,8 @@ const AjukanTTD = () => {
             onClick={() => setFilter(key)}
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
               filter === key
-                ? 'bg-[#1A4A8A] text-white'
-                : 'bg-white border border-gray-200 text-gray-600 hover:border-blue-300'
+                ? 'bg-primary text-white'
+                : 'bg-white border border-neutral-100 text-secondary hover:border-primary/30'
             }`}
           >
             {label}
@@ -102,18 +103,18 @@ const AjukanTTD = () => {
       {loading ? (
         <div className="space-y-3">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white border border-gray-200 rounded-lg p-5 animate-pulse h-20" />
+            <div key={i} className="bg-white border border-neutral-100 rounded-lg p-5 animate-pulse h-20" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          icon="✍️"
+          icon={<FileSignature className="w-12 h-12 text-gray-300" />}
           title="Tidak ada surat"
           description="Belum ada surat pada kategori ini."
           action={
             <Link
               to="/warga/buat-surat"
-              className="px-4 py-2 bg-[#1A4A8A] text-white rounded text-sm font-medium hover:bg-[#0F2D5C]"
+              className="px-4 py-2 bg-primary text-white rounded text-sm font-medium hover:bg-primary-dark"
             >
               Buat Surat Baru
             </Link>
@@ -122,17 +123,17 @@ const AjukanTTD = () => {
       ) : (
         <div className="space-y-3">
           {filtered.map((s) => (
-            <div key={s.id} className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+            <div key={s.id} className="bg-white border border-neutral-100 rounded-lg shadow-sm overflow-hidden">
               <button
-                className="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                className="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-neutral-50 transition-colors"
                 onClick={() => setExpanded(expanded === s.id ? null : s.id)}
               >
                 <div className="flex items-start gap-3 min-w-0">
                   <span className="text-xl mt-0.5 flex-shrink-0" aria-hidden="true">
-                    {s.status === 2 ? '✅' : s.status === 3 ? '❌' : '📄'}
+                    {s.status === 2 ? <CheckCircle className="w-5 h-5 text-success" /> : s.status === 3 ? <XCircle className="w-5 h-5 text-error" /> : <FileText className="w-5 h-5 text-secondary" />}
                   </span>
                   <div className="min-w-0">
-                    <p className="font-medium text-gray-900 text-sm leading-snug truncate">{s.subjek}</p>
+                    <p className="font-medium text-neutral-900 text-sm leading-snug truncate">{s.subjek}</p>
                     <p className="text-xs text-gray-400 mt-0.5">Diajukan {fmt(s.tanggal_ajuan)}</p>
                   </div>
                 </div>
@@ -148,7 +149,7 @@ const AjukanTTD = () => {
               </button>
 
               {expanded === s.id && (
-                <div className="border-t border-gray-100 px-5 py-4 bg-gray-50">
+                <div className="border-t border-neutral-100 px-5 py-4 bg-neutral-50">
                   <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm mb-4">
                     {[
                       ['RT / RW', `${s.rt ?? '—'} / ${s.rw ?? '—'}`],
@@ -164,7 +165,7 @@ const AjukanTTD = () => {
                   </dl>
 
                   {s.status === 3 && s.alasan_penolakan && (
-                    <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded mb-3">
+                    <div className="bg-error/10 border border-error/20 text-error p-3 rounded mb-3">
                       <p className="text-xs font-semibold mb-0.5">Alasan Penolakan:</p>
                       <p className="text-sm">{s.alasan_penolakan}</p>
                     </div>
@@ -179,13 +180,13 @@ const AjukanTTD = () => {
                     )}
                     {s.status === 2 && s.file_path_signed && (
                       <a href={s.file_path_signed} target="_blank" rel="noopener noreferrer"
-                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-medium transition-colors">
+                        className="px-3 py-1.5 bg-success hover:bg-success/90 text-white rounded text-xs font-medium transition-colors">
                         ↓ Unduh Surat Bertanda Tangan
                       </a>
                     )}
                     {s.status === 3 && (
                       <Link to="/warga/buat-surat"
-                        className="px-3 py-1.5 bg-[#1A4A8A] hover:bg-[#0F2D5C] text-white rounded text-xs font-medium transition-colors">
+                        className="px-3 py-1.5 bg-primary hover:bg-primary-dark text-white rounded text-xs font-medium transition-colors">
                         Ajukan Ulang
                       </Link>
                     )}

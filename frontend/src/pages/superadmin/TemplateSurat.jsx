@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Info, FileText } from 'lucide-react';
 import { templateService } from '../../services';
 import PageHeader from '../../components/ui/PageHeader';
 import FileDropzone from '../../components/ui/FileDropzone';
@@ -65,42 +66,42 @@ export default function TemplateSurat() {
       />
 
       {message && (
-        <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm border border-blue-200">
-          ℹ️ {message}
+        <div className="bg-primary-light/10 text-primary-dark p-4 rounded-lg text-sm border border-primary/20">
+          <Info className="inline w-4 h-4 mr-1" /> {message}
         </div>
       )}
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg shadow-sm">
-          <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
+        <div className="lg:col-span-2 bg-white border border-neutral-100 rounded-lg shadow-sm">
+          <div className="px-5 py-4 border-b border-neutral-100 bg-neutral-50">
             <h3 className="text-base font-semibold text-gray-800">Daftar Template Aktif</h3>
           </div>
           
           {loading ? (
             <div className="p-5 space-y-3">
-              {[...Array(3)].map((_, i) => <div key={i} className="animate-pulse flex h-12 bg-gray-100 rounded" />)}
+              {[...Array(3)].map((_, i) => <div key={i} className="animate-pulse flex h-12 bg-neutral-50 rounded" />)}
             </div>
           ) : templates.length === 0 ? (
-            <EmptyState icon="📄" title="Belum ada template" description="Silakan unggah template pertama Anda di sebelah kanan." />
+            <EmptyState icon={<FileText className="w-12 h-12 text-gray-300"/>} title="Belum ada template" description="Silakan unggah template pertama Anda di sebelah kanan." />
           ) : (
             <div className="divide-y divide-gray-100">
               {templates.map(t => (
-                <div key={t.id} className="p-5 flex items-center justify-between hover:bg-blue-50 transition-colors">
+                <div key={t.id} className="p-5 flex items-center justify-between hover:bg-primary-light/10 transition-colors">
                   <div>
-                    <h4 className="font-semibold text-gray-900">{t.nama_template || t.nama}</h4>
+                    <h4 className="font-semibold text-neutral-900">{t.nama_template || t.nama}</h4>
                     <p className="text-xs text-gray-500 mt-0.5">{t.filename || t.file_name || '—'}</p>
                   </div>
                   <div className="flex gap-2">
                     <a 
                       href={templateService.getDownloadUrl(t.id)} 
                       target="_blank" rel="noopener noreferrer"
-                      className="p-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded"
+                      className="p-2 text-primary-light bg-primary-light/10 hover:bg-primary-light/20 rounded"
                     >
                       Unduh
                     </a>
                     <button 
                       onClick={() => handleDelete(t.id)}
-                      className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded"
+                      className="p-2 text-error bg-error/10 hover:bg-error/20 rounded"
                     >
                       Hapus
                     </button>
@@ -111,7 +112,7 @@ export default function TemplateSurat() {
           )}
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 self-start">
+        <div className="bg-white border border-neutral-100 rounded-lg shadow-sm p-5 self-start">
           <h3 className="text-base font-semibold text-gray-800 mb-4">Unggah Template</h3>
           <form onSubmit={handleUpload} className="space-y-4">
             <div>
@@ -132,7 +133,7 @@ export default function TemplateSurat() {
             <button
               type="submit"
               disabled={!nama || !file || uploading}
-              className="w-full py-2.5 bg-[#1A4A8A] hover:bg-[#0F2D5C] text-white text-sm font-semibold rounded shadow-sm disabled:opacity-50 transition-colors"
+              className="w-full py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-semibold rounded shadow-sm disabled:opacity-50 transition-colors"
             >
               {uploading ? 'Mengunggah...' : 'Unggah & Simpan'}
             </button>

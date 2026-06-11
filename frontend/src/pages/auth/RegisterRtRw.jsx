@@ -4,7 +4,7 @@ import Logo from '../../components/Logo';
 import {
   ShieldCheck, User, Lock, Building2, MapPin,
   Hash, Loader2, AlertCircle, CheckCircle, ChevronRight, ChevronLeft,
-  Eye, EyeOff, Info
+  Eye, EyeOff, Info, AlertTriangle, Landmark
 } from 'lucide-react';
 import { authService } from "../../services";
 
@@ -69,10 +69,10 @@ export default function RegisterRtRw() {
             {/* Pilihan RW */}
             <button
               onClick={() => { setRole('rw'); setStep(STEP_FORM); }}
-              className="w-full flex items-center justify-between p-5 border-2 border-slate-200 rounded-2xl hover:border-blue-500 hover:bg-blue-50 transition group"
+              className="w-full flex items-center justify-between p-5 border-2 border-slate-200 rounded-2xl hover:border-blue-500 hover:bg-primary-light/10 transition group"
             >
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-100 text-blue-700 rounded-xl">
+                <div className="p-3 bg-primary-light/20 text-primary rounded-xl">
                   <Building2 className="w-6 h-6" />
                 </div>
                 <div className="text-left">
@@ -101,9 +101,9 @@ export default function RegisterRtRw() {
             </button>
 
             {/* Info alur pendaftaran */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex gap-3">
+            <div className="bg-primary-light/10 border border-primary/20 rounded-xl px-4 py-3 flex gap-3">
               <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-              <div className="text-xs text-blue-700 space-y-1">
+              <div className="text-xs text-primary space-y-1">
                 <p className="font-bold">Urutan Pendaftaran:</p>
                 <p>1. <span className="font-semibold">Ketua RW</span> mendaftar terlebih dahulu dan mendapatkan <span className="font-semibold">ID RW</span>.</p>
                 <p>2. <span className="font-semibold">Ketua RT</span> mendaftar menggunakan ID RW dari Ketua RW-nya.</p>
@@ -111,7 +111,7 @@ export default function RegisterRtRw() {
             </div>
 
             <div className="pt-2 border-t border-slate-100 text-center">
-              <Link to="/login-rtrw" className="text-sm font-medium text-blue-600 hover:text-blue-500 transition">
+              <Link to="/login-rtrw" className="text-sm font-medium text-primary-light hover:text-blue-500 transition">
                 Sudah punya akun? Login di sini
               </Link>
             </div>
@@ -138,7 +138,7 @@ export default function RegisterRtRw() {
             </div>
             <button
               onClick={() => navigate('/login-rtrw')}
-              className="w-full py-2.5 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition shadow"
+              className="w-full py-2.5 bg-primary-dark text-white font-bold rounded-xl hover:bg-primary-dark transition shadow"
             >
               Lanjut ke Halaman Login
             </button>
@@ -178,7 +178,7 @@ export default function RegisterRtRw() {
           </button>
 
           {error && (
-            <div className="mb-5 flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <div className="mb-5 flex items-center gap-2 text-sm text-error bg-error/10 border border-error/20 rounded-xl px-4 py-3">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -189,7 +189,7 @@ export default function RegisterRtRw() {
             <div className="mb-5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex gap-3">
               <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <div className="text-xs text-amber-800">
-                <p className="font-bold mb-1">⚠️ Syarat Pendaftaran Ketua RT</p>
+                <p className="font-bold mb-1 flex items-center gap-1.5"><AlertTriangle className="w-5 h-5 text-warning"/> Syarat Pendaftaran Ketua RT</p>
                 <p>Ketua RW di wilayah Anda harus sudah mendaftar terlebih dahulu. Minta <span className="font-semibold">ID RW</span> kepada Ketua RW Anda, lalu masukkan di kolom "ID RW Induk" di bawah.</p>
               </div>
             </div>
@@ -327,7 +327,7 @@ export default function RegisterRtRw() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl text-sm font-bold text-white bg-blue-900 hover:bg-blue-800 transition shadow disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl text-sm font-bold text-white bg-primary-dark hover:bg-primary-dark transition shadow disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? 'Mendaftarkan...' : `Daftarkan Akun ${isRw ? 'RW' : 'RT'}`}
@@ -336,7 +336,7 @@ export default function RegisterRtRw() {
 
           <div className="mt-5 text-center text-sm text-slate-500">
             Sudah punya akun?{' '}
-            <Link to="/login-rtrw" className="font-medium text-blue-600 hover:text-blue-500 transition">
+            <Link to="/login-rtrw" className="font-medium text-primary-light hover:text-blue-500 transition">
               Login di sini
             </Link>
           </div>

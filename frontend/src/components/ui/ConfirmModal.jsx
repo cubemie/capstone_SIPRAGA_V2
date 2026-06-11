@@ -5,7 +5,7 @@ const ConfirmModal = ({
   title,
   children,
   confirmLabel = 'Konfirmasi',
-  confirmClass = 'bg-red-600 hover:bg-red-700 text-white',
+  confirmClass = 'bg-error hover:bg-error/90 text-white',
   onConfirm,
   onCancel,
   loading = false,
@@ -28,11 +28,11 @@ const ConfirmModal = ({
       <div className="absolute inset-0 bg-black/50" onClick={onCancel} aria-hidden="true" />
       <div className="relative bg-white rounded-xl shadow-xl p-6 max-w-md w-full">
         <div className="flex items-start justify-between mb-4">
-          <h2 id="modal-title" className="text-base font-semibold text-gray-900">{title}</h2>
+          <h2 id="modal-title" className="text-base font-semibold text-neutral-900">{title}</h2>
           <button
             onClick={onCancel}
             aria-label="Tutup modal"
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none ml-4"
+            className="text-gray-400 hover:text-secondary text-xl leading-none ml-4"
           >
             ✕
           </button>
@@ -41,7 +41,7 @@ const ConfirmModal = ({
         <div className="flex gap-3 justify-end">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded hover:bg-neutral-50"
           >
             Batal
           </button>

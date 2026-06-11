@@ -17,10 +17,14 @@ const { createClient } = require('@supabase/supabase-js');
 
 // ─── Konfigurasi Supabase ────────────────────────────────────────────────────
 
-// Kita gunakan env jika ada, fallback ke hardcoded info dari user
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://avlwwbkhsrubhsfwbgpr.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bHd3Ymtoc3J1YmhzZndiZ3ByIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTA4MTgxOSwiZXhwIjoyMDk2NjU3ODE5fQ.dJRzNTWroMDCkJ3Zd9PXxsJklG02XzwjT6iHdlt_-yc';
+// Kita gunakan env jika ada
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const BUCKET_NAME = process.env.SUPABASE_BUCKET || 'sipraga-storage';
+
+if (!SUPABASE_URL || !SUPABASE_KEY) {
+  throw new Error('[upload.js] SUPABASE_URL dan SUPABASE_SERVICE_ROLE_KEY wajib diset');
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 

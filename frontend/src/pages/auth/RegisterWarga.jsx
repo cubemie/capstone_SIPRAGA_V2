@@ -78,7 +78,7 @@ export default function RegisterWarga() {
         </h2>
         <p className="mt-2 text-center text-sm text-slate-600">
           Sudah punya akun?{' '}
-          <Link to="/login-warga" className="font-medium text-blue-600 hover:text-blue-500 transition duration-150">
+          <Link to="/login-warga" className="font-medium text-primary-light hover:text-blue-500 transition duration-150">
             Masuk di sini
           </Link>
         </p>
@@ -88,7 +88,7 @@ export default function RegisterWarga() {
         <div className="bg-white py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-slate-150">
           <form className="space-y-6" onSubmit={handleRegister}>
             {error && (
-              <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-2 text-sm text-error bg-error/10 border border-error/20 rounded-xl px-4 py-3">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -303,7 +303,7 @@ export default function RegisterWarga() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-primary-light hover:bg-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {loading ? 'Mendaftar...' : 'Daftar Akun'}

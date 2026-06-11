@@ -43,7 +43,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
           ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-[#0F2D5C]">
+        <div className="flex items-center justify-between p-4 border-b border-neutral-100 bg-primary-dark">
           <h2 className="text-base font-semibold text-white">Notifikasi</h2>
           <button
             onClick={onClose}
@@ -61,7 +61,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="animate-pulse space-y-2">
                   <div className="h-3 bg-gray-200 rounded w-3/4" />
-                  <div className="h-3 bg-gray-100 rounded w-1/2" />
+                  <div className="h-3 bg-neutral-50 rounded w-1/2" />
                 </div>
               ))}
             </div>
@@ -75,17 +75,17 @@ const NotificationPanel = ({ isOpen, onClose }) => {
               {items.map((item) => (
                 <li
                   key={item.id}
-                  className="px-4 py-3 border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  className="px-4 py-3 border-b border-neutral-100 hover:bg-neutral-50 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <p className="text-sm font-medium text-gray-900 leading-snug line-clamp-1">
+                    <p className="text-sm font-medium text-neutral-900 leading-snug line-clamp-1">
                       {item.subjek}
                     </p>
                     <StatusBadge status={item.status} />
                   </div>
                   <p className="text-xs text-gray-400">{fmt(item.tanggal_ajuan)}</p>
                   {item.status === 3 && item.alasan_penolakan && (
-                    <p className="text-xs text-red-600 mt-1 line-clamp-2">
+                    <p className="text-xs text-error mt-1 line-clamp-2">
                       Alasan: {item.alasan_penolakan}
                     </p>
                   )}
@@ -95,7 +95,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
           )}
         </div>
 
-        <div className="p-4 border-t border-gray-200 text-center">
+        <div className="p-4 border-t border-neutral-100 text-center">
           <p className="text-xs text-gray-400">
             Notifikasi berdasarkan status surat Anda
           </p>

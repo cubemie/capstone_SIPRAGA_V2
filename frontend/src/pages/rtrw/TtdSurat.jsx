@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import SignatureCanvas from 'react-signature-canvas';
+import { Info } from 'lucide-react';
 import { ttdService } from '../../services';
 import PageHeader from '../../components/ui/PageHeader';
 import FileDropzone from '../../components/ui/FileDropzone';
@@ -54,28 +56,28 @@ export default function TtdSurat() {
       />
 
       {message && (
-        <div className="bg-blue-50 text-blue-800 p-4 rounded-lg mb-5 text-sm border border-blue-200">
-          ℹ️ {message}
+        <div className="bg-primary-light/10 text-primary-dark p-4 rounded-lg mb-5 text-sm border border-primary/20">
+          <Info className="inline w-4 h-4 mr-1" /> {message}
         </div>
       )}
 
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <div className="bg-white border border-neutral-100 rounded-lg p-6 shadow-sm">
           <h3 className="text-sm font-semibold text-gray-800 uppercase mb-4">Tanda Tangan Saat Ini</h3>
           {loading ? (
-            <div className="h-32 bg-gray-100 animate-pulse rounded-lg" />
+            <div className="h-32 bg-neutral-50 animate-pulse rounded-lg" />
           ) : currentTtd ? (
-            <div className="border border-dashed border-gray-300 p-4 rounded-lg flex items-center justify-center bg-gray-50 min-h-[150px]">
+            <div className="border border-dashed border-gray-300 p-4 rounded-lg flex items-center justify-center bg-neutral-50 min-h-[150px]">
               <img src={currentTtd} alt="Tanda Tangan" className="max-h-32 object-contain mix-blend-multiply" />
             </div>
           ) : (
-            <div className="border border-dashed border-gray-300 p-4 rounded-lg flex items-center justify-center bg-gray-50 min-h-[150px] text-gray-400 text-sm">
+            <div className="border border-dashed border-gray-300 p-4 rounded-lg flex items-center justify-center bg-neutral-50 min-h-[150px] text-gray-400 text-sm">
               Belum ada tanda tangan
             </div>
           )}
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <div className="bg-white border border-neutral-100 rounded-lg p-6 shadow-sm">
           <h3 className="text-sm font-semibold text-gray-800 uppercase mb-4">Perbarui Tanda Tangan</h3>
           <form onSubmit={handleUpload}>
             <FileDropzone 
@@ -88,7 +90,7 @@ export default function TtdSurat() {
             <button
               type="submit"
               disabled={!file || uploading}
-              className="mt-4 w-full py-2.5 bg-[#1A4A8A] hover:bg-[#0F2D5C] text-white text-sm font-semibold rounded-lg shadow-sm disabled:opacity-50 transition-colors"
+              className="mt-4 w-full py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-semibold rounded-lg shadow-sm disabled:opacity-50 transition-colors"
             >
               {uploading ? 'Mengunggah...' : 'Simpan Tanda Tangan'}
             </button>

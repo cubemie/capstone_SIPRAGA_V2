@@ -3,6 +3,7 @@
 // PUT  /api/warga/lengkapi-data  (multipart)
 
 import { useEffect, useState } from 'react';
+import { User, CheckCircle } from 'lucide-react';
 import { wargaService } from '../../services';
 import FileDropzone from '../../components/ui/FileDropzone';
 import PageHeader from '../../components/ui/PageHeader';
@@ -86,7 +87,7 @@ const ProfilWarga = () => {
         return (
             <div className="space-y-4">
                 {[...Array(3)].map((_, i) => (
-                    <div key={i} className="bg-white border border-gray-200 rounded-lg p-5 animate-pulse h-32" />
+                    <div key={i} className="bg-white border border-neutral-100 rounded-lg p-5 animate-pulse h-32" />
                 ))}
             </div>
         );
@@ -101,7 +102,7 @@ const ProfilWarga = () => {
                     !editMode && (
                         <button
                             onClick={() => setEditMode(true)}
-                            className="px-4 py-2 bg-[#1A4A8A] hover:bg-[#0F2D5C] text-white rounded text-sm font-medium transition-colors"
+                            className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded text-sm font-medium transition-colors"
                         >
                             Edit Profil
                         </button>
@@ -110,16 +111,16 @@ const ProfilWarga = () => {
             />
 
             {saveMsg && (
-                <div role="alert" className="bg-green-50 border border-green-200 text-green-800 p-4 rounded-lg mb-5 text-sm">
-                    ✅ {saveMsg}
+                <div role="alert" className="bg-success/10 border border-success/20 text-success p-4 rounded-lg mb-5 text-sm">
+                    <CheckCircle className="inline w-4 h-4 mr-1" /> {saveMsg}
                 </div>
             )}
 
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 mb-5">
+            <div className="bg-white border border-neutral-100 rounded-lg shadow-sm p-5 mb-5">
                 <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-xl flex-shrink-0">👤</div>
+                    <div className="w-12 h-12 rounded-full bg-primary-light/20 flex items-center justify-center text-primary flex-shrink-0"><User className="w-6 h-6" /></div>
                     <div className="flex-1 min-w-0">
-                        <h2 className="text-lg font-semibold text-gray-900">{profil?.nama ?? '—'}</h2>
+                        <h2 className="text-lg font-semibold text-neutral-900">{profil?.nama ?? '—'}</h2>
                         <p className="text-sm text-gray-500 font-mono mt-0.5">{profil?.NIK ?? '—'}</p>
                         <p className="text-xs text-gray-400">{profil?.email ?? '—'}</p>
                     </div>
@@ -128,7 +129,7 @@ const ProfilWarga = () => {
 
             {editMode ? (
                 <form onSubmit={handleSave} className="space-y-5">
-                    <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                    <div className="bg-white border border-neutral-100 rounded-lg p-5 shadow-sm">
                         <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Alamat & Wilayah</h3>
                         <div className="space-y-4">
                             <div>
@@ -156,7 +157,7 @@ const ProfilWarga = () => {
                         </div>
                     </div>
 
-                    <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                    <div className="bg-white border border-neutral-100 rounded-lg p-5 shadow-sm">
                         <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Data Kependudukan</h3>
                         <div className="grid sm:grid-cols-2 gap-4">
                             <div>
@@ -188,12 +189,12 @@ const ProfilWarga = () => {
                         </div>
                     </div>
 
-                    <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                    <div className="bg-white border border-neutral-100 rounded-lg p-5 shadow-sm">
                         <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Foto KTP</h3>
                         {profil?.foto_ktp && (
                             <div className="mb-3">
                                 <p className="text-xs text-gray-500 mb-1">KTP saat ini:</p>
-                                <img src={profil.foto_ktp} alt="Foto KTP" className="h-24 rounded border border-gray-200 object-cover" />
+                                <img src={profil.foto_ktp} alt="Foto KTP" className="h-24 rounded border border-neutral-100 object-cover" />
                             </div>
                         )}
                         <FileDropzone accept=".jpg,.jpeg,.png" maxMB={3} value={ktpFile} onChange={setKtpFile}
@@ -201,16 +202,16 @@ const ProfilWarga = () => {
                     </div>
 
                     {saveError && (
-                        <div role="alert" className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg text-sm">{saveError}</div>
+                        <div role="alert" className="bg-error/10 border border-error/20 text-error p-4 rounded-lg text-sm">{saveError}</div>
                     )}
 
                     <div className="flex gap-3 justify-end">
                         <button type="button" onClick={() => { setEditMode(false); setSaveError(''); }}
-                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-gray-50">
+                            className="px-4 py-2 border border-gray-300 text-gray-700 rounded text-sm font-medium hover:bg-neutral-50">
                             Batal
                         </button>
                         <button type="submit" disabled={saving}
-                            className="px-5 py-2 bg-[#1A4A8A] hover:bg-[#0F2D5C] text-white rounded text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
+                            className="px-5 py-2 bg-primary hover:bg-primary-dark text-white rounded text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors">
                             {saving && <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>}
                             {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
                         </button>
@@ -218,7 +219,7 @@ const ProfilWarga = () => {
                 </form>
             ) : (
                 <div className="space-y-5">
-                    <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                    <div className="bg-white border border-neutral-100 rounded-lg p-5 shadow-sm">
                         <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Alamat & Wilayah</h3>
                         <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
                             <Field label="Alamat" value={profil?.alamat} />
@@ -229,7 +230,7 @@ const ProfilWarga = () => {
                             <Field label="RT / RW" value={profil?.rt && profil?.rw ? `${profil.rt} / ${profil.rw}` : '—'} />
                         </dl>
                     </div>
-                    <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                    <div className="bg-white border border-neutral-100 rounded-lg p-5 shadow-sm">
                         <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">Data Kependudukan</h3>
                         <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
                             <Field label="Tempat, Tanggal Lahir" value={profil?.tempat_lahir && profil?.tanggal_lahir ? `${profil.tempat_lahir}, ${new Date(profil.tanggal_lahir).toLocaleDateString('id-ID')}` : '—'} />
@@ -241,9 +242,9 @@ const ProfilWarga = () => {
                         </dl>
                     </div>
                     {profil?.foto_ktp && (
-                        <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                        <div className="bg-white border border-neutral-100 rounded-lg p-5 shadow-sm">
                             <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">Foto KTP</h3>
-                            <img src={profil.foto_ktp} alt="Foto KTP" className="h-32 rounded-lg border border-gray-200 object-cover" />
+                            <img src={profil.foto_ktp} alt="Foto KTP" className="h-32 rounded-lg border border-neutral-100 object-cover" />
                         </div>
                     )}
                 </div>
