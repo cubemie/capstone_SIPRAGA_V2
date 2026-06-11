@@ -18,7 +18,7 @@ import { LoginRTRW, LoginSuperadmin, RegisterWarga } from './pages/auth/AuthPage
 // Warga pages
 import WargaDashboard from './pages/warga/Dashboard';
 import BuatSurat from './pages/warga/BuatSurat';
-
+import AjukanTTD from './pages/warga/AjukanTTD';
 import StatusSurat from './pages/warga/StatusSurat';
 import WargaProfil from './pages/warga/ProfilWarga';
 
@@ -66,7 +66,7 @@ const App = () => (
           <Route index element={<Navigate to="/warga/dashboard" replace />} />
           <Route path="dashboard" element={<WargaDashboard />} />
           <Route path="buat-surat" element={<BuatSurat />} />
-
+          <Route path="ajukan-ttd" element={<AjukanTTD />} />
           <Route path="status" element={<StatusSurat />} />
           <Route path="profil" element={<WargaProfil />} />
         </Route>

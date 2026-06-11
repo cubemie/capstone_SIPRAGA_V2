@@ -140,18 +140,29 @@ class SuratService {
   }
 
   /**
+   * Ambil SEMUA surat dari semua warga (superadmin monitoring).
+   * @returns {{ data: Array|null, error: string|null }}
+   */
+  static async getAllSurat() {
+    const rows = await SuratModel.findAll();
+    return { data: rows, error: null };
+  }
+
+  /**
    * Ambil statistik surat per warga.
    * @param {number} id_warga
    * @returns {{ data: Object|null, error: string|null }}
    */
   static async getStatistik(id_warga) {
     const stats = await SuratModel.getStatistik(id_warga);
+    const total = Number(stats.total) || 0;
     return {
       data: {
-        diajukan: stats.total,
-        menunggu: stats.menunggu,
-        disetujui: stats.disetujui,
-        ditolak: stats.ditolak,
+        total,           // alias — dipakai di Dashboard.jsx warga
+        diajukan: total, // backward-compat
+        menunggu:   Number(stats.menunggu)  || 0,
+        disetujui:  Number(stats.disetujui) || 0,
+        ditolak:    Number(stats.ditolak)   || 0,
       },
       error: null,
     };

@@ -108,6 +108,9 @@ export const superadminService = {
 
   // POST /api/superadmin/rw
   buatRW: (data) => api.post('/api/superadmin/rw', data),
+
+  // GET /api/surat/semua — global monitoring
+  getAllSurat: () => api.get('/api/surat/semua'),
 };
 
 /* ─────────────────────────────────────────

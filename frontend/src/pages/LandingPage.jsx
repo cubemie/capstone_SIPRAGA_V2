@@ -99,8 +99,8 @@ const LandingPage = () => (
         </div>
         <div className="grid sm:grid-cols-3 gap-5">
           {[
-            { icon: <ShieldCheck className="w-8 h-8 text-white mb-4"/>, title: 'Aman & Terenkripsi', desc: 'Data Anda dilindungi dengan JWT dan enkripsi bcrypt.' },
-            { icon: <Cloud className="w-8 h-8 text-white mb-4"/>, title: 'Penyimpanan Cloud', desc: 'Dokumen tersimpan aman di Cloudinary, bisa diakses kapan saja.' },
+            { icon: <ShieldCheck className="w-8 h-8 text-white mb-4"/>, title: 'Aman & Terenkripsi', desc: 'Data Anda dilindungi dengan JWT dan enkripsi bcrypt standar industri.' },
+            { icon: <Cloud className="w-8 h-8 text-white mb-4"/>, title: 'Penyimpanan Cloud', desc: 'Dokumen tersimpan aman di Supabase Storage, bisa diakses kapan saja.' },
             { icon: <FileSignature className="w-8 h-8 text-white mb-4"/>, title: 'TTD Digital', desc: 'Pengurus RT/RW menandatangani secara digital tanpa tatap muka.' },
           ].map((f, i) => (
             <div key={i} className="bg-primary hover:bg-primary-dark transition-colors p-6 border-l-4 border-primary-light">

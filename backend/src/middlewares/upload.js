@@ -26,7 +26,11 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   throw new Error('[upload.js] SUPABASE_URL dan SUPABASE_SERVICE_ROLE_KEY wajib diset');
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const ws = require('ws');
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: false },
+  realtime: { transport: ws }
+});
 
 // ─── Custom Multer Storage untuk Supabase ───────────────────────────────────
 
