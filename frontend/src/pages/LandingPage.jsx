@@ -1,101 +1,137 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, FileText, CheckCircle, Users } from 'lucide-react';
-import Logo from '../components/Logo';
+import { ClipboardEdit, FileText, FileSignature, DownloadCloud, Landmark, Cloud, ShieldCheck } from 'lucide-react';
 
-export default function LandingPage() {
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
-      {/* Header */}
-      <header className="bg-blue-900 text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Logo className="text-white [&_svg]:text-white [&_span]:text-white" />
-          <nav className="flex space-x-4">
-            <Link to="/login-warga" className="bg-white text-blue-900 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition shadow">
-              Login Warga
-            </Link>
-            <Link to="/login-rtrw" className="bg-blue-700 text-white border border-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-600 transition shadow">
-              Login RT / RW / Admin
-            </Link>
-          </nav>
+const STEPS = [
+  { no: '01', icon: <ClipboardEdit className="w-8 h-8 text-primary" />, title: 'Daftar & Isi Data', desc: 'Buat akun dengan NIK Anda, lalu lengkapi data kependudukan dan alamat.' },
+  { no: '02', icon: <FileText className="w-8 h-8 text-primary" />, title: 'Pilih & Ajukan Surat', desc: 'Pilih template surat, isi form, atau ajukan permintaan manual ke admin.' },
+  { no: '03', icon: <FileSignature className="w-8 h-8 text-primary" />, title: 'Tunggu TTD RT/RW', desc: 'Pengurus RT/RW menandatangani surat secara digital melalui sistem.' },
+  { no: '04', icon: <DownloadCloud className="w-8 h-8 text-primary" />, title: 'Unduh Surat', desc: 'Unduh surat yang sudah ditandatangani langsung dari akun Anda.' },
+];
+
+const LandingPage = () => (
+  <div className="min-h-screen flex flex-col">
+    {/* Navbar */}
+    <nav className="bg-primary-dark h-16 flex items-center justify-between px-6 md:px-12">
+      <span className="text-white font-bold text-lg tracking-tight flex items-center gap-2"><Landmark className="w-5 h-5"/> SIPRAGA</span>
+      <div className="flex items-center gap-3">
+        <Link to="/login-warga"
+          className="text-white/80 hover:text-white text-sm transition-colors">
+          Masuk
+        </Link>
+        <Link to="/register-warga"
+          className="bg-white text-primary-dark hover:bg-primary-light/10 text-sm font-medium px-3 py-1.5 rounded transition-colors">
+          Daftar
+        </Link>
+      </div>
+    </nav>
+
+    {/* Hero */}
+    <section className="bg-primary-dark relative overflow-hidden flex-shrink-0">
+      {/* Decorative pattern */}
+      <div className="absolute inset-0 opacity-5" aria-hidden="true">
+        <svg width="100%" height="100%">
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="1" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+      </div>
+
+      <div className="relative max-w-4xl mx-auto px-6 py-20 md:py-28 text-center">
+        <p className="text-blue-300 text-sm font-medium tracking-widest uppercase mb-4">
+          Sistem Informasi Pengantar RT/RW — SIPRAGA
+        </p>
+        <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight mb-5">
+          Administrasi Surat RT/RW<br />
+          <span className="text-blue-300">Kini Lebih Mudah</span>
+        </h1>
+        <p className="text-white/70 text-base md:text-lg max-w-xl mx-auto mb-8">
+          Ajukan surat pengantar dari rumah. Tanpa antre, tanpa bolak-balik. Pengurus RT/RW bisa menyetujui secara digital.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link
+            to="/login-warga"
+            className="px-6 py-3 bg-white text-primary-dark hover:bg-primary-light/10 rounded-lg font-semibold text-sm transition-colors shadow-md"
+          >
+            Masuk sebagai Warga
+          </Link>
+          <Link
+            to="/login-rtrw"
+            className="px-6 py-3 border-2 border-white/50 text-white hover:bg-white/10 rounded-lg font-semibold text-sm transition-colors"
+          >
+            Masuk sebagai RT/RW
+          </Link>
         </div>
-      </header>
+      </div>
+    </section>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white py-20 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
-            Layanan Surat Pengantar RT/RW Digital
-          </h1>
-          <p className="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed">
-            Ajukan surat pengantar, pantau status persetujuan, dan tanda tangani dokumen secara digital dengan cepat, transparan, dan aman dalam satu platform terpadu.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Link to="/register-warga" className="w-full sm:w-auto bg-emerald-500 text-white px-8 py-3 rounded-xl font-semibold text-lg hover:bg-emerald-400 transition shadow-lg text-center">
-              Daftar Akun Warga
-            </Link>
-            <Link to="/login-warga" className="w-full sm:w-auto bg-white/10 backdrop-blur text-white border border-white/20 px-8 py-3 rounded-xl font-semibold text-lg hover:bg-white/20 transition shadow-lg text-center">
-              Ajukan Surat Sekarang
-            </Link>
-          </div>
+    {/* How it works */}
+    <section className="bg-white py-16 px-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl font-bold text-neutral-900">Cara Kerja SIPRAGA</h2>
+          <p className="text-gray-500 text-sm mt-2">Empat langkah mudah dari pengajuan hingga unduh surat</p>
         </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-20 px-4 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-center text-slate-950 mb-12">
-          Fitur Unggulan RT-RW CORETAX
-        </h2>
-        <div className="grid md:grid-cols-4 gap-8">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center">
-            <div className="p-3 bg-blue-100 text-blue-900 rounded-xl mb-4">
-              <FileText className="w-8 h-8" />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {STEPS.map((s) => (
+            <div key={s.no} className="relative">
+              <div className="bg-primary-light/10 rounded-xl p-5 h-full">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl" aria-hidden="true">{s.icon}</span>
+                  <span className="text-xs font-bold text-blue-400 tracking-widest">{s.no}</span>
+                </div>
+                <h3 className="font-semibold text-neutral-900 text-sm mb-2">{s.title}</h3>
+                <p className="text-xs text-gray-500 leading-relaxed">{s.desc}</p>
+              </div>
             </div>
-            <h3 className="text-lg font-bold mb-2">Pengajuan Online</h3>
-            <p className="text-slate-500 text-sm">
-              Warga dapat mengajukan berbagai jenis surat pengantar kapan saja tanpa harus bertatap muka langsung.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center">
-            <div className="p-3 bg-amber-100 text-amber-900 rounded-xl mb-4">
-              <Shield className="w-8 h-8" />
-            </div>
-            <h3 className="text-lg font-bold mb-2">Tanda Tangan Digital</h3>
-            <p className="text-slate-500 text-sm">
-              Ketua RT dan RW dapat menandatangani surat secara digital yang sah dan terenkripsi.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center">
-            <div className="p-3 bg-emerald-100 text-emerald-900 rounded-xl mb-4">
-              <CheckCircle className="w-8 h-8" />
-            </div>
-            <h3 className="text-lg font-bold mb-2">Pantau Real-Time</h3>
-            <p className="text-slate-500 text-sm">
-              Pantau status surat pengajuan Anda secara berkala mulai dari verifikasi RT hingga disetujui RW.
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center">
-            <div className="p-3 bg-indigo-100 text-indigo-900 rounded-xl mb-4">
-              <Users className="w-8 h-8" />
-            </div>
-            <h3 className="text-lg font-bold mb-2">Kelola Template</h3>
-            <p className="text-slate-500 text-sm">
-              Super Admin dapat mengunggah dan mengelola berbagai template surat resmi sesuai kebutuhan desa.
-            </p>
-          </div>
+          ))}
         </div>
-      </section>
+      </div>
+    </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-10 mt-auto border-t border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="mb-2">© {new Date().getFullYear()} RT-RW CORETAX. Hak Cipta Dilindungi Undang-Undang.</p>
-          <p className="text-sm text-slate-500">Mewujudkan Administrasi RT dan RW yang Lebih Cepat, Akurat, dan Transparan.</p>
+    {/* Features */}
+    <section className="bg-neutral-50 py-16 px-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl font-bold text-neutral-900">Fitur Unggulan</h2>
         </div>
-      </footer>
-    </div>
-  );
-}
+        <div className="grid sm:grid-cols-3 gap-5">
+          {[
+            { icon: <ShieldCheck className="w-8 h-8 text-white mb-4"/>, title: 'Aman & Terenkripsi', desc: 'Data Anda dilindungi dengan JWT dan enkripsi bcrypt.' },
+            { icon: <Cloud className="w-8 h-8 text-white mb-4"/>, title: 'Penyimpanan Cloud', desc: 'Dokumen tersimpan aman di Cloudinary, bisa diakses kapan saja.' },
+            { icon: <FileSignature className="w-8 h-8 text-white mb-4"/>, title: 'TTD Digital', desc: 'Pengurus RT/RW menandatangani secara digital tanpa tatap muka.' },
+          ].map((f, i) => (
+            <div key={i} className="bg-primary hover:bg-primary-dark transition-colors p-6 border-l-4 border-primary-light">
+              {f.icon}
+              <h3 className="font-semibold text-white text-sm mb-1">{f.title}</h3>
+              <p className="text-xs text-blue-100">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    {/* CTA */}
+    <section className="bg-primary-dark py-12 px-6 text-center">
+      <h2 className="text-xl font-bold text-white mb-3">Siap mengajukan surat?</h2>
+      <p className="text-white/60 text-sm mb-6">Daftar gratis sekarang dan nikmati kemudahan administrasi digital.</p>
+      <Link
+        to="/register-warga"
+        className="inline-block px-6 py-3 bg-white text-primary-dark hover:bg-primary-light/10 rounded-lg font-semibold text-sm transition-colors"
+      >
+        Daftar Sekarang — Gratis
+      </Link>
+    </section>
+
+    {/* Footer */}
+    <footer className="bg-gray-900 py-5 px-6 text-center">
+      <p className="text-xs text-gray-500">
+        © 2026 SIPRAGA — Sistem Informasi Pengantar RT/RW
+      </p>
+    </footer>
+  </div>
+);
+
+export default LandingPage;

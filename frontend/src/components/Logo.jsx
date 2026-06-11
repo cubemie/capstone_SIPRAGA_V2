@@ -7,7 +7,7 @@ export default function Logo({ className = '' }) {
   
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
-      <Mailbox className="w-8 h-8 text-blue-600" />
+      <Mailbox className="w-8 h-8 text-primary-light" />
       <span className="text-xl font-bold tracking-wide text-slate-800 dark:text-white">
         RT-RW CORETAX
       </span>

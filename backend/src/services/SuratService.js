@@ -67,10 +67,12 @@ class SuratService {
 
   /**
    * Ambil semua surat yang masuk dan menunggu verifikasi.
+   * @param {number|string} id - ID pengguna
+   * @param {string} role - Role pengguna ('rt', 'rw', 'superadmin')
    * @returns {{ data: Array|null, error: string|null }}
    */
-  static async getSuratMasuk() {
-    const rows = await SuratModel.findMasuk();
+  static async getSuratMasuk(id, role) {
+    const rows = await SuratModel.findMasuk(id, role);
     return { data: rows, error: null };
   }
 

@@ -1,137 +1,112 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FileText, CheckSquare, History, Award, Clock, CheckCircle2, XCircle, Loader2, AlertCircle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
-import { useSurat } from '../../hooks/useSurat';
-import { suratService } from '../../services/suratService';
+import { useEffect, useState } from 'react';
+import { Clock, FileText } from 'lucide-react';
+import { suratService } from '../../services';
+import PageHeader from '../../components/ui/PageHeader';
+import StatCard from '../../components/ui/StatCard';
+import StatusBadge from '../../components/ui/StatusBadge';
+import EmptyState from '../../components/ui/EmptyState';
 
-export default function RtRwDashboard() {
-  const { data: suratMasuk, loading, error, refetch } = useSurat('masuk');
+const fmt = (dt) => dt ? new Date(dt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
 
-  const [actionLoading, setActionLoading] = useState(null); // ID surat yang sedang diproses
+export default function RTRWDashboard() {
+  const [surat, setSurat] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
+
+  const fetchSurat = () => {
+    setLoading(true);
+    suratService.getMenungguTTD()
+      .then(res => setSurat(res.data ?? res))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchSurat();
+  }, []);
 
   const handleApprove = async (id) => {
     setActionLoading(id);
-    const formData = new FormData(); // backend bisa terima approve tanpa file TTD dari dashboard
-    const { error: err } = await suratService.approveSurat(id, formData);
-    setActionLoading(null);
-    if (!err) refetch();
+    try {
+      const fd = new FormData();
+      await suratService.tandaTangani(id, fd);
+      fetchSurat();
+    } catch (err) {
+      alert(err?.message || 'Gagal menyetujui surat');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const handleReject = async (id) => {
     const alasan = prompt('Masukkan alasan penolakan:');
     if (!alasan) return;
     setActionLoading(id);
-    const { error: err } = await suratService.rejectSurat(id, alasan);
-    setActionLoading(null);
-    if (!err) refetch();
+    try {
+      await suratService.tolakSurat(id, alasan);
+      fetchSurat();
+    } catch (err) {
+      alert(err?.message || 'Gagal menolak surat');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
-  // Stats
-  const pendingCount = suratMasuk.filter(s => s.status === 'pending_rt' || s.status === 'pending_rw').length;
-
   return (
-    <div className="p-6 space-y-6">
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
-            <Clock className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-xs text-slate-500 font-medium block">Butuh Verifikasi</span>
-            <p className="text-xl font-bold text-slate-800">{loading ? '—' : pendingCount}</p>
-          </div>
-        </div>
+    <div>
+      <PageHeader 
+        title="Dashboard RT/RW" 
+        subtitle="Kelola permintaan surat dari warga yang menunggu tanda tangan Anda." 
+      />
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-            <CheckCircle2 className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-xs text-slate-500 font-medium block">Total Masuk</span>
-            <p className="text-xl font-bold text-slate-800">{loading ? '—' : suratMasuk.length}</p>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <StatCard icon={<Clock />} label="Menunggu Persetujuan" value={loading ? '...' : surat.length} colorClass="text-warning" />
       </div>
 
-      {/* Verification Requests List */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h4 className="font-bold text-slate-800">Daftar Surat Masuk (Butuh Persetujuan)</h4>
-          {!loading && pendingCount > 0 && (
-            <span className="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">
-              Ada {pendingCount} surat pending
-            </span>
-          )}
+      <div className="bg-white border border-neutral-100 rounded-lg shadow-sm">
+        <div className="px-5 py-4 border-b border-neutral-100 flex justify-between items-center bg-neutral-50">
+          <h2 className="text-base font-semibold text-gray-800">Antrean Surat Masuk</h2>
         </div>
 
-        {/* Loading */}
-        {loading && (
-          <div className="flex items-center justify-center py-16 gap-2 text-slate-400">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            <span className="text-sm">Memuat surat masuk...</span>
+        {loading ? (
+          <div className="p-5 space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="animate-pulse flex gap-4 h-16 bg-neutral-50 rounded" />
+            ))}
           </div>
-        )}
-
-        {/* Error */}
-        {!loading && error && (
-          <div className="m-6 flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-4">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Empty */}
-        {!loading && !error && suratMasuk.length === 0 && (
-          <div className="py-16 text-center text-slate-400 text-sm">
-            Tidak ada surat yang membutuhkan verifikasi saat ini.
-          </div>
-        )}
-
-        {/* List */}
-        {!loading && !error && suratMasuk.length > 0 && (
-          <div className="divide-y divide-slate-100">
-            {suratMasuk.map((surat) => (
-              <div
-                key={surat.id}
-                className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/50 transition"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-bold text-slate-900 text-sm">{surat.nama_warga || surat.warga?.nama}</span>
-                    <span className="text-xs text-slate-400">• NIK: {surat.nik_warga || surat.warga?.nik}</span>
-                  </div>
-                  <p className="text-slate-800 font-medium text-sm">
-                    {surat.jenis_surat || surat.subjek}
-                    {surat.keperluan && ` (${surat.keperluan})`}
-                  </p>
-                  <span className="text-xs text-slate-400 block">
-                    Diajukan pada: {new Date(surat.created_at || surat.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </span>
+        ) : surat.length === 0 ? (
+          <EmptyState 
+            icon={<FileText className="w-12 h-12 text-gray-300" />} 
+            title="Tidak Ada Surat" 
+            description="Belum ada surat yang menunggu persetujuan Anda saat ini." 
+          />
+        ) : (
+          <div className="divide-y divide-gray-100">
+            {surat.map(s => (
+              <div key={s.id} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-primary-light/10 transition-colors">
+                <div>
+                  <p className="font-semibold text-neutral-900 text-sm">{s.nama_warga || s.warga?.nama}</p>
+                  <p className="text-xs text-gray-500 mb-1">NIK: {s.nik_warga || s.warga?.NIK}</p>
+                  <p className="text-sm text-gray-800 font-medium">{s.jenis_surat || s.subjek}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Diajukan: {fmt(s.tanggal_ajuan || s.created_at)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handleApprove(surat.id)}
-                    disabled={actionLoading === surat.id}
-                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition shadow disabled:opacity-60"
+                    onClick={() => handleApprove(s.id)}
+                    disabled={actionLoading === s.id}
+                    className="px-4 py-2 bg-success hover:bg-success/90 text-white text-xs font-semibold rounded shadow-sm disabled:opacity-50"
                   >
-                    {actionLoading === surat.id ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Setujui'}
+                    {actionLoading === s.id ? 'Memproses...' : 'Setujui & TTD'}
                   </button>
                   <button
-                    onClick={() => handleReject(surat.id)}
-                    disabled={actionLoading === surat.id}
-                    className="px-3.5 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-bold transition disabled:opacity-60"
+                    onClick={() => handleReject(s.id)}
+                    disabled={actionLoading === s.id}
+                    className="px-4 py-2 bg-error hover:bg-error text-white text-xs font-semibold rounded shadow-sm disabled:opacity-50"
                   >
                     Tolak
                   </button>
-                  {surat.dokumen_url && (
-                    <a
-                      href={surat.dokumen_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition"
-                    >
+                  {s.file_path && (
+                    <a href={s.file_path} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-xs font-semibold rounded shadow-sm hover:bg-neutral-50">
                       Lihat Dokumen
                     </a>
                   )}

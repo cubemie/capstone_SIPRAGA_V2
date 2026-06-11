@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { suratService } from '../services/suratService';
+import { suratService } from "../services";
 
 const FETCHERS = {
   my: suratService.getMySurat,

@@ -80,7 +80,9 @@ CREATE TABLE IF NOT EXISTS warga (
   pekerjaan         VARCHAR(100),
   kewarganegaraan   VARCHAR(50),
   negara            VARCHAR(100),
-  foto_ktp          VARCHAR(255)
+  foto_ktp          VARCHAR(255),
+  rt_id             INT NULL,
+  CONSTRAINT fk_warga_rt FOREIGN KEY (rt_id) REFERENCES rt(rt_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------
