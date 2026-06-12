@@ -306,8 +306,11 @@ const createMarkdownTemplate = async (req, res) => {
     const { letter_type_id, name, markdown_content } = req.body;
     if (!markdown_content) return res.status(400).json({ success: false, message: 'Konten template wajib diisi' });
 
+    const sanitizeHtml = require('sanitize-html');
+    
     // Compile Markdown → HTML
-    const html_compiled = marked.parse(markdown_content);
+    const dirty_html = marked.parse(markdown_content);
+    const html_compiled = sanitizeHtml(dirty_html);
 
     const [result] = await pool.query(
       `INSERT INTO letter_markdown_templates
@@ -327,7 +330,10 @@ const updateMarkdownTemplate = async (req, res) => {
     const { id } = req.params;
     const { name, markdown_content, is_active } = req.body;
 
-    const html_compiled = markdown_content ? marked.parse(markdown_content) : undefined;
+    const sanitizeHtml = require('sanitize-html');
+    const html_compiled = markdown_content 
+      ? sanitizeHtml(marked.parse(markdown_content)) 
+      : undefined;
 
     await pool.query(
       `UPDATE letter_markdown_templates SET
@@ -429,18 +435,22 @@ const previewMarkdownTemplate = async (req, res) => {
     `;
 
     // Generate PDF dengan Puppeteer (lazy-require)
-    const puppeteer = require('puppeteer');
-    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+    const { getBrowser } = require('../utils/puppeteerManager');
+    const browser = await getBrowser();
     const page    = await browser.newPage();
-    await page.setContent(fullHtml, { waitUntil: 'networkidle0' });
-    const pdfBuffer = await page.pdf({ format: 'A4', margin: { top: '2cm', bottom: '2cm', left: '2.5cm', right: '2cm' } });
-    await browser.close();
+    
+    try {
+      await page.setContent(fullHtml, { waitUntil: 'networkidle0' });
+      const pdfBuffer = await page.pdf({ format: 'A4', margin: { top: '2cm', bottom: '2cm', left: '2.5cm', right: '2cm' } });
 
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `inline; filename="preview-template-${id}.pdf"`,
-    });
-    res.send(pdfBuffer);
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `inline; filename="preview-template-${id}.pdf"`,
+      });
+      res.send(pdfBuffer);
+    } finally {
+      await page.close();
+    }
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

@@ -21,14 +21,12 @@ class PdfService {
    * Generate PDF buffer from HTML string
    */
   static async generatePdfBuffer(htmlContent) {
-    const puppeteer = require('puppeteer');
-    const browser = await puppeteer.launch({
-      headless: "new",
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    const { getBrowser } = require('../../../utils/puppeteerManager');
+    const browser = await getBrowser();
+    let page;
 
     try {
-      const page = await browser.newPage();
+      page = await browser.newPage();
       await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
       
       const pdfBuffer = await page.pdf({
@@ -39,7 +37,7 @@ class PdfService {
       
       return pdfBuffer;
     } finally {
-      await browser.close();
+      if (page) await page.close();
     }
   }
 
