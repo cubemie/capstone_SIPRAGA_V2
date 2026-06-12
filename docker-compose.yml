@@ -28,6 +28,13 @@ services:
       retries: 10
       start_period: 40s
 
+  redis:
+    image: redis:alpine
+    container_name: coretax_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
   backend:
     build: ./backend
     container_name: coretax_backend
@@ -35,9 +42,13 @@ services:
     ports:
       - "3000:3000"
     env_file: ./backend/.env
+    environment:
+      - REDIS_URL=redis://redis:6379
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
 
 volumes:
   db_data:

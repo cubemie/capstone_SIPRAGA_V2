@@ -1,7 +1,7 @@
 const express      = require('express');
 const router       = express.Router();
 const rateLimit    = require('express-rate-limit');
-const AuthController = require('../controllers/AuthController');
+const authController = require('../controllers/authController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 
 /**
@@ -18,12 +18,19 @@ const loginLimiter = rateLimit({
   },
 });
 
-router.post('/register', AuthController.register);
-router.post('/register-rw', AuthController.registerRw);
-router.post('/register-rt', AuthController.registerRt);
-router.post('/login',      loginLimiter, AuthController.loginWarga);
-router.post('/login-rtrw', loginLimiter, AuthController.loginRtRw);
-router.post('/logout', AuthController.logout);
-router.get('/check-session', verifyToken, AuthController.checkSession);
+router.post('/register', authController.register);
+router.post('/register-rw', authController.registerRw);
+router.post('/register-rt', authController.registerRt);
+router.post('/login',      loginLimiter, authController.loginWarga);
+router.post('/login-rtrw', loginLimiter, authController.loginRtRw);
+router.post('/logout', authController.logout);
+router.get('/check-session', verifyToken, authController.checkSession);
+
+// Profil Terpadu (Semua Role)
+const ProfileController = require('../controllers/ProfileController');
+const { uploadAvatar } = require('../middlewares/upload');
+
+router.get('/profile', verifyToken, ProfileController.getProfile);
+router.put('/profile', verifyToken, uploadAvatar.single('avatar'), ProfileController.updateProfile);
 
 module.exports = router;

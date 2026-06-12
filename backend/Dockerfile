@@ -11,7 +11,7 @@ WORKDIR /app
 # Install dependencies lebih dulu (memanfaatkan Docker layer cache)
 # Layer ini TIDAK di-rebuild selama package.json tidak berubah
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Copy source code
 COPY src/ ./src/

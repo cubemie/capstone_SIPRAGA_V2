@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import Logo from '../Logo';
 import {
   User, Send, FileText, CheckSquare, Award, History,
-  LayoutDashboard, LogOut, Bell, Menu, X,
+  LayoutDashboard, LogOut, Bell, Menu, X, UserCircle,
 } from 'lucide-react';
 
 export default function DashboardLayout() {
@@ -25,19 +25,22 @@ export default function DashboardLayout() {
 
   if (user?.role === 'warga') {
     menuItems = [
-      { path: '/warga/dashboard', label: 'Dashboard',    icon: User },
-      { path: '/warga/ajukan',    label: 'Ajukan Surat', icon: Send },
-      { path: '/warga/status',    label: 'Status Surat', icon: FileText },
+      { path: '/warga/dashboard', label: 'Dashboard',    icon: LayoutDashboard },
+      { path: '/profil',          label: 'Profil Saya',  icon: UserCircle },
+      { path: '/warga/buat-surat-v2', label: 'Ajukan Surat Baru', icon: Send },
+      { path: '/warga/riwayat',   label: 'Status & Riwayat', icon: History },
+      { path: '/warga/inbox',     label: 'Kotak Masuk', icon: Bell },
     ];
     sidebarBg     = 'bg-[#1e3a5f]';
     sidebarHover  = 'hover:bg-[#2d5282]';
     sidebarActive = 'bg-[#2d5282]';
   } else if (user?.role === 'rt' || user?.role === 'rw') {
     menuItems = [
-      { path: '/rtrw/dashboard', label: 'Verifikasi Surat',     icon: CheckSquare },
-      { path: '/rtrw/ajukan',    label: 'Buat Surat Pengantar', icon: FileText },
+      { path: '/profil',         label: 'Profil Saya',          icon: UserCircle },
+      { path: '/rtrw/inbox',     label: 'Tugas & Kotak Masuk', icon: Bell },
+      { path: '/rtrw/buat-surat-v2', label: 'Buat Surat Pengantar', icon: FileText },
+      { path: '/rtrw/riwayat-v2',label: 'Riwayat Surat',   icon: History },
       { path: '/rtrw/ttd',       label: 'Tanda Tangan Digital', icon: Award },
-      { path: '/rtrw/riwayat',   label: 'Riwayat Surat',        icon: History },
     ];
     sidebarBg     = 'bg-slate-900';
     sidebarHover  = 'hover:bg-slate-800';

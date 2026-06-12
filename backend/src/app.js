@@ -10,6 +10,7 @@ const errorHandler  = require('./middlewares/errorHandler');
 const app = express();
 
 // ─── Import Routes ────────────────────────────────────────────────────────────
+const lettersRoutes = require('./modules/letters/letters.routes');
 const authRoutes          = require('./routes/authRoutes');
 const suratRoutes         = require('./routes/suratRoutes');
 const wargaRoutes         = require('./routes/wargaRoutes');
@@ -52,6 +53,9 @@ app.use('/api/ttd',            ttdRtRwRoutes);
 app.use('/api',                dashboardRtRwRoutes);
 app.use('/api/superadmin',     superadminRoutes);
 app.use('/api/template-surat', templateSuratRoutes);
+
+// V2 Route
+app.use('/api/v2/letters', lettersRoutes);
 
 // ─── Swagger Documentation ────────────────────────────────────────────────────
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));

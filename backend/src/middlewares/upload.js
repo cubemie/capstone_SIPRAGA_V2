@@ -148,6 +148,13 @@ const uploadTtd = multer({
   limits:     { fileSize: 2 * 1024 * 1024 },
 });
 
+/** Upload avatar user (JPG/PNG, maks 2 MB) */
+const uploadAvatar = multer({
+  storage:    makeSupabaseStorage('avatar'),
+  fileFilter: imageFilter,
+  limits:     { fileSize: 2 * 1024 * 1024 },
+});
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 module.exports = {
@@ -156,4 +163,5 @@ module.exports = {
   uploadKtp,
   uploadTtd,
   uploadTemplate,
+  uploadAvatar,
 };

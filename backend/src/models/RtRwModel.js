@@ -67,6 +67,20 @@ class RtRwModel {
     await db.query('UPDATE rt SET ttd_digital = ? WHERE rt_id = ?', [filename, id]);
   }
 
+  /**
+   * Update data profil RT.
+   * @param {number} id
+   * @param {Object} fields
+   */
+  static async updateRt(id, fields) {
+    await db.query(
+      `UPDATE rt
+       SET nama_ketua=?, provinsi=?, kota=?, kecamatan=?, kelurahan_desa=?, avatar_url=?
+       WHERE rt_id = ?`,
+      [fields.nama_ketua, fields.provinsi, fields.kota, fields.kecamatan, fields.kelurahan_desa, fields.avatar_url, id]
+    );
+  }
+
   // ─── RW ──────────────────────────────────────────────────────────────────
 
   /**
@@ -133,6 +147,20 @@ class RtRwModel {
    */
   static async updateTtdRw(id, filename) {
     await db.query('UPDATE rw SET ttd_digital = ? WHERE rw_id = ?', [filename, id]);
+  }
+
+  /**
+   * Update data profil RW.
+   * @param {number} id
+   * @param {Object} fields
+   */
+  static async updateRw(id, fields) {
+    await db.query(
+      `UPDATE rw
+       SET nama_ketua=?, provinsi=?, kota=?, kecamatan=?, kelurahan_desa=?, avatar_url=?
+       WHERE rw_id = ?`,
+      [fields.nama_ketua, fields.provinsi, fields.kota, fields.kecamatan, fields.kelurahan_desa, fields.avatar_url, id]
+    );
   }
 
   // ─── Superadmin ──────────────────────────────────────────────────────────

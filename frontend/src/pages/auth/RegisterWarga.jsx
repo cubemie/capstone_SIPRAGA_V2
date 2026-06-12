@@ -54,6 +54,12 @@ export default function RegisterWarga() {
       confirm_password: formData.confirm_password,
       jenis_kelamin: formData.jenis_kelamin,
       tanggal_lahir: formData.tanggal_lahir,
+      tempat_lahir: formData.tempatLahir,
+      alamat: formData.alamat,
+      rt: formData.rt,
+      rw: formData.rw,
+      kelurahan_desa: formData.kelurahan,
+      kecamatan: formData.kecamatan,
     });
     setLoading(false);
 

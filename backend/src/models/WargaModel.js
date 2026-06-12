@@ -54,28 +54,14 @@ class WargaModel {
 
   /**
    * Buat akun warga baru.
-   * @param {{ nik, nama, email, password, jenis_kelamin, tanggal_lahir }} data
    */
-  static async create({ nik, nama, email, password, jenis_kelamin, tanggal_lahir }) {
+  static async create({ nik, nama, email, password, jenis_kelamin, tanggal_lahir, tempat_lahir, alamat, rt, rw, kelurahan_desa, kecamatan, provinsi, kota }) {
     await db.query(
-      `INSERT INTO warga (NIK, nama, jenis_kelamin, tanggal_lahir, email, password)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [nik, nama, jenis_kelamin, tanggal_lahir, email, password]
+      `INSERT INTO warga (NIK, nama, jenis_kelamin, tanggal_lahir, email, password, tempat_lahir, alamat, rt, rw, kelurahan_desa, kecamatan, provinsi, kota)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [nik, nama, jenis_kelamin, tanggal_lahir, email, password, tempat_lahir, alamat, rt, rw, kelurahan_desa, kecamatan, provinsi, kota]
     );
   }
-/**
-   * Ambil data warga berdasarkan id_warga.
-   * @param {number} id_warga
-   * @returns {Object|null}
-   */
-  static async findById(id_warga) {
-    const [rows] = await db.query(
-      'SELECT id_warga, nama, email, no_hp FROM warga WHERE id_warga = ?',
-      [id_warga]
-    );
-    return rows[0] || null;
-  }
-  
   /**
    * Update data profil warga.
    * @param {number} id
@@ -86,13 +72,13 @@ class WargaModel {
       `UPDATE warga
        SET provinsi=?, kota=?, kecamatan=?, kelurahan_desa=?, rw=?, rt=?,
            agama=?, status_perkawinan=?, pekerjaan=?, kewarganegaraan=?,
-           tempat_lahir=?, alamat=?, negara=?, foto_ktp=?
+           tempat_lahir=?, alamat=?, negara=?, foto_ktp=?, avatar_url=?
        WHERE id_warga = ?`,
       [
         fields.provinsi, fields.kota, fields.kecamatan, fields.kelurahan_desa,
         fields.rw, fields.rt, fields.agama, fields.status_perkawinan,
         fields.pekerjaan, fields.kewarganegaraan, fields.tempat_lahir,
-        fields.alamat, fields.negara, fields.foto_ktp, id,
+        fields.alamat, fields.negara, fields.foto_ktp, fields.avatar_url, id,
       ]
     );
   }

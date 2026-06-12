@@ -66,4 +66,7 @@ export const api = {
   /** Khusus untuk update file (FormData) via PUT */
   putFormData: (endpoint, formData) =>
     request(endpoint, { method: 'PUT', body: formData }),
+  put: async (path, body) => { /* same pattern as post */ },
+  patch: async (path, body) => { /* same pattern as post */ },
+
 };

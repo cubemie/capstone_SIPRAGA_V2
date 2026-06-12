@@ -50,34 +50,36 @@ class AuthService {
 
   /**
    * Registrasi warga baru.
-   * @param {{ nik, nama, email, password, confirm_password, jenis_kelamin, tanggal_lahir }} data
-   * @returns {{ data: Object|null, error: string|null }}
    */
   static async registerWarga(data) {
-    const { nik, nama, email, password, confirm_password, jenis_kelamin, tanggal_lahir } = data;
+    const { nik, nama, email, password, confirm_password, jenis_kelamin, tanggal_lahir, tempat_lahir, alamat, rt, rw, kelurahan_desa, kecamatan, provinsi, kota } = data;
 
     // Validasi field wajib
     if (!nik || !nama || !email || !password || !confirm_password || !jenis_kelamin || !tanggal_lahir) {
       return { data: null, error: 'Semua field wajib diisi.' };
     }
 
-    // Validasi format NIK
-    const nikError = validateNik(nik);
-    if (nikError) return { data: null, error: nikError };
-
-    // Validasi konfirmasi password
     if (password !== confirm_password) {
       return { data: null, error: 'Konfirmasi password tidak cocok.' };
     }
 
-    // Cek duplikat NIK atau email
-    const existing = await WargaModel.findByNikOrEmail(nik, email);
-    if (existing) {
-      return { data: null, error: 'NIK atau email sudah terdaftar.' };
+    const nikError = validateNik(nik);
+    if (nikError) return { data: null, error: nikError };
+
+    // Cek duplikasi NIK atau email
+    const existingUser = await WargaModel.findByNikOrEmail(nik, email);
+    if (existingUser) {
+      return { data: null, error: 'NIK atau Email sudah terdaftar.' };
     }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
-    await WargaModel.create({ nik, nama, email, password: hashedPassword, jenis_kelamin, tanggal_lahir });
+
+    // Simpan ke database
+    await WargaModel.create({
+      nik, nama, email, password: hashedPassword, jenis_kelamin, tanggal_lahir,
+      tempat_lahir, alamat, rt, rw, kelurahan_desa, kecamatan, provinsi, kota
+    });
 
     return { data: { message: 'Registrasi berhasil. Silakan login.' }, error: null };
   }
