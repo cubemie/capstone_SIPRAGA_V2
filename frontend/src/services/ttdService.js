@@ -1,18 +1,11 @@
 import { api } from '../utils/api';
 
-export const ttdService = {
-  /**
-   * Ambil tanda tangan digital saat ini.
-   * BE route: GET /api/ttd/current-ttd
-   */
-  getCurrentTtd: () =>
-    api.get('/ttd/current-ttd'),
+export const getTtd = async () => {
+  const res = await api.get('/ttd/current-ttd');
+  return res.data;
+};
 
-  /**
-   * Upload / simpan tanda tangan digital baru.
-   * BE route: POST /api/ttd/upload-ttd (multipart/form-data)
-   * @param {FormData} formData — harus berisi field 'ttdImage'
-   */
-  uploadTtd: (formData) =>
-    api.postFormData('/ttd/upload-ttd', formData),
+export const uploadTtd = async (formData) => {
+  const res = await api.postFormData('/ttd/upload-ttd', formData);
+  return res.data;
 };

@@ -18,5 +18,7 @@ module.exports = (req, res, next) => {
   }
 
   req.rtRwUser = decoded; // { id, username, role }
+  req.user = decoded;
+  req.tenantId = decoded.rw_id || decoded.id;
   next();
 };

@@ -11,6 +11,7 @@ const app = express();
 
 // ─── Import Routes ────────────────────────────────────────────────────────────
 const lettersRoutes = require('./modules/letters/letters.routes');
+const publicRoutes  = require('./modules/public/public.routes');
 const authRoutes          = require('./routes/authRoutes');
 const suratRoutes         = require('./routes/suratRoutes');
 const wargaRoutes         = require('./routes/wargaRoutes');
@@ -56,6 +57,8 @@ app.use('/api/template-surat', templateSuratRoutes);
 
 // V2 Route
 app.use('/api/v2/letters', lettersRoutes);
+app.use('/api/v2/public', publicRoutes);
+
 
 // ─── Swagger Documentation ────────────────────────────────────────────────────
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));

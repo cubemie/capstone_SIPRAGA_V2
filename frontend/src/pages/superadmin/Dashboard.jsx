@@ -3,9 +3,22 @@ import { Link } from 'react-router-dom';
 import { Users, Map, FileCode } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTemplate } from '../../hooks/useTemplate';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../../utils/api';
+
+const fetchStats = async () => {
+  const res = await api.get('/superadmin/stats');
+  return res.data.data;
+};
 
 export default function SuperAdminDashboard() {
   const { data: templates, loading: loadingTemplates } = useTemplate();
+  
+  const { data: stats } = useQuery({
+    queryKey: ['superadmin-stats'],
+    queryFn: fetchStats,
+  });
+
 
   return (
     <div className="p-6 space-y-6">
@@ -23,26 +36,25 @@ export default function SuperAdminDashboard() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-            <Users className="w-6 h-6" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        {[
+          { label: 'Total Warga', value: stats?.total_warga ?? '—', color: 'bg-blue-50 text-blue-700' },
+          { label: 'Jumlah RT', value: stats?.total_rt ?? '—', color: 'bg-green-50 text-green-700' },
+          { label: 'Jumlah RW', value: stats?.total_rw ?? '—', color: 'bg-purple-50 text-purple-700' },
+          {
+            label: 'Surat V2',
+            value: stats?.surat_v2?.reduce((a, b) => a + Number(b.total), 0) ?? '—',
+            color: 'bg-orange-50 text-orange-700',
+          },
+        ].map(({ label, value, color }) => (
+          <div key={label} className={`rounded-lg p-4 ${color}`}>
+            <p className="text-2xl font-bold">{value}</p>
+            <p className="text-sm mt-1 opacity-70">{label}</p>
           </div>
-          <div>
-            <span className="text-xs text-slate-500 font-medium block">Total Warga</span>
-            <p className="text-xl font-bold text-slate-800">—</p>
-          </div>
-        </div>
+        ))}
+      </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
-            <Map className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="text-xs text-slate-500 font-medium block">Total RT / RW</span>
-            <p className="text-xl font-bold text-slate-800">—</p>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
 
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">

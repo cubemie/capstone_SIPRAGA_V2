@@ -65,6 +65,83 @@ const LettersModel = {
     return rows[0];
   },
 
+  async getDetailByUuid(uuid) {
+    const [rows] = await db.query(
+      `SELECT l.*,
+              lt.name AS letter_type_name,
+              w.nama AS resident_name, w.NIK AS resident_nik,
+              lwo.name AS workflow_name, lwo.steps AS workflow_steps
+       FROM letters l
+       JOIN letter_types lt ON l.letter_type_id = lt.id
+       JOIN warga w ON l.resident_id = w.id_warga
+       JOIN letter_workflow_options lwo ON l.workflow_option_id = lwo.id
+       WHERE l.uuid = ?`,
+      [uuid]
+    );
+    if (!rows.length) return null;
+
+    const letter = rows[0];
+
+    // Field values
+    const [fieldValues] = await db.query(
+      'SELECT field_key, value FROM letter_field_values WHERE letter_id = ?',
+      [letter.id]
+    );
+
+    // Approval history
+    const [approvals] = await db.query(
+      `SELECT la.*, 
+              COALESCE(r.nama_ketua, rw.nama_ketua) AS approver_name
+       FROM letter_approvals la
+       LEFT JOIN rt r ON la.approver_id = r.rt_id
+       LEFT JOIN rw rw ON la.approver_id = rw.rw_id
+       WHERE la.letter_id = ?
+       ORDER BY la.acted_at ASC`,
+      [letter.id]
+    );
+
+    // PDF versions
+    const [pdfVersions] = await db.query(
+      `SELECT type, file_url, generated_at
+       FROM letter_pdf_versions
+       WHERE letter_id = ?
+       ORDER BY generated_at DESC`,
+      [letter.id]
+    );
+
+    return {
+      ...letter,
+      field_values: fieldValues,
+      approvals,
+      pdf_versions: pdfVersions,
+    };
+  },
+
+  async getInboxByRole(role, tenantId) {
+    let statusFilter;
+    if (role === 'rt') {
+      statusFilter = `l.status IN ('submitted', 'in_review_rt') AND l.tenant_id = ?`;
+    } else if (role === 'rw') {
+      statusFilter = `l.status IN ('approved_rt', 'in_review_rw')`;
+    } else {
+      return [];
+    }
+
+    const params = role === 'rt' ? [tenantId] : [];
+    const [rows] = await db.query(
+      `SELECT l.uuid, l.status, l.created_at, l.subject,
+              lt.name AS letter_type_name,
+              w.nama AS resident_name
+       FROM letters l
+       JOIN letter_types lt ON l.letter_type_id = lt.id
+       JOIN warga w ON l.resident_id = w.id_warga
+       WHERE ${statusFilter}
+       ORDER BY l.created_at DESC`,
+      params
+    );
+    return rows;
+  },
+
   async getMyLetters(residentId) {
     const [rows] = await db.query(
       `SELECT l.*, 

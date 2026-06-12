@@ -141,6 +141,7 @@ class AuthService {
 
     const token = signToken({
       id:       user.rt_id || user.rw_id,
+      rw_id:    user.rw_id,
       username: user.username,
       nama:     user.nama_ketua,
       role,

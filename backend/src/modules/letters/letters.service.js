@@ -78,18 +78,11 @@ class LettersService {
    * Get detail of a letter by its UUID
    */
   static async getLetterDetail(uuid) {
-    const letter = await LettersModel.getLetterByUuid(uuid);
-    if (!letter) {
+    const detail = await LettersModel.getDetailByUuid(uuid);
+    if (!detail) {
       throw new Error("Letter not found");
     }
-
-    // Get dynamic field values
-    const fields = await LettersModel.getFieldValues(letter.id);
-    
-    return {
-      ...letter,
-      fields
-    };
+    return detail;
   }
 
   /**

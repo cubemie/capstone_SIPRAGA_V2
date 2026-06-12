@@ -84,3 +84,9 @@ export const suratService = {
   ajukanSuratOffline: (data) =>
     api.post('/surat/offline', data),
 };
+
+export const getLettersV2 = async () => {
+  const res = await api.get('/v2/letters');
+  return res.data?.data || res.data;
+};
+

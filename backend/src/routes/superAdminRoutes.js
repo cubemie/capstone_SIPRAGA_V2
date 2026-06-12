@@ -14,5 +14,7 @@ router.post('/login', authController.loginSuperadmin);
 // verifyToken memvalidasi JWT dulu, requireSuperadmin cek role
 router.post('/rt', verifyToken, requireSuperadmin, authController.insertRt);
 router.post('/rw', verifyToken, requireSuperadmin, authController.insertRw);
+router.get('/stats', verifyToken, requireSuperadmin, authController.getStats);
 
 module.exports = router;
+

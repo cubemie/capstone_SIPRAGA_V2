@@ -9,6 +9,7 @@
 const AuthService = require('../services/AuthService');
 const { blacklistToken } = require('../middlewares/authMiddleware');
 const { sendSuccess, sendError } = require('../utils/response');
+const db = require('../config/db');
 
 class AuthController {
   /** POST /api/auth/register */
@@ -126,6 +127,37 @@ class AuthController {
       next(err);
     }
   }
+
+  /** GET /api/superadmin/stats */
+  static async getStats(req, res, next) {
+    try {
+      const [[{ total_warga }]] = await db.query('SELECT COUNT(*) AS total_warga FROM warga');
+      const [[{ total_rt }]] = await db.query('SELECT COUNT(*) AS total_rt FROM rt');
+      const [[{ total_rw }]] = await db.query('SELECT COUNT(*) AS total_rw FROM rw');
+
+      const [suratV1] = await db.query('SELECT status, COUNT(*) AS total FROM pengajuan_surat GROUP BY status');
+      
+      let suratV2 = [];
+      try {
+        const [v2] = await db.query('SELECT status, COUNT(*) AS total FROM letters GROUP BY status');
+        suratV2 = v2;
+      } catch (e) {
+        // ignore if letters table doesn't exist yet
+      }
+
+      const data = {
+        total_warga,
+        total_rt,
+        total_rw,
+        surat_v1: suratV1,
+        surat_v2: suratV2,
+      };
+      sendSuccess(res, data, 'Statistik berhasil diambil', 200);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
+
 
 module.exports = AuthController;

@@ -1,72 +1,90 @@
-const LettersModel = require('../../letters.model');
-const { pdfQueue } = require('../pdf/pdf.queue');
+const pool = require('../../../../config/db.js');
+const { pdfQueue } = require('../../../../config/queue.js');
 
-class ApprovalsService {
-  /**
-   * Approve a letter by RT or RW
-   */
-  static async approveLetter(uuid, role) {
-    const letter = await LettersModel.getLetterByUuid(uuid);
-    if (!letter) throw new Error("Letter not found");
+const STATUS_TRANSITIONS = {
+  // RT_ONLY workflow
+  RT_ONLY: {
+    rt: { from: ['submitted', 'in_review_rt'], to: 'completed' },
+  },
+  // RT_THEN_RW workflow
+  RT_THEN_RW: {
+    rt: { from: ['submitted', 'in_review_rt'], to: 'approved_rt' },
+    rw: { from: ['approved_rt', 'in_review_rw'], to: 'completed' },
+  },
+};
 
-    // Get current workflow steps
-    const steps = typeof letter.workflow_steps === 'string' ? JSON.parse(letter.workflow_steps) : letter.workflow_steps;
-    
-    // Find the next step
-    const currentStepIndex = steps.findIndex(s => s.step === letter.current_step);
-    if (currentStepIndex === -1) throw new Error("Invalid workflow state");
+const approveLetter = async (letterId, role, notes = null, signatureUrl = null) => {
+  // if letterId is uuid, we need to convert to ID first, or adjust query.
+  // wait, the controller passed `uuid` to `ApprovalsService.approveLetter(uuid, role)`.
+  const [[letter]] = await pool.query(
+    `SELECT l.*, lwo.code AS workflow_code
+     FROM letters l
+     JOIN letter_workflow_options lwo ON l.workflow_option_id = lwo.id
+     WHERE l.uuid = ?`,
+    [letterId] // letterId is actually uuid here
+  );
 
-    const currentStepConfig = steps[currentStepIndex];
-    if (currentStepConfig.role !== role) {
-      throw new Error(`Role ${role} is not authorized for this step`);
-    }
+  if (!letter) throw new Error('Surat tidak ditemukan');
 
-    const nextStepConfig = steps[currentStepIndex + 1];
+  const workflow = STATUS_TRANSITIONS[letter.workflow_code];
+  if (!workflow) throw new Error('Workflow tidak dikenal');
 
-    if (nextStepConfig) {
-      // Move to next step
-      let nextStatus = 'in_review_rw'; // default assumption
-      if (nextStepConfig.role === 'admin_rw') {
-        nextStatus = 'in_review_rw';
-      }
-      
-      await LettersModel.updateLetterStatus(letter.id, nextStatus, nextStepConfig.step);
-      return { status: nextStatus, step: nextStepConfig.step };
-    } else {
-      // Workflow is finished!
-      // Generate a letter number (in a real app, use a sequence generator)
-      const letterNumber = `LTR/${new Date().getFullYear()}/${letter.id.toString().padStart(4, '0')}`;
-      
-      // Update status to completed
-      await LettersModel.updateLetterStatus(letter.id, 'completed', letter.current_step, letterNumber, letter.uuid);
-
-      // Trigger PDF generation asynchronously!
-      await pdfQueue.add('generate-pdf', { letterUuid: letter.uuid });
-
-      return { status: 'completed', step: letter.current_step };
-    }
+  // Map role admin_rt/admin_rw to rt/rw if necessary
+  const normalizedRole = role === 'admin_rt' ? 'rt' : role === 'admin_rw' ? 'rw' : role;
+  
+  const transition = workflow[normalizedRole];
+  if (!transition) throw new Error(`Role ${normalizedRole} tidak bisa approve workflow ini`);
+  if (!transition.from.includes(letter.status)) {
+    throw new Error(`Status saat ini (${letter.status}) tidak bisa di-approve`);
   }
 
-  /**
-   * Reject a letter
-   */
-  static async rejectLetter(uuid, role, reason) {
-    const letter = await LettersModel.getLetterByUuid(uuid);
-    if (!letter) throw new Error("Letter not found");
+  const nextStatus = transition.to;
 
-    // Check if authorized
-    const steps = typeof letter.workflow_steps === 'string' ? JSON.parse(letter.workflow_steps) : letter.workflow_steps;
-    const currentStepConfig = steps.find(s => s.step === letter.current_step);
-    
-    if (currentStepConfig.role !== role) {
-      throw new Error(`Role ${role} is not authorized for this step`);
-    }
+  // Insert approval history (using letter.id)
+  await pool.query(
+    `INSERT INTO letter_approvals (letter_id, approver_id, step, action, notes, signature_url, acted_at)
+     VALUES (?, ?, ?, 'approved', ?, ?, NOW())`,
+    [letter.id, 1, letter.current_step, notes, signatureUrl] // placeholder 1 for approver_id
+  );
 
-    // In a real app, we might save the rejection reason to a remarks table
-    await LettersModel.updateLetterStatus(letter.id, 'rejected', letter.current_step);
-    
-    return { status: 'rejected' };
+  // Update status surat
+  const updateFields =
+    nextStatus === 'completed'
+      ? 'status = ?, completed_at = NOW(), current_step = current_step + 1'
+      : 'status = ?, current_step = current_step + 1';
+
+  await pool.query(`UPDATE letters SET ${updateFields} WHERE id = ?`, [
+    nextStatus,
+    letter.id,
+  ]);
+
+  // Trigger PDF final jika selesai
+  if (nextStatus === 'completed') {
+    await pdfQueue.add('generate-pdf', { letterId: letter.id, type: 'final' });
   }
-}
 
-module.exports = ApprovalsService;
+  return { nextStatus };
+};
+
+const rejectLetter = async (letterUuid, role, notes) => {
+  const [[letter]] = await pool.query('SELECT * FROM letters WHERE uuid = ?', [letterUuid]);
+  if (!letter) throw new Error('Surat tidak ditemukan');
+
+  await pool.query(
+    `INSERT INTO letter_approvals (letter_id, approver_id, step, action, notes, acted_at)
+     VALUES (?, ?, ?, 'rejected', ?, NOW())`,
+    [letter.id, 1, letter.current_step, notes] // placeholder 1 for approver_id
+  );
+
+  const normalizedRole = role === 'admin_rt' ? 'rt' : role === 'admin_rw' ? 'rw' : role;
+
+  await pool.query(
+    `UPDATE letters SET status = 'rejected' WHERE id = ?`,
+    [letter.id]
+  );
+};
+
+module.exports = {
+  approveLetter,
+  rejectLetter,
+};

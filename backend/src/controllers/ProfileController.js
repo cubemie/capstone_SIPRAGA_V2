@@ -1,95 +1,46 @@
-const WargaModel = require('../models/WargaModel');
-const RtRwModel = require('../models/RtRwModel');
-const { sendSuccess, sendError } = require('../utils/response');
+const pool = require('../config/db.js');
+const { successResponse, errorResponse } = require('../utils/response.js');
 
-class ProfileController {
-  /**
-   * GET /api/profile
-   * Ambil profil berdasarkan token JWT (req.user).
-   */
-  static async getProfile(req, res, next) {
-    try {
-      const { id, role } = req.user; // Diset oleh middleware verifyToken
-
-      let userProfile = null;
-
-      if (role === 'warga') {
-        userProfile = await WargaModel.findById(id);
-      } else if (role === 'rt') {
-        userProfile = await RtRwModel.findRtById(id);
-      } else if (role === 'rw') {
-        userProfile = await RtRwModel.findRwById(id);
-      } else if (role === 'superadmin') {
-        userProfile = await RtRwModel.findSuperadminByUsername(req.user.username);
-      }
-
-      if (!userProfile) {
-        return sendError(res, 404, 'Profil tidak ditemukan');
-      }
-
-      // Hapus field sensitif
-      delete userProfile.password;
-
-      sendSuccess(res, userProfile, 'Profil berhasil diambil');
-    } catch (error) {
-      console.error('Error getProfile:', error);
-      next(error);
-    }
+const getProfile = async (req, res) => {
+  try {
+    const { id_warga } = req.user;
+    const [rows] = await pool.query(
+      `SELECT id_warga, NIK, nama, email, no_hp, tempat_lahir, tanggal_lahir,
+              jenis_kelamin, alamat, rt, rw, kelurahan_desa, kecamatan,
+              agama, status_perkawinan, pekerjaan, kewarganegaraan, foto_ktp
+       FROM warga WHERE id_warga = ?`,
+      [id_warga]
+    );
+    if (!rows.length) return errorResponse(res, 404, 'Profil tidak ditemukan');
+    return successResponse(res, 200, 'Profil berhasil diambil', rows[0]);
+  } catch (err) {
+    return errorResponse(res, 500, 'Gagal mengambil profil', err.message);
   }
+};
 
-  /**
-   * PUT /api/profile
-   * Update profil berdasarkan role (mendukung upload avatar_url jika ada middleware multer).
-   */
-  static async updateProfile(req, res, next) {
-    try {
-      const { id, role } = req.user;
-      
-      // Data yang mau diupdate
-      const updateData = { ...req.body };
-      
-      // Jika ada file avatar diupload
-      if (req.file) {
-        // Asumsi disimpan di folder uploads/avatar/ 
-        // dan bisa diakses via /uploads/...
-        updateData.avatar_url = `/uploads/${req.file.filename}`;
-      }
+const updateProfile = async (req, res) => {
+  try {
+    const { id_warga } = req.user;
+    const { nama, email, no_hp, alamat, NIK } = req.body;
 
-      if (role === 'warga') {
-        // Ambil data lama agar tidak null
-        const oldData = await WargaModel.findById(id);
-        if (!oldData) return sendError(res, 404, 'Profil warga tidak ditemukan');
-        
-        await WargaModel.update(id, {
-          ...oldData,
-          ...updateData
-        });
-      } else if (role === 'rt') {
-        const oldData = await RtRwModel.findRtById(id);
-        if (!oldData) return sendError(res, 404, 'Profil RT tidak ditemukan');
-        
-        await RtRwModel.updateRt(id, {
-          ...oldData,
-          ...updateData
-        });
-      } else if (role === 'rw') {
-        const oldData = await RtRwModel.findRwById(id);
-        if (!oldData) return sendError(res, 404, 'Profil RW tidak ditemukan');
-        
-        await RtRwModel.updateRw(id, {
-          ...oldData,
-          ...updateData
-        });
-      } else {
-        return sendError(res, 403, 'Role ini tidak diizinkan mengubah profil di endpoint ini');
-      }
-
-      sendSuccess(res, null, 'Profil berhasil diperbarui');
-    } catch (error) {
-      console.error('Error updateProfile:', error);
-      next(error);
+    // Validasi NIK 16 digit
+    if (NIK && !/^\d{16}$/.test(NIK)) {
+      return errorResponse(res, 400, 'NIK harus 16 digit angka');
     }
-  }
-}
 
-module.exports = ProfileController;
+    await pool.query(
+      `UPDATE warga SET nama=?, email=?, no_hp=?, alamat=?, NIK=?
+       WHERE id_warga=?`,
+      [nama, email, no_hp, alamat, NIK, id_warga]
+    );
+
+    return successResponse(res, 200, 'Profil berhasil diperbarui');
+  } catch (err) {
+    return errorResponse(res, 500, 'Gagal memperbarui profil', err.message);
+  }
+};
+
+module.exports = {
+  getProfile,
+  updateProfile,
+};

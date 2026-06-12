@@ -1,54 +1,47 @@
-# ============================================================
-# docker-compose.yml — Production-like
-# Penggunaan:
-#   docker compose up --build -d
-#   docker compose down
-#   docker compose down -v   ← reset database (hapus volume)
-# ============================================================
-
+version: '3.8'
 services:
   db:
     image: mysql:8.0
-    container_name: coretax_db
-    restart: unless-stopped
-    env_file: ./backend/.env
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-    ports:
-      - "3307:3306"
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: capstone
     volumes:
-      - db_data:/var/lib/mysql
-      # init.sql dijalankan SEKALI saat volume pertama kali dibuat
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
       retries: 10
-      start_period: 40s
 
   redis:
-    image: redis:alpine
-    container_name: coretax_redis
-    restart: unless-stopped
+    image: redis:7-alpine
+    restart: always
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
 
   backend:
     build: ./backend
-    container_name: coretax_backend
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
+    restart: always
     env_file: ./backend/.env
     environment:
-      - REDIS_URL=redis://redis:6379
+      DB_HOST: db
+      REDIS_HOST: redis
+      DB_NAME: capstone
+      DB_USER: root
+      DB_PASSWORD: root
+    ports:
+      - "3000:3000"
     depends_on:
       db:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
 
 volumes:
-  db_data:
+  mysql_data:

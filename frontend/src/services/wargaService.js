@@ -30,3 +30,13 @@ export const wargaService = {
   lengkapiData: (formData) =>
     api.putFormData('/warga/lengkapi-data', formData),
 };
+
+export const getProfile = async () => {
+  const res = await api.get('/warga/profile');
+  return res.data;
+};
+
+export const updateProfile = async (data) => {
+  const res = await api.put('/warga/profile', data);
+  return res.data;
+};

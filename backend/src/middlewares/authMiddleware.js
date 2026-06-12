@@ -74,6 +74,7 @@ exports.verifyToken = (req, res, next) => {
   const result = extractAndVerifyToken(req, res);
   if (!result) return; // response sudah dikirim di dalam helper
   req.user = result.decoded;
+  req.tenantId = result.decoded.rw_id || result.decoded.id;
   req.token = result.token; // simpan raw token untuk keperluan logout
   next();
 };
