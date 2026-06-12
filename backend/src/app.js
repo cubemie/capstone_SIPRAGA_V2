@@ -20,6 +20,7 @@ const dashboardRtRwRoutes = require('./routes/dashboardRtRwRoutes');
 const superadminRoutes    = require('./routes/superAdminRoutes');
 const templateSuratRoutes = require('./routes/templateSuratRoutes');
 const ttdRtRwRoutes       = require('./routes/ttdRtRwRoutes');
+const notificationRoutes  = require('./routes/notificationRoutes');
 
 // ─── Middleware Global ────────────────────────────────────────────────────────
 
@@ -58,6 +59,8 @@ app.use('/api/template-surat', templateSuratRoutes);
 // V2 Route
 app.use('/api/v2/letters', lettersRoutes);
 app.use('/api/v2/public', publicRoutes);
+
+app.use('/api/notifications', notificationRoutes);
 
 
 // ─── Swagger Documentation ────────────────────────────────────────────────────

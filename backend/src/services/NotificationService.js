@@ -164,6 +164,24 @@ class NotificationService {
       no_hp ? NotificationService.kirimWA({ no_hp, event, data }) : Promise.resolve(),
     ]);
   }
+
+  /**
+   * Buat notifikasi in-app untuk badge
+   */
+  static async createInAppNotification({
+    recipientId, recipientRole, type, title, message, link, letterUuid = null,
+  }) {
+    try {
+      const pool = require('../config/db');
+      await pool.query(
+        `INSERT INTO notifications (recipient_id, recipient_role, type, title, message, link, letter_uuid)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [recipientId, recipientRole, type, title, message, link, letterUuid]
+      );
+    } catch (err) {
+      console.error('[Notif] Gagal buat in-app notif:', err.message);
+    }
+  }
 }
 
 module.exports = NotificationService;

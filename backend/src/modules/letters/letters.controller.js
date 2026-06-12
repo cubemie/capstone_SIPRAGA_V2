@@ -155,7 +155,8 @@ class LettersController {
     try {
       const { uuid } = req.params;
       const role = req.user?.role || 'admin_rt'; // Fallback for dev
-      const result = await ApprovalsService.approveLetter(uuid, role);
+      const approverId = req.user?.id || 1; // Fallback for dev
+      const result = await ApprovalsService.approveLetter(uuid, role, null, null, approverId);
       res.json({ success: true, data: result, message: "Surat berhasil disetujui" });
     } catch (error) {
       console.error("Error approveLetter:", error);
@@ -167,9 +168,11 @@ class LettersController {
     try {
       const { uuid } = req.params;
       const role = req.user?.role || 'admin_rt'; // Fallback for dev
+      const approverId = req.user?.id || 1; // Fallback for dev
       const { reason } = req.body;
-      const result = await ApprovalsService.rejectLetter(uuid, role, reason);
-      res.json({ success: true, data: result, message: "Surat berhasil ditolak" });
+      
+      await ApprovalsService.rejectLetter(uuid, role, reason, approverId);
+      res.json({ success: true, message: "Surat berhasil ditolak" });
     } catch (error) {
       console.error("Error rejectLetter:", error);
       res.status(400).json({ success: false, message: error.message || "Gagal menolak surat" });

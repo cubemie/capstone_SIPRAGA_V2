@@ -13,7 +13,7 @@ const STATUS_TRANSITIONS = {
   },
 };
 
-const approveLetter = async (letterId, role, notes = null, signatureUrl = null) => {
+const approveLetter = async (letterId, role, notes = null, signatureUrl = null, approverId) => {
   // if letterId is uuid, we need to convert to ID first, or adjust query.
   // wait, the controller passed `uuid` to `ApprovalsService.approveLetter(uuid, role)`.
   const [[letter]] = await pool.query(
@@ -40,23 +40,35 @@ const approveLetter = async (letterId, role, notes = null, signatureUrl = null) 
 
   const nextStatus = transition.to;
 
-  // Insert approval history (using letter.id)
-  await pool.query(
-    `INSERT INTO letter_approvals (letter_id, approver_id, step, action, notes, signature_url, acted_at)
-     VALUES (?, ?, ?, 'approved', ?, ?, NOW())`,
-    [letter.id, 1, letter.current_step, notes, signatureUrl] // placeholder 1 for approver_id
-  );
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
 
-  // Update status surat
-  const updateFields =
-    nextStatus === 'completed'
-      ? 'status = ?, completed_at = NOW(), current_step = current_step + 1'
-      : 'status = ?, current_step = current_step + 1';
+    // Insert approval history (using letter.id)
+    await conn.query(
+      `INSERT INTO letter_approvals (letter_id, approver_id, step, action, notes, signature_url, acted_at)
+       VALUES (?, ?, ?, 'approved', ?, ?, NOW())`,
+      [letter.id, approverId, letter.current_step, notes, signatureUrl]
+    );
 
-  await pool.query(`UPDATE letters SET ${updateFields} WHERE id = ?`, [
-    nextStatus,
-    letter.id,
-  ]);
+    // Update status surat
+    const updateFields =
+      nextStatus === 'completed'
+        ? 'status = ?, completed_at = NOW(), current_step = current_step + 1'
+        : 'status = ?, current_step = current_step + 1';
+
+    await conn.query(`UPDATE letters SET ${updateFields} WHERE id = ?`, [
+      nextStatus,
+      letter.id,
+    ]);
+
+    await conn.commit();
+  } catch (error) {
+    await conn.rollback();
+    throw error;
+  } finally {
+    conn.release();
+  }
 
   // Trigger PDF final jika selesai
   if (nextStatus === 'completed') {
@@ -66,22 +78,34 @@ const approveLetter = async (letterId, role, notes = null, signatureUrl = null) 
   return { nextStatus };
 };
 
-const rejectLetter = async (letterUuid, role, notes) => {
+const rejectLetter = async (letterUuid, role, notes, approverId) => {
   const [[letter]] = await pool.query('SELECT * FROM letters WHERE uuid = ?', [letterUuid]);
   if (!letter) throw new Error('Surat tidak ditemukan');
 
-  await pool.query(
-    `INSERT INTO letter_approvals (letter_id, approver_id, step, action, notes, acted_at)
-     VALUES (?, ?, ?, 'rejected', ?, NOW())`,
-    [letter.id, 1, letter.current_step, notes] // placeholder 1 for approver_id
-  );
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
 
-  const normalizedRole = role === 'admin_rt' ? 'rt' : role === 'admin_rw' ? 'rw' : role;
+    await conn.query(
+      `INSERT INTO letter_approvals (letter_id, approver_id, step, action, notes, acted_at)
+       VALUES (?, ?, ?, 'rejected', ?, NOW())`,
+      [letter.id, approverId, letter.current_step, notes]
+    );
 
-  await pool.query(
-    `UPDATE letters SET status = 'rejected' WHERE id = ?`,
-    [letter.id]
-  );
+    const normalizedRole = role === 'admin_rt' ? 'rt' : role === 'admin_rw' ? 'rw' : role;
+
+    await conn.query(
+      `UPDATE letters SET status = 'rejected' WHERE id = ?`,
+      [letter.id]
+    );
+
+    await conn.commit();
+  } catch (error) {
+    await conn.rollback();
+    throw error;
+  } finally {
+    conn.release();
+  }
 };
 
 module.exports = {

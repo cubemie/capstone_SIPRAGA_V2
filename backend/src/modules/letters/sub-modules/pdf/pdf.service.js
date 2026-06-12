@@ -1,4 +1,3 @@
-const puppeteer = require('puppeteer');
 const mustache = require('mustache');
 const QRCode = require('qrcode');
 const LettersModel = require('../../letters.model');
@@ -22,6 +21,7 @@ class PdfService {
    * Generate PDF buffer from HTML string
    */
   static async generatePdfBuffer(htmlContent) {
+    const puppeteer = require('puppeteer');
     const browser = await puppeteer.launch({
       headless: "new",
       args: ['--no-sandbox', '--disable-setuid-sandbox']

@@ -6,6 +6,7 @@ import {
   User, Send, FileText, CheckSquare, Award, History,
   LayoutDashboard, LogOut, Bell, Menu, X, UserCircle,
 } from 'lucide-react';
+import NotificationBell from '../NotificationBell';
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
@@ -47,8 +48,11 @@ export default function DashboardLayout() {
     sidebarActive = 'bg-slate-800';
   } else if (user?.role === 'superadmin') {
     menuItems = [
-      { path: '/superadmin/dashboard', label: 'Dashboard',       icon: LayoutDashboard },
-      { path: '/superadmin/template',  label: 'Kelola Template', icon: FileText },
+      { path: '/superadmin/dashboard',   label: 'Dashboard',           icon: LayoutDashboard },
+      { path: '/superadmin/akun',        label: 'Manajemen Akun',      icon: User },
+      { path: '/superadmin/template-md', label: 'Template Markdown',   icon: FileText },
+      { path: '/superadmin/config',      label: 'Konfigurasi Instansi',icon: CheckSquare },
+      { path: '/superadmin/log',         label: 'Log Sistem',          icon: History },
     ];
     sidebarBg     = 'bg-slate-950';
     sidebarHover  = 'hover:bg-slate-900';
@@ -141,9 +145,7 @@ export default function DashboardLayout() {
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            <button className="p-2 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full transition">
-              <Bell className="w-4.5 h-4.5" />
-            </button>
+            <NotificationBell />
             <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm ${
               user?.role === 'warga' ? 'bg-blue-100 text-blue-900' : 'bg-slate-800 text-white'
             }`}>

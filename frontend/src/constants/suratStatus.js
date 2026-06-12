@@ -32,4 +32,8 @@ export const LETTER_STATUS_V2 = {
   rejected: { label: 'Ditolak', color: 'bg-red-100 text-red-700' },
   completed: { label: 'Selesai', color: 'bg-green-100 text-green-700' },
   cancelled: { label: 'Dibatalkan', color: 'bg-gray-200 text-gray-500' },
+};
+
+export const getStatusV2 = (statusKey) => {
+  return LETTER_STATUS_V2[statusKey] || { label: statusKey || 'Unknown', color: 'bg-gray-100 text-gray-600' };
 };
