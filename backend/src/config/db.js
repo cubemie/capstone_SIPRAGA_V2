@@ -1,32 +1,25 @@
-/**
- * db.js — MySQL Connection Pool
- *
- * Mendukung dua mode konfigurasi:
- * - Development (lokal): gunakan DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
- * - Production (Railway): gunakan MYSQLHOST, MYSQLUSER, MYSQLPASSWORD, MYSQLDATABASE, MYSQLPORT
- *   yang di-inject otomatis oleh Railway MySQL plugin.
- *
- * SSL diaktifkan otomatis jika koneksi ke host eksternal (bukan localhost).
- */
-
 const mysql = require('mysql2/promise');
+require('dotenv').config(); // Pastikan dotenv dipanggil
 
 const db = mysql.createPool({
-  host:     process.env.MYSQLHOST     || process.env.DB_HOST     || 'localhost',
-  user:     process.env.MYSQLUSER     || process.env.DB_USER     || 'root',
-  password: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || '',
-  database: process.env.MYSQLDATABASE || process.env.DB_NAME     || 'capstone',
-  port:     parseInt(process.env.MYSQLPORT, 10) || 3306,
+  // Paksa pakai variabel DB_... dari .env kamu
+  host:     process.env.DB_HOST     || '127.0.0.1',
+  user:     process.env.DB_USER     || 'root',
+  password: process.env.DB_PASSWORD || 'root',
+  database: process.env.DB_NAME     || 'capstone',
+  port:     parseInt(process.env.DB_PORT, 10) || 3306,
 
-  connectionLimit:    parseInt(process.env.DB_POOL_LIMIT, 10) || 10,
-  connectTimeout:     parseInt(process.env.DB_CONNECT_TIMEOUT, 10) || 10000,
+  connectionLimit:    10,
+  connectTimeout:     10000,
   waitForConnections: true,
   queueLimit:         0,
-
-  // Aktifkan SSL untuk koneksi Railway (host eksternal)
-  ssl: (process.env.MYSQLHOST && process.env.MYSQLHOST !== 'localhost')
-    ? { rejectUnauthorized: false }
-    : undefined,
 });
+
+// Debugging: Munculkan log di terminal saat backend jalan
+console.log("=== DB CONNECTION INFO ===");
+console.log("Connecting to:", process.env.DB_HOST || '127.0.0.1');
+console.log("User:", process.env.DB_USER || 'root');
+console.log("Password yang dipakai:", process.env.DB_PASSWORD || 'root');
+console.log("==========================");
 
 module.exports = db;
