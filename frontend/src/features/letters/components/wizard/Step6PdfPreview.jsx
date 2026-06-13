@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 import { api } from '../../../../utils/api';
 
 // Setup worker react-pdf
@@ -15,9 +16,20 @@ const fetchPreviewPdf = async (uuid) => {
 export default function Step6PdfPreview({ draftUuid }) {
   const [numPages, setNumPages] = useState(null);
 
-  const { data: pdfUrl, isLoading, isError } = useQuery({
+  const { data: pdfUrl, isLoading, isError, error } = useQuery({
     queryKey: ['pdf-preview', draftUuid],
-    queryFn: () => fetchPreviewPdf(draftUuid),
+    queryFn: async () => {
+      try {
+        console.log('Fetching PDF for draft:', draftUuid);
+        const res = await api.get(`/v2/letters/${draftUuid}/preview-pdf`);
+        if (res.error) throw new Error(res.error);
+        console.log('PDF URL received:', res.data?.data?.pdf_url ? 'Yes' : 'No');
+        return res.data?.data?.pdf_url;
+      } catch (err) {
+        console.error('PDF Fetch Error:', err);
+        throw err;
+      }
+    },
     enabled: !!draftUuid,
     staleTime: 1000 * 60 * 5, // cache 5 menit
   });
@@ -46,13 +58,20 @@ export default function Step6PdfPreview({ draftUuid }) {
         )}
 
         {isError && (
-          <p className="text-red-500 text-sm">Gagal memuat PDF preview.</p>
+          <div className="text-red-500 text-sm text-center p-4">
+            <p className="font-bold">Gagal memuat PDF preview.</p>
+            <p>{error?.message || String(error)}</p>
+          </div>
         )}
 
         {pdfUrl && (
           <Document
             file={pdfUrl}
             onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+            onLoadError={(err) => {
+              console.error('React-PDF load error:', err);
+              alert('Error loading PDF: ' + err.message);
+            }}
             className="flex flex-col items-center gap-2"
           >
             {Array.from({ length: numPages || 1 }, (_, i) => (

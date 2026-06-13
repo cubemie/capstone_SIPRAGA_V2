@@ -70,11 +70,6 @@ const approveLetter = async (letterId, role, notes = null, signatureUrl = null, 
     conn.release();
   }
 
-  // Trigger PDF final jika selesai
-  if (nextStatus === 'completed') {
-    await pdfQueue.add('generate-pdf', { letterId: letter.id, type: 'final' });
-  }
-
   return { nextStatus };
 };
 

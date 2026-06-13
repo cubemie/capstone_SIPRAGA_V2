@@ -94,16 +94,24 @@ class LettersService {
     if (letter.status !== 'draft') throw new Error("Only draft letters can be submitted");
 
     // Get workflow step 1
-    const steps = typeof letter.workflow_steps === 'string' ? JSON.parse(letter.workflow_steps) : letter.workflow_steps;
-    const firstStep = steps.find(s => s.step === 1);
+    let steps = [];
+    try {
+      steps = typeof letter.workflow_steps === 'string' ? JSON.parse(letter.workflow_steps) : letter.workflow_steps;
+    } catch (e) {
+      console.error("Failed to parse workflow_steps:", e);
+    }
+    const firstStep = steps?.find?.(s => s.step == 1);
     
-    if (!firstStep) throw new Error("Invalid workflow configuration");
+    if (!firstStep) {
+      console.error("Invalid workflow configuration. steps:", steps, "letter.workflow_steps:", letter.workflow_steps);
+      throw new Error("Invalid workflow configuration");
+    }
 
     // Determine status based on first step role
     let newStatus = 'submitted';
-    if (firstStep.role === 'admin_rt') {
+    if (firstStep.role === 'admin_rt' || firstStep.role === 'rt') {
       newStatus = 'in_review_rt';
-    } else if (firstStep.role === 'admin_rw') {
+    } else if (firstStep.role === 'admin_rw' || firstStep.role === 'rw') {
       newStatus = 'in_review_rw';
     }
 

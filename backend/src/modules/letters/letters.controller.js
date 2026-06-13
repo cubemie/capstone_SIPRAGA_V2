@@ -1,9 +1,8 @@
 const LettersService = require('./letters.service');
+const LettersModel = require('./letters.model');
 const ApprovalsService = require('./sub-modules/approvals/approvals.service');
 const pool = require('../../config/db');
 const PdfService = require('./sub-modules/pdf/pdf.service');
-
-
 class LettersController {
   
   static async getLetterTypes(req, res) {
@@ -39,13 +38,22 @@ class LettersController {
 
   static async createDraft(req, res) {
     try {
-      // In a real app, tenant_id and resident_id comes from req.user (auth token)
-      // For now, assuming they are sent in body or mocked
+      console.log('--- createDraft triggered ---');
+      console.log('req.user:', req.user);
+      console.log('req.body:', req.body);
+      
       const { letter_type_id, workflow_option_id, subject, purpose, fields } = req.body;
       
+      // The token payload might have `id` instead of `id_warga` depending on the auth implementation
+      const residentId = req.user?.id_warga || req.user?.id || req.user?.id_user;
+      
+      if (!residentId) {
+        throw new Error('Resident ID tidak ditemukan di dalam token JWT');
+      }
+
       const payload = {
-        tenant_id: req.tenantId,
-        resident_id: req.user.id_warga,
+        tenant_id: req.tenantId || req.user?.rw_id || 1, // Fallback safe
+        resident_id: residentId,
         letter_type_id,
         workflow_option_id,
         subject,
@@ -53,11 +61,13 @@ class LettersController {
         fields
       };
 
+      console.log('Draft Payload:', payload);
+
       const uuid = await LettersService.createDraft(payload);
       res.status(201).json({ success: true, data: { uuid }, message: "Draft berhasil disimpan" });
     } catch (error) {
       console.error("Error createDraft:", error);
-      res.status(500).json({ success: false, message: "Gagal menyimpan draft" });
+      res.status(500).json({ success: false, message: "Gagal menyimpan draft", error: error.message });
     }
   }
 
@@ -151,6 +161,38 @@ class LettersController {
     }
   }
 
+  static async uploadPdfClient(req, res) {
+    try {
+      const { uuid } = req.params;
+      const pdfBuffer = req.file?.buffer;
+      const type = req.body.type || 'final'; // Dapatkan type dari form data
+      
+      if (!pdfBuffer) {
+        return res.status(400).json({ success: false, message: 'File PDF tidak ditemukan' });
+      }
+
+      const [letters] = await pool.query('SELECT id FROM letters WHERE uuid = ?', [uuid]);
+      if (!letters.length) {
+        return res.status(400).json({ success: false, message: 'Surat tidak ditemukan' });
+      }
+
+      const letterId = letters[0].id;
+      const fileUrl = `data:application/pdf;base64,${pdfBuffer.toString('base64')}`;
+
+      // Hapus tipe yang sama jika sudah ada (opsional) atau insert saja (nanti order by generated_at desc ambil limit 1)
+      await pool.query(
+        `INSERT INTO letter_pdf_versions (letter_id, version, type, file_url, generated_at)
+         VALUES (?, 1, ?, ?, NOW())`,
+        [letterId, type, fileUrl]
+      );
+
+      res.json({ success: true, message: 'PDF berhasil diunggah' });
+    } catch (error) {
+      console.error('Error uploadPdfClient:', error);
+      res.status(500).json({ success: false, message: 'Gagal mengunggah PDF', error: error.message });
+    }
+  }
+
   static async approveLetter(req, res) {
     try {
       const { uuid } = req.params;
@@ -178,6 +220,57 @@ class LettersController {
       res.status(400).json({ success: false, message: error.message || "Gagal menolak surat" });
     }
   }
+  static async uploadAttachments(req, res) {
+    try {
+      const { uuid } = req.params;
+      const files = req.files;
+
+      if (!files || files.length === 0) {
+        return res.status(400).json({ success: false, message: "Tidak ada file yang diunggah" });
+      }
+
+      const letter = await LettersModel.getLetterByUuid(uuid);
+      if (!letter) {
+        return res.status(404).json({ success: false, message: "Surat tidak ditemukan" });
+      }
+
+      const supabase = require('../../config/supabase');
+      const supabaseBucket = process.env.SUPABASE_BUCKET || 'sipraga-storage';
+
+      const uploadPromises = files.map(async (file) => {
+        const fileExt = file.originalname.split('.').pop();
+        const fileName = `attachments/${uuid}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+        const { data, error } = await supabase.storage
+          .from(supabaseBucket)
+          .upload(fileName, file.buffer, {
+            contentType: file.mimetype,
+            upsert: true
+          });
+
+        if (error) throw error;
+
+        const { data: publicUrlData } = supabase.storage
+          .from(supabaseBucket)
+          .getPublicUrl(fileName);
+
+        await LettersModel.insertAttachment(letter.id, publicUrlData.publicUrl);
+        return publicUrlData.publicUrl;
+      });
+
+      const urls = await Promise.all(uploadPromises);
+
+      res.json({
+        success: true,
+        message: "Lampiran berhasil diunggah",
+        urls
+      });
+    } catch (error) {
+      console.error("Error uploadAttachments:", error);
+      res.status(500).json({ success: false, message: "Gagal mengunggah lampiran" });
+    }
+  }
+
   static async verifyByQrToken(req, res) {
     try {
       const { qrToken } = req.params;

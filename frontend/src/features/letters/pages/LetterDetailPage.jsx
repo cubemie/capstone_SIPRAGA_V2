@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { toast } from 'sonner';
+import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
+import LetterPdfTemplate from '../components/pdf/LetterPdfTemplate';
 
 const fetchLetterDetail = async (uuid) => {
   const res = await api.get(`/v2/letters/${uuid}`);
@@ -18,22 +20,22 @@ const STATUS_ORDER = [
 ];
 
 function SignatureStatusCard({ letter }) {
-  const pdfVersions = letter?.pdf_versions || [];
-  const previewPdf  = pdfVersions.find(p => p.type === 'preview');
-  const signedRtPdf = pdfVersions.find(p => p.type === 'signed_rt');
-  const signedRwPdf = pdfVersions.find(p => p.type === 'signed_rw');
-  const finalPdf    = pdfVersions.find(p => p.type === 'final');
-
   const workflowCode = letter?.workflow_code || 'RT_ONLY';
+  
+  // Find signatures in approvals history
+  const rtApproval = letter?.approvals?.find(a => a.step === 1 && a.action === 'approved');
+  const rwApproval = letter?.approvals?.find(a => a.step === 2 && a.action === 'approved');
+
+  const isFinal = letter?.status === 'completed';
 
   // Tentukan tahap TTD berdasarkan workflow
   const ttdSteps = workflowCode === 'RT_ONLY'
     ? [
-        { label: 'Tanda Tangan Ketua RT', done: !!signedRtPdf || !!finalPdf, pdf: signedRtPdf || finalPdf },
+        { label: 'Tanda Tangan Ketua RT', done: !!rtApproval, name: rtApproval?.approver_name },
       ]
     : [
-        { label: 'Tanda Tangan Ketua RT', done: !!signedRtPdf || !!finalPdf, pdf: signedRtPdf },
-        { label: 'Tanda Tangan Ketua RW', done: !!finalPdf, pdf: finalPdf },
+        { label: 'Tanda Tangan Ketua RT', done: !!rtApproval, name: rtApproval?.approver_name },
+        { label: 'Tanda Tangan Ketua RW', done: !!rwApproval, name: rwApproval?.approver_name },
       ];
 
   return (
@@ -55,42 +57,13 @@ function SignatureStatusCard({ letter }) {
               <div>
                 <p className="text-sm font-medium text-ink">{step.label}</p>
                 <p className={`text-xs ${step.done ? 'text-emerald-600' : 'text-ink-muted'}`}>
-                  {step.done ? 'Sudah ditandatangani' : 'Menunggu tanda tangan'}
+                  {step.done ? `Ditandatangani oleh ${step.name}` : 'Menunggu tanda tangan'}
                 </p>
               </div>
             </div>
-            {step.done && step.pdf && (
-              <a
-                href={step.pdf.file_url}
-                download={`surat-ttd-${i + 1}.pdf`}
-                className="flex items-center gap-1.5 text-xs font-medium text-brand-600 bg-brand-50 px-3 py-1.5 rounded-lg hover:bg-brand-100 transition"
-              >
-                ⬇ Download
-              </a>
-            )}
           </div>
         ))}
       </div>
-
-      {/* Download surat final */}
-      {finalPdf && (
-        <div className="mt-4 pt-3 border-t border-surface-border">
-          <a
-            href={finalPdf.file_url}
-            download="surat-final-resmi.pdf"
-            className="flex items-center justify-center gap-2 w-full py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition"
-          >
-            ⬇ Download Surat Resmi Final
-          </a>
-          {finalPdf.generated_at && (
-            <p className="text-xs text-ink-muted text-center mt-1.5">
-              Dibuat: {new Date(finalPdf.generated_at).toLocaleDateString('id-ID', {
-                day: 'numeric', month: 'long', year: 'numeric',
-              })}
-            </p>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -286,8 +259,42 @@ export default function LetterDetailPage() {
     color: 'bg-gray-100 text-gray-600',
   };
 
-  const finalPdf = letter.pdf_versions?.find((p) => p.type === 'final');
   const currentStatusIndex = STATUS_ORDER.indexOf(letter.status);
+
+  // Extract signatures from approval history
+  const signatures = letter.approvals
+    ?.filter((a) => a.action === 'approved' && a.signature_url)
+    .map((a) => ({
+      role: a.step === 1 ? 'Ketua RT' : 'Ketua RW',
+      name: a.approver_name,
+      url: a.signature_url,
+    })) || [];
+
+  const isFinal = letter.status === 'completed';
+  const pdfTitle = isFinal ? 'Dokumen Final Resmi' : 'Preview Dokumen';
+
+  // Parse field_values mapping for LetterPdfTemplate
+  const fieldMapping = {};
+  if (letter.field_values) {
+    letter.field_values.forEach(fv => {
+      fieldMapping[fv.field_key] = fv.value;
+    });
+  }
+
+  const previewData = {
+    letter_type_name: letter.letter_type_name || 'Surat Pengantar',
+    letter_number: letter.letter_number || '___/RT.___/RW.___/2026',
+    resident_name: letter.resident_name || 'Nama Lengkap Pemohon',
+    resident_nik: letter.resident_nik || '3374xxxxxxxxxxxx',
+    purpose: letter.purpose || 'Keperluan Surat',
+    dynamic_fields: fieldMapping,
+    signatures: signatures,
+    attachments: letter.attachments || [],
+    approver_name: 'Ketua RT / RW',
+    created_date: new Date(letter.created_at).toLocaleDateString('id-ID', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    }),
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
@@ -402,6 +409,30 @@ export default function LetterDetailPage() {
       <TtdApprovalPanel uuid={uuid} status={letter?.status} userTtdUrl={myTtd} />
 
       <SignatureStatusCard letter={letter} />
+
+      {/* PDF View */}
+      <div className="bg-white border rounded-lg p-4 mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-medium text-gray-600">{pdfTitle}</p>
+          <PDFDownloadLink
+            document={<LetterPdfTemplate data={previewData} />}
+            fileName={`Surat-${letter.letter_type_name.replace(/\s+/g, '-')}-${uuid.substring(0, 8)}.pdf`}
+            className={`text-xs font-medium px-3 py-1.5 rounded-lg transition ${
+              isFinal 
+                ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                : 'bg-brand-50 text-brand-600 hover:bg-brand-100'
+            }`}
+          >
+            {({ loading }) => (loading ? 'Memuat PDF...' : '⬇ Download PDF')}
+          </PDFDownloadLink>
+        </div>
+        
+        <div className="border rounded-lg bg-gray-50 min-h-[600px] flex items-center justify-center overflow-hidden">
+          <PDFViewer width="100%" height="600px" showToolbar={false} style={{ border: 'none' }}>
+            <LetterPdfTemplate data={previewData} />
+          </PDFViewer>
+        </div>
+      </div>
     </div>
   );
 }

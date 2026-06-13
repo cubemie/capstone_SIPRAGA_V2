@@ -25,8 +25,10 @@ const notificationRoutes  = require('./routes/notificationRoutes');
 // ─── Middleware Global ────────────────────────────────────────────────────────
 
 // HTTP request logger — tampilkan log setiap request di terminal
-// dev mode: warna + method + URL + status + response time
-// production: combined format (IP + user-agent, cocok untuk log file)
+app.use((req, res, next) => {
+  console.log(`[GLOBAL LOG] ${req.method} ${req.url}`);
+  next();
+});
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 app.use(cors({

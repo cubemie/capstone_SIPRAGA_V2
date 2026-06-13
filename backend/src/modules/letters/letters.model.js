@@ -109,11 +109,21 @@ const LettersModel = {
       [letter.id]
     );
 
+    // Attachments
+    const [attachments] = await db.query(
+      `SELECT file_url, created_at
+       FROM letter_attachments
+       WHERE letter_id = ?
+       ORDER BY created_at ASC`,
+      [letter.id]
+    );
+
     return {
       ...letter,
       field_values: fieldValues,
       approvals,
       pdf_versions: pdfVersions,
+      attachments,
     };
   },
 
@@ -191,6 +201,14 @@ const LettersModel = {
 
     const [result] = await db.query(query, params);
     return result.affectedRows > 0;
+  },
+
+  async insertAttachment(letterId, fileUrl) {
+    const [result] = await db.query(
+      `INSERT INTO letter_attachments (letter_id, file_url) VALUES (?, ?)`,
+      [letterId, fileUrl]
+    );
+    return result.insertId;
   },
 
   // --------------------------------------------------------------------------

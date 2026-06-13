@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { api } from '../../../utils/api';
-
 import { toast } from 'sonner';
 
 export const useLetterWizard = () => {
   // Wizard State
-  const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [draftUuid, setDraftUuid] = useState(null);
   
   // Form Data State
@@ -53,24 +52,11 @@ export const useLetterWizard = () => {
     staleTime: 5 * 60 * 1000
   });
 
-  // 4. Fetch Draft Detail
-  const { data: draftDetail } = useQuery({
-    queryKey: ['letterDetail', draftUuid],
-    queryFn: async () => {
-      if (!draftUuid) return null;
-      const { data, error } = await api.get(`/v2/letters/${draftUuid}`);
-      if (error) throw new Error(error);
-      return data?.data || null;
-    },
-    enabled: !!draftUuid
-  });
-
   // --- Mutations ---
 
-  // Save Draft (Step 1-5 consolidation)
+  // Simpan Draft
   const saveDraftMutation = useMutation({
     mutationFn: async () => {
-      // Format fields to array
       const fieldsArray = Object.keys(fieldValues).map(key => ({
         field_key: key,
         value: fieldValues[key]
@@ -92,11 +78,28 @@ export const useLetterWizard = () => {
       setDraftUuid(data.uuid);
     },
     onError: (error) => {
-      toast.error(error.message || 'Gagal menyimpan draft');
+      toast.error('Gagal menyimpan draft: ' + (error.message || error));
     }
   });
 
-  // Submit Final (Step 7 -> 8)
+  // Upload Attachments
+  const uploadAttachmentsMutation = useMutation({
+    mutationFn: async ({ uuid, files }) => {
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('attachments', file);
+      });
+      
+      const { data, error } = await api.postFormData(`/v2/letters/${uuid}/attachments`, formData);
+      if (error) throw new Error(error);
+      return data;
+    },
+    onError: (error) => {
+      toast.error('Gagal mengunggah lampiran: ' + (error.message || error));
+    }
+  });
+
+  // Submit Final (Merubah status draft menjadi diajukan)
   const submitLetterMutation = useMutation({
     mutationFn: async (uuid) => {
       const { data, error } = await api.post(`/v2/letters/${uuid}/submit`);
@@ -105,41 +108,30 @@ export const useLetterWizard = () => {
     },
     onSuccess: () => {
       toast.success('Surat berhasil diajukan!');
-      setCurrentStep(8); // Go to success step
+      setIsSubmitted(true);
     },
     onError: (error) => {
       toast.error(error.message || 'Gagal mengajukan surat');
     }
   });
 
-  // --- Handlers ---
-  
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 8));
-  const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
-  const goToStep = (step) => setCurrentStep(step);
-
   return {
     // State
-    currentStep,
+    isSubmitted,
     draftUuid,
     selectedType,
     fieldValues,
     letterContent,
     attachments,
     selectedWorkflow,
-    draftDetail,
     
     // Setters
+    setIsSubmitted,
     setSelectedType,
     setFieldValues,
     setLetterContent,
     setAttachments,
     setSelectedWorkflow,
-    
-    // Navigation
-    nextStep,
-    prevStep,
-    goToStep,
     
     // Queries
     letterTypes,
@@ -150,9 +142,11 @@ export const useLetterWizard = () => {
     isLoadingWorkflows,
     
     // Mutations
-    saveDraft: () => saveDraftMutation.mutateAsync(),
+    saveDraftAsync: saveDraftMutation.mutateAsync,
     isSavingDraft: saveDraftMutation.isPending,
-    submitLetter: () => submitLetterMutation.mutateAsync(draftUuid),
-    isSubmitting: submitLetterMutation.isPending
+    uploadAttachmentsAsync: uploadAttachmentsMutation.mutateAsync,
+    isUploadingAttachments: uploadAttachmentsMutation.isPending,
+    submitLetterAsync: submitLetterMutation.mutateAsync,
+    isSubmitting: submitLetterMutation.isPending || saveDraftMutation.isPending || uploadAttachmentsMutation.isPending
   };
 };

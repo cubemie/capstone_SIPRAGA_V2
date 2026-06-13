@@ -8,6 +8,20 @@ FROM node:22-alpine
 # Set working directory
 WORKDIR /app
 
+# Install Chromium for Puppeteer
+RUN apk add --no-cache \
+      chromium \
+      nss \
+      freetype \
+      harfbuzz \
+      ca-certificates \
+      ttf-freefont \
+      nodejs \
+      yarn
+
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
 # Install dependencies lebih dulu (memanfaatkan Docker layer cache)
 # Layer ini TIDAK di-rebuild selama package.json tidak berubah
 COPY package*.json ./
