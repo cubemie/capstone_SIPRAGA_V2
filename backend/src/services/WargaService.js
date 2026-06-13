@@ -87,13 +87,26 @@ class WargaService {
       record = await RtRwModel.findRwById(user.id);
     }
 
-    if (!record || !record.ttd_digital) {
-      return { data: null, error: 'Tanda tangan belum diunggah.' };
+    if (!record) {
+      return { data: null, error: 'Akun RT/RW tidak ditemukan.' };
     }
 
-    // ttd_digital berisi URL Cloudinary penuh (setelah migrasi)
+    if (!record.ttd_digital) {
+      return {
+        data: {
+          ttd_url: null,
+          has_ttd: false,
+        },
+        error: null,
+      };
+    }
+
+    // ttd_digital berisi URL file publik yang disimpan di storage.
     return {
-      data: { ttd_url: record.ttd_digital },
+      data: {
+        ttd_url: record.ttd_digital,
+        has_ttd: true,
+      },
       error: null,
     };
   }
@@ -112,12 +125,12 @@ class WargaService {
       return { data: null, error: 'Role tidak valid.' };
     }
 
-    // file.path berisi URL Cloudinary penuh (e.g. https://res.cloudinary.com/...)
-    const cloudinaryUrl = file.path;
+    // file.path berisi URL file publik hasil upload storage.
+    const storageUrl = file.path;
 
     const updated = user.role === 'rt'
-      ? await RtRwModel.updateTtdRt(user.id, cloudinaryUrl)
-      : await RtRwModel.updateTtdRw(user.id, cloudinaryUrl);
+      ? await RtRwModel.updateTtdRt(user.id, storageUrl)
+      : await RtRwModel.updateTtdRw(user.id, storageUrl);
 
     if (!updated) {
       return { data: null, error: 'Akun RT/RW tidak ditemukan sehingga TTD gagal disimpan.' };
@@ -126,7 +139,7 @@ class WargaService {
     return {
       data: {
         message: 'Tanda tangan berhasil disimpan.',
-        ttd_url: cloudinaryUrl,
+        ttd_url: storageUrl,
       },
       error: null,
     };

@@ -92,13 +92,25 @@ function makeExtFilter(allowedExts, label) {
 }
 
 /**
- * File filter berdasarkan MIME type.
- * @param {string[]} allowedMimes - Array MIME type yang diizinkan
- * @param {string}   label        - Label untuk pesan error
+ * File filter gambar yang toleran terhadap variasi metadata browser.
+ * Beberapa hasil export dari canvas/signature pad tetap berformat PNG/JPG,
+ * tetapi bisa terkirim dengan mimetype generik. Karena itu, kita cek MIME
+ * dan ekstensi filename sekaligus.
+ * @param {string[]} allowedMimes
+ * @param {string[]} allowedExts
+ * @param {string}   label
  */
-function makeMimeFilter(allowedMimes, label) {
+function makeImageFilter(allowedMimes, allowedExts, label) {
   return (req, file, cb) => {
-    if (allowedMimes.includes(file.mimetype)) {
+    const originalName = String(file.originalname || '');
+    const ext = originalName.includes('.')
+      ? originalName.split('.').pop().toLowerCase()
+      : '';
+
+    const mimeAllowed = allowedMimes.includes(file.mimetype);
+    const extAllowed = allowedExts.includes(ext);
+
+    if (mimeAllowed || extAllowed) {
       cb(null, true);
     } else {
       cb(new Error(`Format file tidak valid. Hanya ${label} yang diizinkan.`));
@@ -109,7 +121,11 @@ function makeMimeFilter(allowedMimes, label) {
 // ─── Filters ──────────────────────────────────────────────────────────────────
 
 const docFilter   = makeExtFilter(['pdf', 'docx'], 'PDF atau DOCX');
-const imageFilter = makeMimeFilter(['image/jpeg', 'image/png', 'image/jpg'], 'JPG atau PNG');
+const imageFilter = makeImageFilter(
+  ['image/jpeg', 'image/png', 'image/jpg'],
+  ['jpg', 'jpeg', 'png'],
+  'JPG atau PNG'
+);
 
 // ─── Multer Instances ─────────────────────────────────────────────────────────
 

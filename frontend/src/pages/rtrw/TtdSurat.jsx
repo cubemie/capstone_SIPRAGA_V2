@@ -7,7 +7,8 @@ import { getTtd, uploadTtd } from '../../services/ttdService';
 
 const dataURLtoBlob = (dataUrl) => {
   const [header, data] = dataUrl.split(',');
-  const mime = header.match(/:(.*?);/)[1];
+  const mimeMatch = header.match(/:(.*?);/);
+  const mime = mimeMatch?.[1] || 'image/png';
   const binary = atob(data);
   const array = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
@@ -47,10 +48,13 @@ export default function TtdSurat() {
       toast.error('Tanda tangan masih kosong');
       return;
     }
-    const dataUrl = sigCanvas.current.toDataURL('image/png');
+
+    const trimmedCanvas = sigCanvas.current.getTrimmedCanvas();
+    const dataUrl = trimmedCanvas.toDataURL('image/png');
     const blob = dataURLtoBlob(dataUrl);
+    const file = new File([blob], 'ttd-digital.png', { type: 'image/png' });
     const formData = new FormData();
-    formData.append('ttdImage', blob, 'ttd.png');
+    formData.append('ttdImage', file);
     mutation.mutate(formData);
   };
 
