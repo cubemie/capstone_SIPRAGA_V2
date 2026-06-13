@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { CheckCircle2, Search, ShieldAlert } from 'lucide-react';
 import { api } from '../../../utils/api';
 
 const verifyLetter = async (qrToken) => {
@@ -22,7 +23,7 @@ export default function QrVerifyPage() {
       <div className="w-full max-w-md bg-[var(--color-surface-card)] rounded-2xl shadow-lg overflow-hidden">
         {/* Header */}
         <div className="bg-[var(--color-primary)] p-6 text-center text-white">
-          <p className="text-4xl mb-2">🔍</p>
+          <Search className="w-10 h-10 mx-auto mb-2" />
           <h1 className="text-xl font-bold">Verifikasi Surat</h1>
           <p className="text-blue-100 text-sm mt-1">SIPRAGA V2</p>
         </div>
@@ -37,7 +38,7 @@ export default function QrVerifyPage() {
 
           {isError && (
             <div className="text-center py-8">
-              <p className="text-5xl mb-3">❌</p>
+              <ShieldAlert className="w-12 h-12 mx-auto mb-3 text-[var(--color-danger)]" />
               <p className="text-[var(--color-danger)] font-semibold">Surat tidak valid</p>
               <p className="text-[var(--color-ink-muted)] text-sm mt-1">
                 Token QR tidak ditemukan atau sudah kedaluwarsa.
@@ -47,7 +48,7 @@ export default function QrVerifyPage() {
 
           {data && !data.valid && (
             <div className="text-center py-8">
-              <p className="text-5xl mb-3">❌</p>
+              <ShieldAlert className="w-12 h-12 mx-auto mb-3 text-[var(--color-danger)]" />
               <p className="text-[var(--color-danger)] font-semibold">Surat tidak valid</p>
             </div>
           )}
@@ -55,7 +56,7 @@ export default function QrVerifyPage() {
           {data?.valid && (
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-2 text-[var(--color-status-disetujui-text)] bg-green-50 rounded-lg py-3">
-                <span className="text-2xl">✅</span>
+                <CheckCircle2 className="w-6 h-6" />
                 <span className="font-semibold">Surat Terverifikasi</span>
               </div>
 

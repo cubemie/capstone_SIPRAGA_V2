@@ -18,23 +18,18 @@ class RtRwModel {
   }
 
   static async isRtUsernameTaken(username) {
-    const [rows] = await db.query('SELECT id FROM rt WHERE username = ?', [username]);
+    const [rows] = await db.query('SELECT rt_id FROM rt WHERE username = ?', [username]);
     return rows.length > 0;
   }
 
   static async createRt(data) {
-    // OTOMATISASI: Jika frontend tidak mengirim rt_id, kita buatkan formatnya
-    // Contoh: no_rt '03' dan rw_id 'RW005-BGR' menjadi 'RT03-RW005-BGR'
-    const generatedRtId = data.rt_id || `RT${data.no_rt}-${data.rw_id}`;
-
     const query = `
       INSERT INTO rt 
-      (rt_id, no_rt, rw_id, nama_ketua, provinsi, kota, kecamatan, kelurahan_desa, username, password, ttd_digital)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (no_rt, rw_id, nama_ketua, provinsi, kota, kecamatan, kelurahan_desa, username, password, ttd_digital)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     return await db.query(query, [
-      generatedRtId,       // Gunakan ID yang baru dibuat atau yang dari data
       data.no_rt, 
       data.rw_id, 
       data.nama_ketua,
@@ -46,6 +41,14 @@ class RtRwModel {
       data.password, 
       data.ttd_digital || null
     ]);
+  }
+
+  static async updateTtdRt(id, ttdUrl) {
+    const [result] = await db.query(
+      'UPDATE rt SET ttd_digital = ? WHERE rt_id = ?',
+      [ttdUrl, id]
+    );
+    return result.affectedRows > 0;
   }
 
   // ─── RW METHODS ──────────────────────────────────────────────────────────
@@ -61,12 +64,12 @@ class RtRwModel {
   }
 
   static async isRwUsernameTaken(username) {
-    const [rows] = await db.query('SELECT id FROM rw WHERE username = ?', [username]);
+    const [rows] = await db.query('SELECT rw_id FROM rw WHERE username = ?', [username]);
     return rows.length > 0;
   }
 
   static async isRwExists(rw_id) {
-    const [rows] = await db.query('SELECT id FROM rw WHERE rw_id = ?', [rw_id]);
+    const [rows] = await db.query('SELECT rw_id FROM rw WHERE rw_id = ?', [rw_id]);
     return rows.length > 0;
   }
 
@@ -84,7 +87,27 @@ class RtRwModel {
     ]);
   }
 
+  static async updateTtdRw(id, ttdUrl) {
+    const [result] = await db.query(
+      'UPDATE rw SET ttd_digital = ? WHERE rw_id = ?',
+      [ttdUrl, id]
+    );
+    return result.affectedRows > 0;
+  }
+
   // ─── SUPERADMIN METHODS ──────────────────────────────────────────────────
+
+  static async isSuperadminUsernameTaken(username) {
+    const [rows] = await db.query('SELECT id FROM superadmin WHERE username = ?', [username]);
+    return rows.length > 0;
+  }
+
+  static async createSuperadmin(data) {
+    return db.query(
+      'INSERT INTO superadmin (username, password) VALUES (?, ?)',
+      [data.username, data.password]
+    );
+  }
 
   static async findSuperadminByUsername(username) {
     const [rows] = await db.query('SELECT * FROM superadmin WHERE username = ?', [username]);

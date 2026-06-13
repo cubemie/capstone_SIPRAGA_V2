@@ -189,7 +189,7 @@ export default function RegisterRtRw() {
             <div className="mb-5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex gap-3">
               <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <div className="text-xs text-amber-800">
-                <p className="font-bold mb-1">⚠️ Syarat Pendaftaran Ketua RT</p>
+                <p className="font-bold mb-1">Syarat Pendaftaran Ketua RT</p>
                 <p>Ketua RW di wilayah Anda harus sudah mendaftar terlebih dahulu. Minta <span className="font-semibold">ID RW</span> kepada Ketua RW Anda, lalu masukkan di kolom "ID RW Induk" di bawah.</p>
               </div>
             </div>

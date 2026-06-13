@@ -32,11 +32,11 @@ export const wargaService = {
 };
 
 export const getProfile = async () => {
-  const res = await api.get('/warga/profile');
+  const res = await api.get('/auth/profile');
   return res.data;
 };
 
 export const updateProfile = async (data) => {
-  const res = await api.put('/warga/profile', data);
+  const res = await api.putFormData('/auth/profile', data);
   return res.data;
 };

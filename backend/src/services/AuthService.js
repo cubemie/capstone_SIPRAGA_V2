@@ -78,7 +78,14 @@ class AuthService {
     // Simpan ke database
     await WargaModel.create({
       nik, nama, email, password: hashedPassword, jenis_kelamin, tanggal_lahir,
-      tempat_lahir, alamat, rt, rw, kelurahan_desa, kecamatan, provinsi, kota
+      tempat_lahir: tempat_lahir || '',
+      alamat: alamat || '',
+      rt: rt || '',
+      rw: rw || '',
+      kelurahan_desa: kelurahan_desa || '',
+      kecamatan: kecamatan || '',
+      provinsi: provinsi || '',
+      kota: kota || '',
     });
 
     return { data: { message: 'Registrasi berhasil. Silakan login.' }, error: null };
@@ -142,6 +149,8 @@ class AuthService {
     const token = signToken({
       id:       user.rt_id || user.rw_id,
       rw_id:    user.rw_id,
+      no_rt:    user.no_rt || null,
+      no_rw:    user.no_rw || null,
       username: user.username,
       nama:     user.nama_ketua,
       role,

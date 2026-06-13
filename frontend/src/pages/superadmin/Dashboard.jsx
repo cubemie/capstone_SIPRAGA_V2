@@ -40,7 +40,7 @@ function RWDetailPanel({ rwId, onClose }) {
   const { data, isLoading } = useQuery({
     queryKey: ['warga-stats', rwId],
     queryFn: async () => {
-      const { data, error } = await api.get(`/superadmin/warga-stats/${rwId}`);
+      const { data, error } = await api.get(`/superadmin/stats/warga/${rwId}`);
       if (error) throw new Error(error);
       return data?.data;
     },
@@ -169,7 +169,7 @@ export default function SuperadminDashboard() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['superadmin-dashboard'],
     queryFn: async () => {
-      const { data, error } = await api.get('/superadmin/dashboard-stats');
+      const { data, error } = await api.get('/superadmin/dashboard');
       if (error) throw new Error(error);
       return data?.data;
     },
@@ -251,4 +251,4 @@ export default function SuperadminDashboard() {
       </div>
     </DashboardLayout>
   );
-}
+}

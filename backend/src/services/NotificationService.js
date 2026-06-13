@@ -14,6 +14,7 @@
  */
 
 const nodemailer = require('nodemailer');
+const pool = require('../config/db');
 
 // ─── Transporter Email ─────────────────────────────────────────────────────────
 
@@ -83,6 +84,39 @@ const TEMPLATE_WA = {
 // ─── Fungsi Publik ────────────────────────────────────────────────────────────
 
 class NotificationService {
+  static normalizeRecipientId(recipientRole, recipientId, recipientMeta = {}) {
+    if (!recipientRole) return null;
+
+    if (recipientRole === 'rw') {
+      const rawValue = recipientMeta.no_rw ?? recipientId;
+      const digits = String(rawValue ?? '').replace(/\D/g, '');
+      return digits ? Number(digits) : null;
+    }
+
+    if (recipientId === null || recipientId === undefined || recipientId === '') {
+      return null;
+    }
+
+    const numericId = Number(recipientId);
+    return Number.isFinite(numericId) ? numericId : null;
+  }
+
+  static resolveActorNotificationTarget(user = {}) {
+    const recipientRole = user.role;
+    const rawRecipientId =
+      recipientRole === 'rw'
+        ? (user.no_rw ?? user.rw_id ?? user.id)
+        : (user.id_warga ?? user.id);
+
+    const recipientId = NotificationService.normalizeRecipientId(
+      recipientRole,
+      rawRecipientId,
+      { no_rw: user.no_rw }
+    );
+
+    return { recipientId, recipientRole };
+  }
+
   /**
    * Kirim notifikasi email.
    * @param {Object} params
@@ -169,14 +203,23 @@ class NotificationService {
    * Buat notifikasi in-app untuk badge
    */
   static async createInAppNotification({
-    recipientId, recipientRole, type, title, message, link, letterUuid = null,
+    recipientId, recipientRole, type, title, message, link, letterUuid = null, recipientMeta = {},
   }) {
     try {
-      const pool = require('../config/db');
+      const normalizedRecipientId = NotificationService.normalizeRecipientId(
+        recipientRole,
+        recipientId,
+        recipientMeta
+      );
+
+      if (!normalizedRecipientId || !recipientRole) {
+        return;
+      }
+
       await pool.query(
         `INSERT INTO notifications (recipient_id, recipient_role, type, title, message, link, letter_uuid)
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [recipientId, recipientRole, type, title, message, link, letterUuid]
+        [normalizedRecipientId, recipientRole, type, title, message, link, letterUuid]
       );
     } catch (err) {
       console.error('[Notif] Gagal buat in-app notif:', err.message);

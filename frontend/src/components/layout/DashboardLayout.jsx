@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import NotificationBell from '../NotificationBell';
 
-export default function DashboardLayout() {
+export default function DashboardLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,6 +50,7 @@ export default function DashboardLayout() {
   } else if (user?.role === 'superadmin') {
     menuItems = [
       { path: '/superadmin/dashboard',   label: 'Dashboard',           icon: LayoutDashboard },
+      { path: '/profil',                 label: 'Profil Saya',         icon: UserCircle },
       { path: '/superadmin/akun',        label: 'Manajemen Akun',      icon: User },
       { path: '/superadmin/template-md', label: 'Template Markdown',   icon: FileText },
       { path: '/superadmin/config',      label: 'Konfigurasi Instansi',icon: CheckSquare },
@@ -157,7 +158,7 @@ export default function DashboardLayout() {
 
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto bg-[var(--color-surface)]">
-          <Outlet />
+          {children || <Outlet />}
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { Building2, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { api } from '../utils/api';
 
 const fetchVerify = async (uuid) => {
@@ -22,7 +23,7 @@ export default function QrVerifyPage() {
         {/* Header */}
         <div className="bg-[var(--color-primary)] p-6 text-center">
           <div className="w-16 h-16 bg-[var(--color-surface-card)] rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
-            <span className="text-3xl">🏛️</span>
+            <Building2 className="w-8 h-8 text-[var(--color-primary)]" />
           </div>
           <h1 className="text-xl font-bold text-white">Verifikasi Surat</h1>
           <p className="text-blue-100 text-sm mt-1">Sistem Pelayanan RT/RW</p>
@@ -39,7 +40,7 @@ export default function QrVerifyPage() {
           {isError && (
             <div className="text-center py-8">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-[var(--color-danger)] text-3xl">❌</span>
+                <ShieldAlert className="w-8 h-8 text-[var(--color-danger)]" />
               </div>
               <h2 className="text-lg font-bold text-[var(--color-ink)]">Dokumen Tidak Valid</h2>
               <p className="text-[var(--color-ink-secondary)] mt-2 text-sm">
@@ -52,7 +53,7 @@ export default function QrVerifyPage() {
             <div className="space-y-6">
               <div className="text-center">
                 <div className="w-16 h-16 bg-[var(--color-status-disetujui-bg)] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-[var(--color-status-disetujui-text)] text-3xl">✅</span>
+                  <CheckCircle2 className="w-8 h-8 text-[var(--color-status-disetujui-text)]" />
                 </div>
                 <h2 className="text-xl font-bold text-[var(--color-ink)]">Dokumen Asli</h2>
                 <p className="text-[var(--color-status-disetujui-text)] font-medium text-sm mt-1">

@@ -107,6 +107,14 @@ VALUES (
   TRUE
 );
 
+-- ── Default Superadmin (seed) ─────────────────────────────────────────────────
+-- Password = bcrypt('admin123', 10) — sama dengan password seed RT/RW di atas
+INSERT IGNORE INTO superadmin (username, password)
+VALUES (
+  'superadmin',
+  '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'
+);
+
 -- ── App Config Default ────────────────────────────────────────────────────────
 INSERT IGNORE INTO app_config (`key`, `value`, description) VALUES
 ('nama_instansi',    'RT 001 RW 001',          'Nama instansi untuk kop surat'),

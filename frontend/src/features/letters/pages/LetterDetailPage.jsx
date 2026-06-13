@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, Check, CheckCircle2, Download, PencilLine, ShieldAlert } from 'lucide-react';
 import { LETTER_STATUS_V2 } from '../../../constants/suratStatus';
 import { api } from '../../../utils/api';
 import { useState } from 'react';
@@ -53,7 +54,7 @@ function SignatureStatusCard({ letter }) {
                   ? 'bg-emerald-100 text-emerald-600'
                   : 'bg-[var(--color-surface-muted)] text-[var(--color-ink-muted)]'
               }`}>
-                {step.done ? '✓' : '○'}
+                {step.done ? <Check className="w-4 h-4" /> : <PencilLine className="w-4 h-4" />}
               </div>
               <div>
                 <p className="text-sm font-medium text-ink">{step.label}</p>
@@ -150,9 +151,10 @@ function TtdApprovalPanel({ uuid, status, userTtdUrl }) {
           </p>
           <Link
             to="/rtrw/ttd"
-            className="text-xs text-amber-700 font-semibold underline mt-1 inline-block"
+            className="text-xs text-amber-700 font-semibold underline mt-1 inline-flex items-center gap-1"
           >
-            Upload TTD sekarang →
+            <PencilLine className="w-3.5 h-3.5" />
+            Upload TTD sekarang
           </Link>
         </div>
       )}
@@ -175,7 +177,7 @@ function TtdApprovalPanel({ uuid, status, userTtdUrl }) {
         >
           {approveMutation.isPending
             ? <><span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Memproses...</>
-            : '✅ Setujui Surat'
+            : <><CheckCircle2 className="w-4 h-4" /> Setujui Surat</>
           }
         </button>
         <button
@@ -185,7 +187,7 @@ function TtdApprovalPanel({ uuid, status, userTtdUrl }) {
         >
           {rejectMutation.isPending
             ? <><span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> Memproses...</>
-            : '❌ Tolak Surat'
+            : <><ShieldAlert className="w-4 h-4" /> Tolak Surat</>
           }
         </button>
       </div>
@@ -198,7 +200,7 @@ export default function LetterDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const backPath = user?.role === 'warga' ? '/warga/riwayat' : '/rtrw/inbox';
-  const backLabel = user?.role === 'warga' ? '← Riwayat Surat' : '← Kotak Masuk';
+  const backLabel = user?.role === 'warga' ? 'Riwayat Surat' : 'Kotak Masuk';
   const queryClient = useQueryClient();
   const [rejectNotes, setRejectNotes] = useState('');
   const [approveNotes, setApproveNotes] = useState('');
@@ -314,6 +316,7 @@ export default function LetterDetailPage() {
         onClick={() => navigate(backPath)}
         className="mb-4 text-xs text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] inline-flex items-center gap-1"
       >
+        <ArrowLeft className="w-3.5 h-3.5" />
         {backLabel}
       </button>
 
@@ -402,10 +405,10 @@ export default function LetterDetailPage() {
                   <p className="text-[var(--color-ink)]">
                     <span className="font-medium">{a.approver_name}</span>{' '}
                     {a.action === 'approved'
-                      ? '✅ Menyetujui'
+                      ? 'Menyetujui'
                       : a.action === 'rejected'
-                      ? '❌ Menolak'
-                      : '🔄 Minta Revisi'}
+                      ? 'Menolak'
+                      : 'Minta Revisi'}
                   </p>
                   {a.notes && (
                     <p className="text-[var(--color-ink-muted)] text-xs mt-0.5">{a.notes}</p>
@@ -442,7 +445,12 @@ export default function LetterDetailPage() {
                 : 'bg-brand-50 text-brand-600 hover:bg-brand-100'
             }`}
           >
-            {({ loading }) => (loading ? 'Memuat PDF...' : '⬇ Download PDF')}
+            {({ loading }) => (
+              <span className="inline-flex items-center gap-1.5">
+                <Download className="w-3.5 h-3.5" />
+                {loading ? 'Memuat PDF...' : 'Download PDF'}
+              </span>
+            )}
           </PDFDownloadLink>
         </div>
         

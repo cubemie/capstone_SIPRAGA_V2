@@ -1,5 +1,6 @@
 const pool = require('../../../../config/db.js');
 const { v4: uuidv4 } = require('uuid');
+const NotificationService = require('../../../../services/NotificationService');
 
 let pdfQueue = null;
 try {
@@ -30,6 +31,48 @@ async function generateLetterNumber(letterTypeCode, tenantId) {
   const monthRoman = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][new Date().getMonth()];
   const year = new Date().getFullYear();
   return `${seq}/${letterTypeCode || 'SK'}/${tenantId || 'RT'}/${monthRoman}/${year}`;
+}
+
+async function getResidentContext(letterId) {
+  const [[resident]] = await pool.query(
+    `SELECT w.id_warga, w.nama, w.email, w.no_hp
+     FROM letters l
+     JOIN warga w ON l.resident_id = w.id_warga
+     WHERE l.id = ?`,
+    [letterId]
+  );
+
+  return resident || null;
+}
+
+async function getRwContext(tenantId) {
+  const [[rw]] = await pool.query(
+    `SELECT rw_id, no_rw, nama_ketua
+     FROM rw
+     WHERE rw_id = ?
+     LIMIT 1`,
+    [tenantId]
+  );
+
+  return rw || null;
+}
+
+async function notifySuperadmins(title, message, link, letterUuid = null) {
+  const [superadmins] = await pool.query('SELECT id FROM superadmin');
+
+  await Promise.allSettled(
+    superadmins.map((admin) =>
+      NotificationService.createInAppNotification({
+        recipientId: admin.id,
+        recipientRole: 'superadmin',
+        type: 'REMINDER',
+        title,
+        message,
+        link,
+        letterUuid,
+      })
+    )
+  );
 }
 
 const approveLetter = async (letterUuid, role, notes = null, signatureUrl = null, approverId) => {
@@ -108,6 +151,52 @@ const approveLetter = async (letterUuid, role, notes = null, signatureUrl = null
     });
   }
 
+  const resident = await getResidentContext(letter.id);
+
+  if (nextStatus === 'approved_rt') {
+    const rw = await getRwContext(letter.tenant_id);
+
+    if (rw) {
+      await NotificationService.createInAppNotification({
+        recipientId: rw.rw_id,
+        recipientRole: 'rw',
+        recipientMeta: { no_rw: rw.no_rw },
+        type: 'NEW_LETTER',
+        title: 'Surat baru menunggu persetujuan RW',
+        message: `${resident?.nama || 'Seorang warga'} sudah lolos verifikasi RT untuk "${letter.subject}".`,
+        link: `/rtrw/surat/${letterUuid}`,
+        letterUuid,
+      });
+    } else {
+      await notifySuperadmins(
+        'Mapping RW surat belum ditemukan',
+        `Surat "${letter.subject}" sudah disetujui RT tetapi akun RW tenant ${letter.tenant_id} belum ditemukan.`,
+        '/superadmin/akun',
+        letterUuid
+      );
+    }
+  }
+
+  if (isCompleted && resident) {
+    await Promise.allSettled([
+      NotificationService.createInAppNotification({
+        recipientId: resident.id_warga,
+        recipientRole: 'warga',
+        type: 'APPROVED',
+        title: 'Surat sudah disetujui',
+        message: `Surat "${letter.subject}" sudah selesai diproses.`,
+        link: `/warga/surat/${letterUuid}`,
+        letterUuid,
+      }),
+      NotificationService.kirimNotifikasi({
+        email: resident.email,
+        no_hp: resident.no_hp || null,
+        event: 'DISETUJUI',
+        data: { nama: resident.nama, subjek: letter.subject },
+      }),
+    ]);
+  }
+
   return { nextStatus, letterNumber, qrToken };
 };
 
@@ -138,6 +227,28 @@ const rejectLetter = async (letterUuid, role, notes, approverId) => {
     throw error;
   } finally {
     conn.release();
+  }
+
+  const resident = await getResidentContext(letter.id);
+
+  if (resident) {
+    await Promise.allSettled([
+      NotificationService.createInAppNotification({
+        recipientId: resident.id_warga,
+        recipientRole: 'warga',
+        type: 'REJECTED',
+        title: 'Surat ditolak',
+        message: `Surat "${letter.subject}" ditolak${notes ? `: ${notes}` : '.'}`,
+        link: `/warga/surat/${letterUuid}`,
+        letterUuid,
+      }),
+      NotificationService.kirimNotifikasi({
+        email: resident.email,
+        no_hp: resident.no_hp || null,
+        event: 'DITOLAK',
+        data: { nama: resident.nama, subjek: letter.subject, alasan: notes },
+      }),
+    ]);
   }
 };
 

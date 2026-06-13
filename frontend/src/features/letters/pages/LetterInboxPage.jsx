@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { ArrowRight, Inbox } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { LETTER_STATUS_V2 } from '../../../constants/suratStatus';
 import { api } from '../../../utils/api';
@@ -73,7 +74,7 @@ export default function LetterInboxPage() {
 
       {!isLoading && filtered.length === 0 && (
         <div className="text-center text-[var(--color-ink-muted)] py-16">
-          <p className="text-3xl mb-2">📭</p>
+          <Inbox className="w-9 h-9 mx-auto mb-2 text-[var(--color-ink-muted)]" />
           <p className="font-medium">Tidak ada surat masuk</p>
         </div>
       )}
@@ -106,7 +107,10 @@ export default function LetterInboxPage() {
                   <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusInfo.color}`}>
                     {statusInfo.label}
                   </span>
-                  <p className="text-xs text-[var(--color-primary)] mt-2 font-medium">Proses →</p>
+                  <p className="text-xs text-[var(--color-primary)] mt-2 font-medium inline-flex items-center gap-1">
+                    Proses
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </p>
                 </div>
               </div>
             </Link>

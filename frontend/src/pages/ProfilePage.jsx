@@ -1,250 +1,491 @@
-// frontend/src/pages/ProfilePage.jsx
-// Tampilkan SEMUA data dari registrasi, termasuk field yang read-only
-
-import React from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  Camera,
+  Edit3,
+  FileText,
+  Mail,
+  MapPin,
+  Phone,
+  Save,
+  Shield,
+  User,
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
-import { User, MapPin, FileText, Phone, Mail, Edit3, Save } from 'lucide-react';
-import DashboardLayout from '../components/layout/DashboardLayout';
 
-const profileSchema = z.object({
-  nama:             z.string().min(3, 'Nama minimal 3 karakter'),
-  email:            z.string().email('Email tidak valid'),
-  no_hp:            z.string().min(10, 'Nomor HP minimal 10 digit'),
-  alamat:           z.string().min(5, 'Alamat terlalu pendek'),
-  NIK:              z.string().length(16, 'NIK harus 16 digit').regex(/^\d+$/, 'NIK hanya angka'),
-  tempat_lahir:     z.string().optional(),
-  tanggal_lahir:    z.string().optional(),
-  jenis_kelamin:    z.enum(['Laki-laki', 'Perempuan']).optional(),
-  agama:            z.string().optional(),
-  status_perkawinan:z.enum(['Belum Kawin', 'Kawin']).optional(),
-  pekerjaan:        z.string().optional(),
-});
+const GENDER_OPTIONS = ['Laki-laki', 'Perempuan'];
+const RELIGION_OPTIONS = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'];
+const MARITAL_STATUS_OPTIONS = ['Belum Kawin', 'Kawin'];
 
-const FIELD_SECTIONS = [
-  {
-    title: 'Data Pribadi',
-    icon: User,
-    fields: [
-      { name: 'nama',          label: 'Nama Lengkap',    type: 'text',   editable: true },
-      { name: 'NIK',           label: 'NIK',             type: 'text',   editable: true },
-      { name: 'tempat_lahir',  label: 'Tempat Lahir',    type: 'text',   editable: true },
-      { name: 'tanggal_lahir', label: 'Tanggal Lahir',   type: 'date',   editable: true },
+function toDateInputValue(value) {
+  if (!value) return '';
+  return String(value).split('T')[0];
+}
+
+function buildSections(role) {
+  if (role === 'warga') {
+    return [
       {
-        name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true,
-        options: ['Laki-laki', 'Perempuan'],
+        title: 'Data Registrasi',
+        icon: User,
+        fields: [
+          { name: 'nama', label: 'Nama Lengkap', type: 'text', editable: true },
+          { name: 'NIK', label: 'NIK', type: 'text', editable: false },
+          { name: 'email', label: 'Email', type: 'email', editable: true },
+          { name: 'no_hp', label: 'Nomor HP', type: 'text', editable: true },
+        ],
       },
       {
-        name: 'agama', label: 'Agama', type: 'select', editable: true,
-        options: ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Buddha', 'Konghucu'],
+        title: 'Data Pribadi',
+        icon: FileText,
+        fields: [
+          { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', editable: true },
+          { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', editable: true },
+          { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true, options: GENDER_OPTIONS },
+          { name: 'agama', label: 'Agama', type: 'select', editable: true, options: RELIGION_OPTIONS },
+          { name: 'status_perkawinan', label: 'Status Perkawinan', type: 'select', editable: true, options: MARITAL_STATUS_OPTIONS },
+          { name: 'pekerjaan', label: 'Pekerjaan', type: 'text', editable: true },
+        ],
       },
       {
-        name: 'status_perkawinan', label: 'Status Perkawinan', type: 'select', editable: true,
-        options: ['Belum Kawin', 'Kawin'],
+        title: 'Alamat',
+        icon: MapPin,
+        fields: [
+          { name: 'alamat', label: 'Alamat Lengkap', type: 'textarea', editable: true },
+          { name: 'rt', label: 'RT', type: 'text', editable: false },
+          { name: 'rw', label: 'RW', type: 'text', editable: false },
+          { name: 'kelurahan_desa', label: 'Kelurahan/Desa', type: 'text', editable: true },
+          { name: 'kecamatan', label: 'Kecamatan', type: 'text', editable: true },
+          { name: 'kota', label: 'Kota/Kabupaten', type: 'text', editable: true },
+          { name: 'provinsi', label: 'Provinsi', type: 'text', editable: true },
+        ],
       },
-      { name: 'pekerjaan', label: 'Pekerjaan', type: 'text', editable: true },
-    ],
-  },
-  {
-    title: 'Kontak',
-    icon: Phone,
-    fields: [
-      { name: 'email', label: 'Email', type: 'email', editable: true },
-      { name: 'no_hp', label: 'Nomor HP / WhatsApp', type: 'text', editable: true },
-    ],
-  },
-  {
-    title: 'Alamat',
-    icon: MapPin,
-    fields: [
-      { name: 'alamat',         label: 'Alamat Lengkap', type: 'textarea', editable: true },
-      { name: 'rt',             label: 'RT',             type: 'text',     editable: false },
-      { name: 'rw',             label: 'RW',             type: 'text',     editable: false },
-      { name: 'kelurahan_desa', label: 'Kelurahan/Desa', type: 'text',     editable: true },
-      { name: 'kecamatan',      label: 'Kecamatan',      type: 'text',     editable: true },
-      { name: 'kota',           label: 'Kota/Kabupaten', type: 'text',     editable: false },
-      { name: 'provinsi',       label: 'Provinsi',       type: 'text',     editable: false },
-    ],
-  },
-];
+    ];
+  }
+
+  if (role === 'rt') {
+    return [
+      {
+        title: 'Akun RT',
+        icon: Shield,
+        fields: [
+          { name: 'nama_ketua', label: 'Nama Ketua RT', type: 'text', editable: true },
+          { name: 'username', label: 'Username', type: 'text', editable: false },
+          { name: 'no_rt', label: 'Nomor RT', type: 'text', editable: false },
+          { name: 'rw_id', label: 'ID RW Induk', type: 'text', editable: false },
+        ],
+      },
+      {
+        title: 'Kontak',
+        icon: Phone,
+        fields: [
+          { name: 'email', label: 'Email', type: 'email', editable: true },
+          { name: 'no_hp', label: 'Nomor HP', type: 'text', editable: true },
+          { name: 'alamat', label: 'Alamat Lengkap', type: 'textarea', editable: true },
+        ],
+      },
+      {
+        title: 'Wilayah',
+        icon: MapPin,
+        fields: [
+          { name: 'kelurahan_desa', label: 'Kelurahan/Desa', type: 'text', editable: true },
+          { name: 'kecamatan', label: 'Kecamatan', type: 'text', editable: true },
+          { name: 'kota', label: 'Kota/Kabupaten', type: 'text', editable: true },
+          { name: 'provinsi', label: 'Provinsi', type: 'text', editable: true },
+        ],
+      },
+      {
+        title: 'Data Tambahan',
+        icon: User,
+        fields: [
+          { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', editable: true },
+          { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', editable: true },
+          { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true, options: GENDER_OPTIONS },
+        ],
+      },
+    ];
+  }
+
+  if (role === 'rw') {
+    return [
+      {
+        title: 'Akun RW',
+        icon: Shield,
+        fields: [
+          { name: 'nama_ketua', label: 'Nama Ketua RW', type: 'text', editable: true },
+          { name: 'username', label: 'Username', type: 'text', editable: false },
+          { name: 'rw_id', label: 'ID RW', type: 'text', editable: false },
+          { name: 'no_rw', label: 'Nomor RW', type: 'text', editable: false },
+        ],
+      },
+      {
+        title: 'Kontak',
+        icon: Phone,
+        fields: [
+          { name: 'email', label: 'Email', type: 'email', editable: true },
+          { name: 'no_hp', label: 'Nomor HP', type: 'text', editable: true },
+          { name: 'alamat', label: 'Alamat Lengkap', type: 'textarea', editable: true },
+        ],
+      },
+      {
+        title: 'Wilayah',
+        icon: MapPin,
+        fields: [
+          { name: 'kelurahan_desa', label: 'Kelurahan/Desa', type: 'text', editable: true },
+          { name: 'kecamatan', label: 'Kecamatan', type: 'text', editable: true },
+          { name: 'kota', label: 'Kota/Kabupaten', type: 'text', editable: true },
+          { name: 'provinsi', label: 'Provinsi', type: 'text', editable: true },
+        ],
+      },
+      {
+        title: 'Data Tambahan',
+        icon: User,
+        fields: [
+          { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', editable: true },
+          { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', editable: true },
+          { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true, options: GENDER_OPTIONS },
+        ],
+      },
+    ];
+  }
+
+  return [
+    {
+      title: 'Akun Superadmin',
+      icon: Shield,
+      fields: [
+        { name: 'username', label: 'Username', type: 'text', editable: false },
+        { name: 'nama_lengkap', label: 'Nama Lengkap', type: 'text', editable: true },
+        { name: 'email', label: 'Email', type: 'email', editable: true },
+        { name: 'no_hp', label: 'Nomor HP', type: 'text', editable: true },
+      ],
+    },
+    {
+      title: 'Data Tambahan',
+      icon: MapPin,
+      fields: [
+        { name: 'alamat', label: 'Alamat Lengkap', type: 'textarea', editable: true },
+        { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', editable: true },
+        { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', editable: true },
+        { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true, options: GENDER_OPTIONS },
+      ],
+    },
+  ];
+}
+
+function buildInitialForm(profile) {
+  return {
+    nama: profile?.nama || '',
+    nama_ketua: profile?.nama_ketua || '',
+    nama_lengkap: profile?.nama_lengkap || '',
+    username: profile?.username || '',
+    NIK: profile?.NIK || '',
+    email: profile?.email || '',
+    no_hp: profile?.no_hp || '',
+    alamat: profile?.alamat || '',
+    tempat_lahir: profile?.tempat_lahir || '',
+    tanggal_lahir: toDateInputValue(profile?.tanggal_lahir),
+    jenis_kelamin: profile?.jenis_kelamin || '',
+    agama: profile?.agama || '',
+    status_perkawinan: profile?.status_perkawinan || '',
+    pekerjaan: profile?.pekerjaan || '',
+    rt: profile?.rt || '',
+    rw: profile?.rw || '',
+    no_rt: profile?.no_rt || '',
+    no_rw: profile?.no_rw || '',
+    rw_id: profile?.rw_id || '',
+    kelurahan_desa: profile?.kelurahan_desa || '',
+    kecamatan: profile?.kecamatan || '',
+    kota: profile?.kota || '',
+    provinsi: profile?.provinsi || '',
+  };
+}
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
-  const [isEditing, setIsEditing] = React.useState(false);
+  const { user } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState('');
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
-      const { data, error } = await api.get('/warga/profile');
+      const { data, error } = await api.get('/auth/profile');
       if (error) throw new Error(error);
       return data?.data;
     },
   });
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm({
-    resolver: zodResolver(profileSchema),
-    values: profile ? {
-      nama:              profile.nama ?? '',
-      email:             profile.email ?? '',
-      no_hp:             profile.no_hp ?? '',
-      alamat:            profile.alamat ?? '',
-      NIK:               profile.NIK ?? '',
-      tempat_lahir:      profile.tempat_lahir ?? '',
-      tanggal_lahir:     profile.tanggal_lahir?.split('T')[0] ?? '',
-      jenis_kelamin:     profile.jenis_kelamin ?? 'Laki-laki',
-      agama:             profile.agama ?? '',
-      status_perkawinan: profile.status_perkawinan ?? 'Belum Kawin',
-      pekerjaan:         profile.pekerjaan ?? '',
-    } : undefined,
-  });
+  const role = profile?.role || user?.role || 'warga';
+  const sections = useMemo(() => buildSections(role), [role]);
+
+  useEffect(() => {
+    if (!profile) return;
+    setFormData(buildInitialForm(profile));
+    setAvatarPreview(profile.avatar_url || '');
+    setAvatarFile(null);
+  }, [profile]);
 
   const mutation = useMutation({
-    mutationFn: async (data) => {
-      const { data: res, error } = await api.put('/warga/profile', data);
+    mutationFn: async ({ values, file }) => {
+      const payload = new FormData();
+
+      Object.entries(values).forEach(([key, value]) => {
+        payload.append(key, value ?? '');
+      });
+
+      if (file) {
+        payload.append('avatar', file);
+      }
+
+      const { data, error } = await api.putFormData('/auth/profile', payload);
       if (error) throw new Error(error);
-      return res;
+      return data;
     },
     onSuccess: () => {
       toast.success('Profil berhasil diperbarui');
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       setIsEditing(false);
+      setAvatarFile(null);
     },
-    onError: (e) => toast.error(e.message || 'Gagal memperbarui profil'),
+    onError: (error) => {
+      toast.error(error.message || 'Gagal memperbarui profil');
+    },
   });
+
+  const handleChange = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAvatarChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Foto profil harus berupa gambar.');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Ukuran foto profil maksimal 2 MB.');
+      return;
+    }
+
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const handleCancel = () => {
+    if (profile) {
+      setFormData(buildInitialForm(profile));
+      setAvatarPreview(profile.avatar_url || '');
+    }
+    setAvatarFile(null);
+    setIsEditing(false);
+  };
+
+  const handleSave = () => {
+    mutation.mutate({ values: formData, file: avatarFile });
+  };
 
   if (isLoading) {
     return (
-      <div className="max-w-2xl mx-auto space-y-4">
-        {[1,2,3].map(i => <div key={i} className="h-40 bg-surface-muted rounded-xl animate-pulse" />)}
+      <div className="mx-auto max-w-4xl space-y-4">
+        {[1, 2, 3].map((item) => (
+          <div key={item} className="h-40 animate-pulse rounded-xl bg-surface-muted" />
+        ))}
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="mx-auto max-w-4xl">
+      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-xl font-bold text-ink">Profil Saya</h1>
-          <p className="text-sm text-ink-secondary mt-0.5">
-            Data yang kamu isi saat registrasi
+          <p className="mt-0.5 text-sm text-ink-secondary">
+            Data registrasi tampil sebagai data awal. Field tambahan bisa kamu lengkapi sendiri.
           </p>
         </div>
         {!isEditing ? (
           <button
             onClick={() => setIsEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 transition"
+            className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-600"
           >
-            <Edit3 className="w-3.5 h-3.5" />
+            <Edit3 className="h-3.5 w-3.5" />
             Edit Profil
           </button>
         ) : (
           <div className="flex gap-2">
             <button
-              onClick={() => { setIsEditing(false); reset(); }}
-              className="px-4 py-2 bg-surface-muted text-ink-secondary text-sm rounded-lg hover:bg-surface-border transition"
+              onClick={handleCancel}
+              className="rounded-lg bg-surface-muted px-4 py-2 text-sm text-ink-secondary transition hover:bg-surface-border"
             >
               Batal
             </button>
             <button
-              onClick={handleSubmit((data) => mutation.mutate(data))}
+              onClick={handleSave}
               disabled={mutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 bg-brand-500 text-white text-sm font-medium rounded-lg hover:bg-brand-600 transition disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-600 disabled:opacity-50"
             >
-              <Save className="w-3.5 h-3.5" />
+              <Save className="h-3.5 w-3.5" />
               {mutation.isPending ? 'Menyimpan...' : 'Simpan'}
             </button>
           </div>
         )}
       </div>
 
-      {/* Foto KTP */}
-      {profile?.foto_ktp && (
-        <div className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl p-4 mb-4">
-          <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-3 flex items-center gap-2">
-            <FileText className="w-3.5 h-3.5" />
-            Foto KTP
+      <div className="mb-4 grid gap-4 lg:grid-cols-[280px_1fr]">
+        <div className="rounded-xl border border-surface-border bg-[var(--color-surface-card)] p-5">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-ink-secondary">
+            Foto Profil
           </p>
-          <img
-            src={profile.foto_ktp}
-            alt="Foto KTP"
-            className="w-48 h-32 object-cover rounded-lg border border-surface-border"
-          />
-        </div>
-      )}
+          <div className="flex flex-col items-center text-center">
+            {avatarPreview ? (
+              <img
+                src={avatarPreview}
+                alt="Foto profil"
+                className="mb-4 h-32 w-32 rounded-full border border-surface-border object-cover"
+              />
+            ) : (
+              <div className="mb-4 flex h-32 w-32 items-center justify-center rounded-full border border-dashed border-surface-border bg-surface-muted text-ink-muted">
+                <User className="h-10 w-10" />
+              </div>
+            )}
 
-      {/* Form sections */}
-      <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
-        {FIELD_SECTIONS.map((section) => (
-          <div key={section.title} className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl p-4 mb-4">
-            <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-4 flex items-center gap-2">
-              <section.icon className="w-3.5 h-3.5" />
+            <p className="text-sm font-semibold text-ink">
+              {formData.nama || formData.nama_ketua || formData.nama_lengkap || formData.username || '-'}
+            </p>
+            <p className="mt-1 text-xs text-ink-secondary">{role.toUpperCase()}</p>
+
+            {isEditing && (
+              <label className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-surface-border px-3 py-2 text-sm text-ink-secondary transition hover:bg-surface-muted">
+                <Camera className="h-4 w-4" />
+                Ganti Foto
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
+              </label>
+            )}
+          </div>
+        </div>
+
+        {profile?.foto_ktp && (
+          <div className="rounded-xl border border-surface-border bg-[var(--color-surface-card)] p-5">
+            <p className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink-secondary">
+              <FileText className="h-3.5 w-3.5" />
+              Dokumen Registrasi
+            </p>
+            <img
+              src={profile.foto_ktp}
+              alt="Foto KTP"
+              className="h-48 w-full rounded-lg border border-surface-border object-cover md:h-56"
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        {sections.map((section) => (
+          <div
+            key={section.title}
+            className="rounded-xl border border-surface-border bg-[var(--color-surface-card)] p-4"
+          >
+            <p className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink-secondary">
+              <section.icon className="h-3.5 w-3.5" />
               {section.title}
             </p>
-            <div className="space-y-3">
-              {section.fields.map((field) => (
-                <div key={field.name}>
-                  <label className="block text-xs font-medium text-ink-secondary mb-1">
-                    {field.label}
-                    {!field.editable && (
-                      <span className="ml-1 text-ink-muted font-normal">(tidak dapat diubah)</span>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {section.fields.map((field) => {
+                const disabled = !isEditing || !field.editable;
+                const value = formData[field.name] ?? '';
+                const wrapperClass =
+                  field.type === 'textarea' ? 'md:col-span-2' : '';
+
+                return (
+                  <div key={field.name} className={wrapperClass}>
+                    <label className="mb-1 block text-xs font-medium text-ink-secondary">
+                      {field.label}
+                      {!field.editable && (
+                        <span className="ml-1 font-normal text-ink-muted">(tetap)</span>
+                      )}
+                    </label>
+
+                    {field.type === 'textarea' ? (
+                      <textarea
+                        value={value}
+                        onChange={(event) => handleChange(field.name, event.target.value)}
+                        disabled={disabled}
+                        rows={3}
+                        className={`w-full resize-none rounded-lg border px-3 py-2 text-sm transition ${
+                          disabled
+                            ? 'border-surface-border bg-surface-muted text-ink-secondary'
+                            : 'border-surface-border bg-[var(--color-surface-card)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-500'
+                        }`}
+                      />
+                    ) : field.type === 'select' ? (
+                      <select
+                        value={value}
+                        onChange={(event) => handleChange(field.name, event.target.value)}
+                        disabled={disabled}
+                        className={`w-full rounded-lg border px-3 py-2 text-sm transition ${
+                          disabled
+                            ? 'border-surface-border bg-surface-muted text-ink-secondary'
+                            : 'border-surface-border bg-[var(--color-surface-card)] focus:outline-none focus:ring-2 focus:ring-brand-500'
+                        }`}
+                      >
+                        <option value="">Pilih {field.label}</option>
+                        {field.options?.map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type={field.type}
+                        value={value}
+                        onChange={(event) => handleChange(field.name, event.target.value)}
+                        disabled={disabled}
+                        className={`w-full rounded-lg border px-3 py-2 text-sm transition ${
+                          disabled
+                            ? 'border-surface-border bg-surface-muted text-ink-secondary'
+                            : 'border-surface-border bg-[var(--color-surface-card)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-500'
+                        }`}
+                      />
                     )}
-                  </label>
-                  {field.type === 'textarea' ? (
-                    <textarea
-                      {...register(field.name)}
-                      rows={3}
-                      disabled={!isEditing || !field.editable}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border resize-none transition
-                        ${!isEditing || !field.editable
-                          ? 'bg-surface-muted border-surface-border text-ink-secondary'
-                          : 'bg-[var(--color-surface-card)] border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent'
-                        }
-                        ${errors[field.name] ? 'border-red-400 bg-[var(--color-danger-light)]' : ''}
-                      `}
-                    />
-                  ) : field.type === 'select' ? (
-                    <select
-                      {...register(field.name)}
-                      disabled={!isEditing || !field.editable}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border transition
-                        ${!isEditing || !field.editable
-                          ? 'bg-surface-muted border-surface-border text-ink-secondary'
-                          : 'bg-[var(--color-surface-card)] border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-500'
-                        }
-                      `}
-                    >
-                      {field.options?.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      {...register(field.name)}
-                      type={field.type}
-                      disabled={!isEditing || !field.editable}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border transition
-                        ${!isEditing || !field.editable
-                          ? 'bg-surface-muted border-surface-border text-ink-secondary'
-                          : 'bg-[var(--color-surface-card)] border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent'
-                        }
-                        ${errors[field.name] ? 'border-red-400 bg-[var(--color-danger-light)]' : ''}
-                      `}
-                    />
-                  )}
-                  {errors[field.name] && (
-                    <p className="text-xs text-[var(--color-danger)] mt-1">{errors[field.name].message}</p>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         ))}
-      </form>
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="rounded-xl border border-surface-border bg-[var(--color-surface-card)] p-4">
+          <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink-secondary">
+            <Mail className="h-3.5 w-3.5" />
+            Ringkasan Kontak
+          </p>
+          <p className="text-sm text-ink">{formData.email || '-'}</p>
+          <p className="mt-1 text-sm text-ink-secondary">{formData.no_hp || 'Nomor HP belum diisi'}</p>
+        </div>
+        <div className="rounded-xl border border-surface-border bg-[var(--color-surface-card)] p-4">
+          <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink-secondary">
+            <MapPin className="h-3.5 w-3.5" />
+            Ringkasan Lokasi
+          </p>
+          <p className="text-sm text-ink">
+            {[formData.kelurahan_desa, formData.kecamatan, formData.kota, formData.provinsi]
+              .filter(Boolean)
+              .join(', ') || 'Lokasi belum lengkap'}
+          </p>
+        </div>
+      </div>
     </div>
   );
-}
+}

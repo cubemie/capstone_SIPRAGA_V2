@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../utils/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { Activity, Filter } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ACTION_COLORS = {
   LOGIN:             'bg-green-50 text-green-700',
@@ -146,9 +146,10 @@ export default function LogSistem() {
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="text-xs px-3 py-1.5 border border-surface-border rounded-lg disabled:opacity-40 hover:bg-surface-muted transition"
+                className="text-xs px-3 py-1.5 border border-surface-border rounded-lg disabled:opacity-40 hover:bg-surface-muted transition inline-flex items-center gap-1"
               >
-                ← Sebelumnya
+                <ChevronLeft className="w-3.5 h-3.5" />
+                Sebelumnya
               </button>
               <span className="text-xs text-ink-muted">
                 Halaman {page} dari {totalPages}
@@ -156,9 +157,10 @@ export default function LogSistem() {
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="text-xs px-3 py-1.5 border border-surface-border rounded-lg disabled:opacity-40 hover:bg-surface-muted transition"
+                className="text-xs px-3 py-1.5 border border-surface-border rounded-lg disabled:opacity-40 hover:bg-surface-muted transition inline-flex items-center gap-1"
               >
-                Berikutnya →
+                Berikutnya
+                <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
@@ -166,4 +168,4 @@ export default function LogSistem() {
       </div>
     </DashboardLayout>
   );
-}
+}

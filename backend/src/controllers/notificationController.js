@@ -1,12 +1,15 @@
 // backend/src/controllers/notificationController.js
 const pool = require('../config/db');
+const NotificationService = require('../services/NotificationService');
 
 // Ambil notifikasi untuk user yang login (warga, rt, atau rw)
 const getNotifications = async (req, res) => {
   try {
-    const { id_warga, id, role } = req.user;
-    const recipientId   = id_warga || id;
-    const recipientRole = role;
+    const { recipientId, recipientRole } = NotificationService.resolveActorNotificationTarget(req.user);
+
+    if (!recipientId || !recipientRole) {
+      return res.status(400).json({ success: false, message: 'Data penerima notifikasi tidak valid' });
+    }
 
     const [notifs] = await pool.query(
       `SELECT * FROM notifications
@@ -28,7 +31,12 @@ const getNotifications = async (req, res) => {
 const markAsRead = async (req, res) => {
   try {
     const { id } = req.params;
-    await pool.query('UPDATE notifications SET is_read = TRUE WHERE id = ?', [id]);
+    const { recipientId, recipientRole } = NotificationService.resolveActorNotificationTarget(req.user);
+
+    await pool.query(
+      'UPDATE notifications SET is_read = TRUE WHERE id = ? AND recipient_id = ? AND recipient_role = ?',
+      [id, recipientId, recipientRole]
+    );
     return res.json({ success: true });
   } catch (err) {
     return res.status(500).json({ success: false, message: err.message });
@@ -38,11 +46,11 @@ const markAsRead = async (req, res) => {
 // Tandai semua sebagai sudah dibaca
 const markAllAsRead = async (req, res) => {
   try {
-    const { id_warga, id, role } = req.user;
-    const recipientId   = id_warga || id;
+    const { recipientId, recipientRole } = NotificationService.resolveActorNotificationTarget(req.user);
+
     await pool.query(
       'UPDATE notifications SET is_read = TRUE WHERE recipient_id = ? AND recipient_role = ?',
-      [recipientId, role]
+      [recipientId, recipientRole]
     );
     return res.json({ success: true });
   } catch (err) {
@@ -50,4 +58,4 @@ const markAllAsRead = async (req, res) => {
   }
 };
 
-module.exports = { getNotifications, markAsRead, markAllAsRead };
+module.exports = { getNotifications, markAsRead, markAllAsRead };

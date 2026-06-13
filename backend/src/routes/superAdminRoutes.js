@@ -14,7 +14,9 @@ router.post('/login',    authController.loginSuperadmin);
 
 // ─── Dashboard Stats ─────────────────────────────────────────────────────────
 router.get('/dashboard',     ...guard, sa.getDashboardStats);
+router.get('/dashboard-stats', ...guard, sa.getDashboardStats);
 router.get('/stats/warga/:rw_id', ...guard, sa.getWargaStats);
+router.get('/warga-stats/:rw_id', ...guard, sa.getWargaStats);
 
 // ─── Legacy (lama) ───────────────────────────────────────────────────────────
 router.post('/rt',   verifyToken, requireSuperadmin, authController.insertRt);

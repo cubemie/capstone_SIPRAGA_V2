@@ -1,11 +1,9 @@
-// frontend/src/pages/superadmin/TemplateSuratMarkdown.jsx — FILE BARU
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api } from '../../utils/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { Plus, Eye, Trash2, Edit3, Save, X } from 'lucide-react';
+import { Plus, Eye, Trash2, Edit3, Save } from 'lucide-react';
 
 // Panduan variabel Mustache yang tersedia
 const VARIABLE_HINTS = [
@@ -63,13 +61,12 @@ export default function TemplateSuratMarkdown() {
   const [editingId, setEditingId]   = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [form, setForm]             = useState({ name: '', letter_type_id: '', markdown_content: MARKDOWN_STARTER });
-  const [previewUrl, setPreviewUrl] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: templates = [], isLoading } = useQuery({
     queryKey: ['markdown-templates'],
     queryFn: async () => {
-      const { data, error } = await api.get('/superadmin/templates/markdown');
+      const { data, error } = await api.get('/superadmin/templates');
       if (error) throw new Error(error);
       return data?.data || [];
     },
@@ -85,7 +82,7 @@ export default function TemplateSuratMarkdown() {
 
   const createMutation = useMutation({
     mutationFn: async (payload) => {
-      const { data, error } = await api.post('/superadmin/templates/markdown', payload);
+      const { data, error } = await api.post('/superadmin/templates', payload);
       if (error) throw new Error(error);
       return data;
     },
@@ -100,7 +97,7 @@ export default function TemplateSuratMarkdown() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, payload }) => {
-      const { data, error } = await api.put(`/superadmin/templates/markdown/${id}`, payload);
+      const { data, error } = await api.put(`/superadmin/templates/${id}`, payload);
       if (error) throw new Error(error);
       return data;
     },
@@ -113,7 +110,7 @@ export default function TemplateSuratMarkdown() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => api.delete(`/superadmin/templates/markdown/${id}`),
+    mutationFn: (id) => api.delete(`/superadmin/templates/${id}`),
     onSuccess: () => {
       toast.success('Template dihapus');
       queryClient.invalidateQueries({ queryKey: ['markdown-templates'] });
@@ -121,8 +118,35 @@ export default function TemplateSuratMarkdown() {
   });
 
   const handlePreview = async (id) => {
-    // Buka PDF preview di tab baru
-    window.open(`${import.meta.env.VITE_API_URL}/superadmin/templates/markdown/${id}/preview`, '_blank');
+    const token = localStorage.getItem('token');
+    if (!token) {
+      toast.error('Token login tidak ditemukan.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/superadmin/templates/${id}/preview`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Preview template gagal dibuka.');
+      }
+
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const previewWindow = window.open(objectUrl, '_blank', 'noopener,noreferrer');
+
+      if (!previewWindow) {
+        window.location.href = objectUrl;
+      }
+
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+    } catch (error) {
+      toast.error(error.message || 'Preview template gagal dibuka.');
+    }
   };
 
   const TemplateForm = ({ initial, onSave, onCancel, saving }) => {
@@ -311,4 +335,4 @@ export default function TemplateSuratMarkdown() {
       </div>
     </DashboardLayout>
   );
-}
+}

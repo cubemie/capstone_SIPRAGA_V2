@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Clock, XCircle, Loader2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Clock, Plus, XCircle, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../utils/api';
 
@@ -52,9 +52,10 @@ export default function WargaDashboard() {
         </div>
         <Link
           to="/warga/buat-surat-v2"
-          className="bg-[var(--color-surface-card)] text-[var(--color-primary)] px-5 py-2.5 rounded-xl font-bold hover:bg-[var(--color-brand-50)] transition shadow text-sm self-start md:self-auto whitespace-nowrap"
+          className="bg-[var(--color-surface-card)] text-[var(--color-primary)] px-5 py-2.5 rounded-xl font-bold hover:bg-[var(--color-brand-50)] transition shadow text-sm self-start md:self-auto whitespace-nowrap inline-flex items-center gap-2"
         >
-          + Ajukan Surat Baru
+          <Plus className="w-4 h-4" />
+          Ajukan Surat Baru
         </Link>
       </div>
 
@@ -82,7 +83,10 @@ export default function WargaDashboard() {
         <div className="px-5 py-4 border-b border-[var(--color-surface-border)] flex justify-between items-center bg-[var(--color-surface)]">
           <h4 className="font-bold text-[var(--color-ink)] text-sm">Status Pengajuan Terakhir</h4>
           <Link to="/warga/riwayat" className="text-xs text-[var(--color-primary)] font-bold hover:underline">
-            Lihat Semua →
+            <span className="inline-flex items-center gap-1">
+              Lihat Semua
+              <ArrowRight className="w-3.5 h-3.5" />
+            </span>
           </Link>
         </div>
         <div className="overflow-x-auto">

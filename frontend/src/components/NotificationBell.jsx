@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Bell, X } from 'lucide-react';
+import { Bell, CheckCircle2, Clock3, FileText, ShieldAlert, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../utils/api';
 
@@ -47,10 +47,10 @@ export default function NotificationBell() {
   const notifications = data?.notifications ?? [];
 
   const TYPE_ICONS = {
-    NEW_LETTER:  '📩',
-    APPROVED:    '✅',
-    REJECTED:    '❌',
-    REMINDER:    '⏰',
+    NEW_LETTER: FileText,
+    APPROVED: CheckCircle2,
+    REJECTED: ShieldAlert,
+    REMINDER: Clock3,
   };
 
   return (
@@ -107,7 +107,10 @@ export default function NotificationBell() {
                     !notif.is_read ? 'bg-brand-50/50' : ''
                   }`}
                 >
-                  <span className="text-lg flex-shrink-0">{TYPE_ICONS[notif.type] ?? '🔔'}</span>
+                  {(() => {
+                    const Icon = TYPE_ICONS[notif.type] || Bell;
+                    return <Icon className="w-4.5 h-4.5 mt-0.5 flex-shrink-0 text-brand-600" />;
+                  })()}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-ink truncate">{notif.title}</p>
                     <p className="text-xs text-ink-secondary mt-0.5 line-clamp-2">{notif.message}</p>
@@ -128,4 +131,4 @@ export default function NotificationBell() {
       )}
     </div>
   );
-}
+}

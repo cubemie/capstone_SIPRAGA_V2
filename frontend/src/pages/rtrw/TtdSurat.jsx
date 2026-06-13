@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import SignatureCanvas from 'react-signature-canvas';
+import { Eraser, ImageUp, PenTool, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { getTtd, uploadTtd } from '../../services/ttdService';
 
@@ -58,11 +59,11 @@ export default function TtdSurat() {
       <h1 className="text-2xl font-bold text-[var(--color-ink)] mb-6">Tanda Tangan Digital</h1>
 
       {/* TTD Tersimpan */}
-      {ttdData?.ttd_digital && (
+      {ttdData?.data?.ttd_url && (
         <div className="mb-6 p-4 border rounded-lg bg-[var(--color-surface-muted)]">
           <p className="text-sm font-medium text-[var(--color-ink-secondary)] mb-2">TTD Saat Ini</p>
           <img
-            src={ttdData.ttd_digital}
+            src={ttdData.data.ttd_url}
             alt="TTD Tersimpan"
             className="max-h-24 border rounded bg-[var(--color-surface-card)] p-2"
           />
@@ -101,9 +102,9 @@ export default function TtdSurat() {
           <button
             onClick={() => fileInputRef.current.click()}
             disabled={mutation.isPending}
-            className="w-full border-2 border-dashed border-[var(--color-surface-border)] rounded-lg py-12 text-[var(--color-ink-muted)] hover:border-[var(--color-primary-light)] hover:text-[var(--color-primary-dark)] transition-colors"
+            className="w-full border-2 border-dashed border-[var(--color-surface-border)] rounded-lg py-12 text-[var(--color-ink-muted)] hover:border-[var(--color-primary-light)] hover:text-[var(--color-primary-dark)] transition-colors flex flex-col items-center justify-center"
           >
-            <p className="text-lg">📎</p>
+            <ImageUp className="w-7 h-7" />
             <p className="text-sm mt-1">Klik untuk pilih file PNG/JPG</p>
           </button>
         </div>
@@ -125,15 +126,17 @@ export default function TtdSurat() {
           <div className="flex gap-2">
             <button
               onClick={() => sigCanvas.current.clear()}
-              className="flex-1 border border-[var(--color-surface-border)] text-[var(--color-ink-secondary)] py-2 rounded-lg text-sm hover:bg-[var(--color-surface-muted)]"
+              className="flex-1 border border-[var(--color-surface-border)] text-[var(--color-ink-secondary)] py-2 rounded-lg text-sm hover:bg-[var(--color-surface-muted)] flex items-center justify-center gap-2"
             >
+              <Eraser className="w-4 h-4" />
               Hapus
             </button>
             <button
               onClick={handleSaveCanvas}
               disabled={mutation.isPending}
-              className="flex-1 bg-[var(--color-primary)] text-white py-2 rounded-lg text-sm font-medium hover:bg-[var(--color-primary-dark)] disabled:opacity-50"
+              className="flex-1 bg-[var(--color-primary)] text-white py-2 rounded-lg text-sm font-medium hover:bg-[var(--color-primary-dark)] disabled:opacity-50 flex items-center justify-center gap-2"
             >
+              {mutation.isPending ? <PenTool className="w-4 h-4 animate-pulse" /> : <Save className="w-4 h-4" />}
               {mutation.isPending ? 'Menyimpan...' : 'Simpan TTD'}
             </button>
           </div>

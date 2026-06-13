@@ -115,10 +115,12 @@ class WargaService {
     // file.path berisi URL Cloudinary penuh (e.g. https://res.cloudinary.com/...)
     const cloudinaryUrl = file.path;
 
-    if (user.role === 'rt') {
-      await RtRwModel.updateTtdRt(user.id, cloudinaryUrl);
-    } else {
-      await RtRwModel.updateTtdRw(user.id, cloudinaryUrl);
+    const updated = user.role === 'rt'
+      ? await RtRwModel.updateTtdRt(user.id, cloudinaryUrl)
+      : await RtRwModel.updateTtdRw(user.id, cloudinaryUrl);
+
+    if (!updated) {
+      return { data: null, error: 'Akun RT/RW tidak ditemukan sehingga TTD gagal disimpan.' };
     }
 
     return {

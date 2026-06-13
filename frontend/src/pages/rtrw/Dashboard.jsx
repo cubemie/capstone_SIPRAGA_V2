@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Clock, CheckCircle2, Loader2, AlertCircle, X } from 'lucide-react';
+import { ArrowRight, FileText, Inbox, Clock, CheckCircle2, Loader2, AlertCircle, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useSurat } from '../../hooks/useSurat';
 import { suratService } from '../../services/suratService';
@@ -205,8 +205,14 @@ export default function RtRwDashboard() {
       {v2Pending.length > 0 && (
         <div className="mt-6">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-[var(--color-ink)]">📬 Surat Masuk V2 ({v2Pending.length})</h3>
-            <Link to="/rtrw/inbox" className="text-xs text-[var(--color-primary)] hover:underline">Lihat semua →</Link>
+            <h3 className="font-semibold text-[var(--color-ink)] inline-flex items-center gap-2">
+              <Inbox className="w-4.5 h-4.5 text-[var(--color-primary)]" />
+              Surat Masuk V2 ({v2Pending.length})
+            </h3>
+            <Link to="/rtrw/inbox" className="text-xs text-[var(--color-primary)] hover:underline inline-flex items-center gap-1">
+              Lihat semua
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
           <div className="space-y-2">
             {v2Pending.slice(0, 3).map(letter => (
