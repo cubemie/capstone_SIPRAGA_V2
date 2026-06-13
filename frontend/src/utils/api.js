@@ -1,10 +1,5 @@
 /**
  * HTTP Client terpusat untuk semua request ke backend.
- *
- * Fitur:
- * - Auto-inject Authorization: Bearer <token> dari localStorage
- * - Kembalikan { data, error } agar mudah di-handle di service/komponen
- * - Support JSON dan FormData (untuk upload file)
  */
 
 const BASE_URL = '/api';
@@ -15,11 +10,9 @@ function getToken() {
 
 async function request(endpoint, options = {}) {
   const token = getToken();
-
   const isFormData = options.body instanceof FormData;
 
   const headers = {
-    // Jangan set Content-Type jika FormData — browser akan set otomatis dengan boundary
     ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
@@ -59,14 +52,9 @@ export const api = {
   delete: (endpoint) =>
     request(endpoint, { method: 'DELETE' }),
 
-  /** Khusus untuk upload file (FormData) */
   postFormData: (endpoint, formData) =>
     request(endpoint, { method: 'POST', body: formData }),
 
-  /** Khusus untuk update file (FormData) via PUT */
   putFormData: (endpoint, formData) =>
     request(endpoint, { method: 'PUT', body: formData }),
-  put: async (path, body) => { /* same pattern as post */ },
-  patch: async (path, body) => { /* same pattern as post */ },
-
 };

@@ -39,66 +39,84 @@ capstone_RT-RW_CORETAX/
 
 ## Panduan Setup untuk Tim
 
-Untuk rekan-rekan tim, silakan ikuti langkah berikut untuk menjalankan aplikasi di komputer masing-masing. **Kalian tidak perlu menginstal Docker**, cukup gunakan Node.js dan MySQL lokal (seperti XAMPP).
+Backend dan database **wajib dijalankan via Docker Compose**. Frontend dijalankan lokal dengan Vite.
 
 ### 1. Persiapan Awal (Prasyarat)
-- **Node.js**: Wajib diinstal (minimal v18) untuk menjalankan backend dan frontend.
-- **MySQL / XAMPP**: Pastikan server database MySQL lokal sudah terinstal dan menyala.
-- **Git**: Untuk proses pull/push kode.
+- **Docker Desktop**: Wajib terinstal dan menyala.
+- **Node.js**: v18+ (hanya untuk menjalankan frontend).
+- **Git**: Untuk pull/push kode.
 
-### 2. Setup Database Lokal
-1. Buka MySQL kalian (lewat phpMyAdmin atau DBeaver).
-2. Buat database baru dengan nama `capstone`.
-3. Import file `database/init.sql` ke dalam database `capstone` tersebut agar tabel-tabelnya otomatis terbuat.
+### 2. Setup Environment Backend
+1. Salin template environment:
+   ```bash
+   cp backend/.env.example backend/.env
+   ```
+2. **Jangan ubah** `DB_HOST=db` dan `REDIS_HOST=redis` — itu nama service Docker, bukan localhost.
+3. Sesuaikan `JWT_SECRET` dan kredensial opsional (Supabase, SMTP, dll.) jika perlu.
 
-### 3. Cara Menjalankan Backend (Manual)
-1. Buka terminal dan masuk ke folder `backend`:
-   ```bash
-   cd backend
-   ```
-2. Buat file `.env` dengan menyalin template yang ada:
-   ```bash
-   cp .env.example .env
-   ```
-3. Buka file `.env` yang baru dibuat dan pastikan konfigurasinya mengarah ke MySQL lokal kalian:
-   `DB_HOST=localhost`
-   `DB_PORT=3306` (atau sesuaikan dengan port MySQL kalian)
-4. Instal dependencies backend:
-   ```bash
-   npm install
-   ```
-5. Jalankan backend:
-   ```bash
-   npm run dev
-   ```
-   Backend akan berjalan di `http://localhost:3000`.
+### 3. Jalankan Backend + Database + Redis (Docker)
+Dari root proyek:
+```bash
+# Production-like
+docker compose up --build -d
 
-### 4. Cara Menjalankan Frontend
-1. Buka tab terminal baru, lalu masuk ke folder `frontend`:
-   ```bash
-   cd frontend
-   ```
-2. Instal dependencies frontend:
-   ```bash
-   npm install
-   ```
-3. Jalankan server frontend:
-   ```bash
-   npm run dev
-   ```
-4. Buka browser dan ketik alamat: `http://localhost:5173`
+# Atau development (hot-reload backend)
+docker compose -f docker-compose.dev.yml up --build
+```
+
+Setelah container healthy:
+- Backend API: `http://localhost:3000`
+- MySQL (akses dari host): `localhost:3307` (user `root`, password `root`, db `capstone`)
+- Redis: `localhost:6379`
+
+Database otomatis diinisialisasi dari:
+`00-base.sql` → `init.sql` → `seed.sql` → `seed_workflows.sql`
+
+### 4. Jalankan Frontend (Lokal)
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Buka browser: `http://localhost:5173`
+
+Frontend mem-proxy request `/api` ke `http://localhost:3000` (backend Docker).
+
+### 5. Perintah Docker Berguna
+```bash
+# Lihat log backend
+docker compose logs -f backend
+
+# Stop semua container
+docker compose down
+
+# Reset database (hapus volume)
+docker compose down -v
+docker compose up --build -d
+```
 
 ---
 
-## Cara Menjalankan Menggunakan Docker (Khusus Setup / PIC Server)
-Bagian ini **opsional** dan utamanya digunakan oleh PIC yang mengatur environment Docker (tidak wajib untuk anggota tim lain).
+## Setup Manual (Tidak Direkomendasikan)
+Jika benar-benar perlu menjalankan backend tanpa Docker, ubah `DB_HOST=localhost` di `.env` dan siapkan MySQL/Redis lokal sendiri. **Tim development menggunakan Docker sebagai standar.**
 
-1. Pastikan Docker Desktop menyala.
-2. Buka terminal di root proyek, jalankan:
-   ```bash
-   docker compose up --build -d
-   ```
-*(Untuk menggunakan Docker, pastikan `DB_HOST=db` di dalam `.env` backend).*
+<details>
+<summary>Instruksi manual lama (legacy)</summary>
+
+### Setup Database Lokal
+1. Buat database `capstone`.
+2. Import `database/init.sql`, `database/seed.sql`, dan `database/seed_workflows.sql`.
+
+### Backend Manual
+```bash
+cd backend
+cp .env.example .env
+# Ubah DB_HOST=localhost, REDIS_HOST=localhost di .env
+npm install
+npm run dev
+```
+
+</details>
 
 
 

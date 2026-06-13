@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LETTER_STATUS_V2 } from '../../../constants/suratStatus';
 import { api } from '../../../utils/api';
@@ -11,7 +11,8 @@ import LetterPdfTemplate from '../components/pdf/LetterPdfTemplate';
 
 const fetchLetterDetail = async (uuid) => {
   const res = await api.get(`/v2/letters/${uuid}`);
-  return res.data.data;
+  if (res.error) throw new Error(res.error);
+  return res.data?.data;
 };
 
 const STATUS_ORDER = [
@@ -194,7 +195,10 @@ function TtdApprovalPanel({ uuid, status, userTtdUrl }) {
 
 export default function LetterDetailPage() {
   const { uuid } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
+  const backPath = user?.role === 'warga' ? '/warga/riwayat' : '/rtrw/inbox';
+  const backLabel = user?.role === 'warga' ? '← Riwayat Surat' : '← Kotak Masuk';
   const queryClient = useQueryClient();
   const [rejectNotes, setRejectNotes] = useState('');
   const [approveNotes, setApproveNotes] = useState('');
@@ -230,7 +234,7 @@ export default function LetterDetailPage() {
     enabled: ['rt', 'rw'].includes(user?.role),
   });
 
-  const { data: letter, isLoading } = useQuery({
+  const { data: letter, isLoading, error } = useQuery({
     queryKey: ['letter-detail', uuid],
     queryFn: () => fetchLetterDetail(uuid),
     enabled: !!uuid,
@@ -242,6 +246,14 @@ export default function LetterDetailPage() {
         {[1, 2, 3].map((i) => (
           <div key={i} className="h-24 bg-gray-100 rounded-lg animate-pulse" />
         ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-3xl mx-auto p-6 text-center text-red-500 py-16">
+        Gagal memuat surat: {error.message}
       </div>
     );
   }
@@ -298,6 +310,13 @@ export default function LetterDetailPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-6 space-y-6">
+      <button
+        onClick={() => navigate(backPath)}
+        className="mb-4 text-xs text-gray-500 hover:text-gray-700 inline-flex items-center gap-1"
+      >
+        {backLabel}
+      </button>
+
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

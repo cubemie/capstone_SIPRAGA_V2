@@ -51,8 +51,22 @@ class LettersController {
         throw new Error('Resident ID tidak ditemukan di dalam token JWT');
       }
 
+      const [wargaRows] = await pool.query('SELECT rt, rw FROM warga WHERE id_warga = ?', [residentId]);
+      const warga = wargaRows[0];
+      let tenantId = 'RW001';
+
+      if (warga?.rw) {
+        const rwVal = String(warga.rw).trim();
+        const rwCandidate = rwVal.startsWith('RW') ? rwVal : `RW${rwVal.padStart(3, '0')}`;
+        const [rwRows] = await pool.query(
+          `SELECT rw_id FROM rw WHERE rw_id = ? OR no_rw = ? OR rw_id = ? LIMIT 1`,
+          [rwVal, rwVal, rwCandidate]
+        );
+        tenantId = rwRows[0]?.rw_id || 'RW001';
+      }
+
       const payload = {
-        tenant_id: req.tenantId || req.user?.rw_id || 1, // Fallback safe
+        tenant_id: tenantId,
         resident_id: residentId,
         letter_type_id,
         workflow_option_id,
@@ -98,6 +112,14 @@ class LettersController {
     try {
       const { uuid } = req.params;
       const detail = await LettersService.getLetterDetail(uuid);
+
+      if (req.user?.role === 'warga') {
+        const residentId = req.user?.id_warga;
+        if (detail.resident_id !== residentId) {
+          return res.status(403).json({ success: false, message: 'Akses ditolak' });
+        }
+      }
+
       res.json({ success: true, data: detail });
     } catch (error) {
       console.error("Error getLetterDetail:", error);
@@ -196,28 +218,38 @@ class LettersController {
   static async approveLetter(req, res) {
     try {
       const { uuid } = req.params;
-      const role = req.user?.role || 'admin_rt'; // Fallback for dev
-      const approverId = req.user?.id || 1; // Fallback for dev
-      const result = await ApprovalsService.approveLetter(uuid, role, null, null, approverId);
-      res.json({ success: true, data: result, message: "Surat berhasil disetujui" });
+      const { notes, signature_url } = req.body;
+      const role = req.user?.role;
+      const approverId = req.user?.id;
+
+      if (!role || !approverId) {
+        return res.status(401).json({ success: false, message: 'Data user tidak valid' });
+      }
+
+      const result = await ApprovalsService.approveLetter(uuid, role, notes, signature_url, approverId);
+      res.json({ success: true, data: result, message: 'Surat berhasil disetujui' });
     } catch (error) {
-      console.error("Error approveLetter:", error);
-      res.status(400).json({ success: false, message: error.message || "Gagal menyetujui surat" });
+      console.error('Error approveLetter:', error);
+      res.status(400).json({ success: false, message: error.message || 'Gagal menyetujui surat' });
     }
   }
 
   static async rejectLetter(req, res) {
     try {
       const { uuid } = req.params;
-      const role = req.user?.role || 'admin_rt'; // Fallback for dev
-      const approverId = req.user?.id || 1; // Fallback for dev
-      const { reason } = req.body;
-      
-      await ApprovalsService.rejectLetter(uuid, role, reason, approverId);
-      res.json({ success: true, message: "Surat berhasil ditolak" });
+      const { notes, reason } = req.body;
+      const role = req.user?.role;
+      const approverId = req.user?.id;
+
+      if (!role || !approverId) {
+        return res.status(401).json({ success: false, message: 'Data user tidak valid' });
+      }
+
+      await ApprovalsService.rejectLetter(uuid, role, notes || reason, approverId);
+      res.json({ success: true, message: 'Surat berhasil ditolak' });
     } catch (error) {
-      console.error("Error rejectLetter:", error);
-      res.status(400).json({ success: false, message: error.message || "Gagal menolak surat" });
+      console.error('Error rejectLetter:', error);
+      res.status(400).json({ success: false, message: error.message || 'Gagal menolak surat' });
     }
   }
   static async uploadAttachments(req, res) {
@@ -254,7 +286,12 @@ class LettersController {
           .from(supabaseBucket)
           .getPublicUrl(fileName);
 
-        await LettersModel.insertAttachment(letter.id, publicUrlData.publicUrl);
+        await LettersModel.insertAttachment(letter.id, {
+          original_name: file.originalname,
+          file_url: publicUrlData.publicUrl,
+          mime_type: file.mimetype || 'application/octet-stream',
+          file_size: file.size || 0,
+        });
         return publicUrlData.publicUrl;
       });
 

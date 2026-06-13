@@ -10,6 +10,7 @@ services:
       - ./database/00-base.sql:/docker-entrypoint-initdb.d/00-base.sql
       - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
       - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+      - ./database/seed_workflows.sql:/docker-entrypoint-initdb.d/03-seed_workflows.sql
       - mysql_data:/var/lib/mysql
     ports:
       - "3307:3306"
@@ -32,10 +33,12 @@ services:
     env_file: ./backend/.env
     environment:
       DB_HOST: db
-      REDIS_HOST: redis
-      DB_NAME: capstone
+      DB_PORT: 3306
       DB_USER: root
       DB_PASSWORD: root
+      DB_NAME: capstone
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     ports:
       - "3000:3000"
     depends_on:

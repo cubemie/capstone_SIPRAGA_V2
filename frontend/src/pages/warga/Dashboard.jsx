@@ -111,11 +111,19 @@ export default function WargaDashboard() {
                 {recentSurat.map((s) => (
                   <tr key={s.uuid} className="hover:bg-slate-50/60 transition">
                     <td className="px-5 py-4 whitespace-nowrap font-medium text-slate-800">
-                      {formatDate(s.created_at)}
+                      <Link to={`/warga/surat/${s.uuid}`} className="hover:text-blue-600 hover:underline">
+                        {formatDate(s.created_at)}
+                      </Link>
                     </td>
-                    <td className="px-5 py-4">{s.letter_type_name || '-'}</td>
+                    <td className="px-5 py-4">
+                      <Link to={`/warga/surat/${s.uuid}`} className="hover:text-blue-600 hover:underline">
+                        {s.letter_type_name || '-'}
+                      </Link>
+                    </td>
                     <td className="px-5 py-4 whitespace-nowrap">
-                      {getStatusBadge(s.status)}
+                      <Link to={`/warga/surat/${s.uuid}`}>
+                        {getStatusBadge(s.status)}
+                      </Link>
                     </td>
                   </tr>
                 ))}

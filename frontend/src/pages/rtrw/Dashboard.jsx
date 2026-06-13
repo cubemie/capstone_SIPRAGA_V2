@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { FileText, Clock, CheckCircle2, Loader2, AlertCircle, X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useSurat } from '../../hooks/useSurat';
 import { suratService } from '../../services/suratService';
+import { api } from '../../utils/api';
 import { toast } from 'sonner';
 import { SURAT_STATUS } from '../../constants/suratStatus';
 
@@ -66,6 +69,17 @@ export default function RtRwDashboard() {
   const { data: suratMasuk, loading, error, refetch } = useSurat('masuk');
   const [actionLoading, setActionLoading] = useState(null);
   const [rejectModalId, setRejectModalId] = useState(null);
+
+  const { data: v2Inbox = [] } = useQuery({
+    queryKey: ['inbox-rtrw'],
+    queryFn: async () => {
+      const res = await api.get('/v2/letters/inbox');
+      return res.data?.data || [];
+    },
+    refetchInterval: 30000,
+  });
+
+  const v2Pending = v2Inbox.filter(l => ['submitted', 'in_review_rt', 'approved_rt', 'in_review_rw'].includes(l.status));
 
   const handleApprove = async (id) => {
     setActionLoading(id);
@@ -187,6 +201,34 @@ export default function RtRwDashboard() {
           </div>
         )}
       </div>
+
+      {v2Pending.length > 0 && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-slate-800">📬 Surat Masuk V2 ({v2Pending.length})</h3>
+            <Link to="/rtrw/inbox" className="text-xs text-blue-600 hover:underline">Lihat semua →</Link>
+          </div>
+          <div className="space-y-2">
+            {v2Pending.slice(0, 3).map(letter => (
+              <Link
+                key={letter.uuid}
+                to={`/rtrw/surat/${letter.uuid}`}
+                className="block p-3 bg-white border border-slate-200 rounded-xl hover:shadow-sm transition"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-medium text-slate-800">{letter.resident_name}</p>
+                    <p className="text-xs text-slate-500">{letter.letter_type_name}</p>
+                  </div>
+                  <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
+                    {letter.status === 'submitted' ? 'Menunggu' : 'Diproses'}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

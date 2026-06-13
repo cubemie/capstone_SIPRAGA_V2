@@ -6,7 +6,8 @@ import { api } from '../../../utils/api';
 
 const fetchInbox = async () => {
   const res = await api.get('/v2/letters/inbox');
-  return res.data.data;
+  if (res.error) throw new Error(res.error);
+  return res.data?.data || [];
 };
 
 const TABS = [
@@ -18,15 +19,15 @@ const TABS = [
 export default function LetterInboxPage() {
   const [activeTab, setActiveTab] = useState('all');
 
-  const { data: letters = [], isLoading } = useQuery({
+  const { data: letters = [], isLoading, error } = useQuery({
     queryKey: ['inbox-rtrw'],
     queryFn: fetchInbox,
-    refetchInterval: 30000, // refresh tiap 30 detik
+    refetchInterval: 30000,
   });
 
   const filtered = letters.filter((l) => {
     if (activeTab === 'all') return true;
-    if (activeTab === 'waiting') return ['submitted', 'approved_rt'].includes(l.status);
+    if (activeTab === 'waiting') return ['submitted', 'in_review_rt', 'approved_rt'].includes(l.status);
     if (activeTab === 'process') return ['in_review_rt', 'in_review_rw'].includes(l.status);
     return true;
   });
@@ -34,6 +35,12 @@ export default function LetterInboxPage() {
   return (
     <div className="max-w-3xl mx-auto p-6">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Inbox Surat Masuk</h1>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+          Gagal memuat inbox: {error.message}
+        </div>
+      )}
 
       <div className="flex gap-2 mb-4 border-b">
         {TABS.map((tab) => (
@@ -47,6 +54,11 @@ export default function LetterInboxPage() {
             }`}
           >
             {tab.label}
+            {tab.key === 'all' && letters.length > 0 && (
+              <span className="ml-1.5 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full">
+                {letters.length}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -61,7 +73,8 @@ export default function LetterInboxPage() {
 
       {!isLoading && filtered.length === 0 && (
         <div className="text-center text-gray-400 py-16">
-          <p>Tidak ada surat masuk</p>
+          <p className="text-3xl mb-2">📭</p>
+          <p className="font-medium">Tidak ada surat masuk</p>
         </div>
       )}
 
@@ -74,7 +87,7 @@ export default function LetterInboxPage() {
           return (
             <Link
               key={letter.uuid}
-              to={`/letters/${letter.uuid}`}
+              to={`/rtrw/surat/${letter.uuid}`}
               className="block border rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
             >
               <div className="flex items-center justify-between">

@@ -1,5 +1,7 @@
 # ============================================================
-# docker-compose.dev.yml — FIXED VERSION
+# docker-compose.dev.yml — Development dengan hot-reload backend
+# Backend + Database + Redis semua di Docker.
+# Frontend tetap dijalankan lokal: cd frontend && npm run dev
 # ============================================================
 
 services:
@@ -7,29 +9,30 @@ services:
     image: mysql:8.0
     container_name: coretax_db_dev
     environment:
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_DATABASE=capstone
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: capstone
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data_dev:/var/lib/mysql
-      # Pastikan folder database/init.sql ada di folder utama kamu
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./database/00-base.sql:/docker-entrypoint-initdb.d/00-base.sql:ro
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - ./database/seed_workflows.sql:/docker-entrypoint-initdb.d/03-seed_workflows.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     container_name: coretax_redis_dev
     ports:
-      - "6380:6379"
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
 
-  # NOTE: Jika kamu ingin menjalankan backend lewat terminal Windows (npm run dev),
-  # kamu bisa mematikan service backend ini atau biarkan saja tapi jangan jalankan npm run dev di Windows.
-  # Saya tetap sertakan agar docker-compose tetap valid.
   backend:
     build: ./backend
     container_name: coretax_backend_dev
@@ -37,9 +40,13 @@ services:
       - "3000:3000"
     env_file: ./backend/.env
     environment:
-      - REDIS_URL=redis://redis:6379
-      - DB_HOST=db
-      - DB_PASSWORD=root
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: capstone
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     volumes:
       - ./backend/src:/app/src
     command: npx nodemon src/server.js
@@ -47,7 +54,7 @@ services:
       db:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
 
 volumes:
   db_data_dev:

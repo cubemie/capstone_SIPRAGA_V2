@@ -16,7 +16,7 @@ VALUES (
   'Banyumanik',
   'Srondol Wetan',
   'ketuarw001',
-  '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'
+  '$2b$10$YikZd8a/51iYuyP5HdQhHuysQ3UG3RyXnlUyKpP726C7JRhX7da16'
 );
 
 -- RT Default (FK ke RW001)
@@ -30,7 +30,7 @@ VALUES (
   'Banyumanik',
   'Srondol Wetan',
   'ketuart001',
-  '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy'
+  '$2b$10$YikZd8a/51iYuyP5HdQhHuysQ3UG3RyXnlUyKpP726C7JRhX7da16'
 );
 
 INSERT IGNORE INTO letter_types (code, name, description, required_docs, sort_order) VALUES

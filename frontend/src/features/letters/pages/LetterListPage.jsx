@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { getLettersV2 } from '../../../services/suratService';
 import { LETTER_STATUS_V2 } from '../../../constants/suratStatus';
+import { useAuth } from '../../../context/AuthContext';
 
 const TABS = [
   { key: 'all', label: 'Semua' },
@@ -15,6 +16,10 @@ const PROCESS_STATUSES = ['submitted', 'in_review_rt', 'approved_rt', 'in_review
 
 export default function LetterListPage() {
   const [activeTab, setActiveTab] = useState('all');
+  const { user } = useAuth();
+
+  const pathPrefix = user?.role === 'warga' ? '/warga' : '/rtrw';
+  const newLetterPath = user?.role === 'warga' ? '/warga/buat-surat-v2' : '/rtrw/buat-surat-v2';
 
   const { data: letters = [], isLoading } = useQuery({
     queryKey: ['letters-v2'],
@@ -34,14 +39,13 @@ export default function LetterListPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Surat Saya</h1>
         <Link
-          to="/letters/new"
+          to={newLetterPath}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
         >
           + Ajukan Surat
         </Link>
       </div>
 
-      {/* Tab Filter */}
       <div className="flex gap-2 mb-4 border-b">
         {TABS.map((tab) => (
           <button
@@ -82,7 +86,7 @@ export default function LetterListPage() {
           return (
             <Link
               key={letter.uuid}
-              to={`/letters/${letter.uuid}`}
+              to={`${pathPrefix}/surat/${letter.uuid}`}
               className="block border rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
             >
               <div className="flex items-center justify-between">
@@ -98,9 +102,7 @@ export default function LetterListPage() {
                     })}
                   </p>
                 </div>
-                <span
-                  className={`text-xs font-medium px-3 py-1 rounded-full ${statusInfo.color}`}
-                >
+                <span className={`text-xs font-medium px-3 py-1 rounded-full ${statusInfo.color}`}>
                   {statusInfo.label}
                 </span>
               </div>

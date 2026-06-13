@@ -69,6 +69,7 @@ const LettersModel = {
     const [rows] = await db.query(
       `SELECT l.*,
               lt.name AS letter_type_name,
+              lwo.code AS workflow_code,
               w.nama AS resident_name, w.NIK AS resident_nik,
               lwo.name AS workflow_name, lwo.steps AS workflow_steps
        FROM letters l
@@ -111,10 +112,10 @@ const LettersModel = {
 
     // Attachments
     const [attachments] = await db.query(
-      `SELECT file_url, created_at
+      `SELECT original_name, file_url, mime_type, uploaded_at
        FROM letter_attachments
        WHERE letter_id = ?
-       ORDER BY created_at ASC`,
+       ORDER BY uploaded_at ASC`,
       [letter.id]
     );
 
@@ -128,16 +129,19 @@ const LettersModel = {
   },
 
   async getInboxByRole(role, tenantId) {
-    let statusFilter;
+    let whereClause;
+    let params;
+
     if (role === 'rt') {
-      statusFilter = `l.status IN ('submitted', 'in_review_rt') AND l.tenant_id = ?`;
+      whereClause = `l.status IN ('submitted', 'in_review_rt') AND l.tenant_id = ?`;
+      params = [tenantId];
     } else if (role === 'rw') {
-      statusFilter = `l.status IN ('approved_rt', 'in_review_rw')`;
+      whereClause = `l.status IN ('approved_rt', 'in_review_rw') AND l.tenant_id = ?`;
+      params = [tenantId];
     } else {
       return [];
     }
 
-    const params = role === 'rt' ? [tenantId] : [];
     const [rows] = await db.query(
       `SELECT l.uuid, l.status, l.created_at, l.subject,
               lt.name AS letter_type_name,
@@ -145,7 +149,7 @@ const LettersModel = {
        FROM letters l
        JOIN letter_types lt ON l.letter_type_id = lt.id
        JOIN warga w ON l.resident_id = w.id_warga
-       WHERE ${statusFilter}
+       WHERE ${whereClause}
        ORDER BY l.created_at DESC`,
       params
     );
@@ -203,10 +207,12 @@ const LettersModel = {
     return result.affectedRows > 0;
   },
 
-  async insertAttachment(letterId, fileUrl) {
+  async insertAttachment(letterId, attachment) {
+    const { original_name, file_url, mime_type, file_size } = attachment;
     const [result] = await db.query(
-      `INSERT INTO letter_attachments (letter_id, file_url) VALUES (?, ?)`,
-      [letterId, fileUrl]
+      `INSERT INTO letter_attachments (letter_id, original_name, file_url, mime_type, file_size)
+       VALUES (?, ?, ?, ?, ?)`,
+      [letterId, original_name, file_url, mime_type, file_size]
     );
     return result.insertId;
   },
