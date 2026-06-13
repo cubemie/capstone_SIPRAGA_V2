@@ -1,65 +1,77 @@
-// backend/src/controllers/ProfileController.js
-// GANTI SELURUH ISI — versi lengkap dengan semua field
+/**
+ * ProfileController.js
+ * Menangani pengambilan dan pembaruan profil untuk Warga, RT, dan RW.
+ */
 
 const pool = require('../config/db');
 
 const getProfile = async (req, res) => {
   try {
-    const { id_warga } = req.user;
-    const [rows] = await pool.query(
-      `SELECT
-        id_warga, NIK, nama, email, no_hp,
-        tempat_lahir, tanggal_lahir, jenis_kelamin,
-        alamat, rt, rw, kelurahan_desa, kecamatan,
-        agama, status_perkawinan, pekerjaan,
-        kewarganegaraan, negara, provinsi, kota,
-        foto_ktp
-       FROM warga WHERE id_warga = ?`,
-      [id_warga]
-    );
-    if (!rows.length) {
+    // req.user didapat dari token saat login (authMiddleware)
+    // Pastikan login-rtrw mengirimkan 'id' dan 'role' di tokennya
+    const { id, role, id_warga } = req.user; 
+    
+    let query = "";
+    let userId = id || id_warga; // Mengantisipasi perbedaan nama variabel ID
+    let userData = null;
+
+    if (role === 'admin_rt') {
+      // Ambil dari tabel RT
+      const [rows] = await pool.query('SELECT * FROM rt WHERE rt_id = ?', [userId]);
+      userData = rows[0];
+    } else if (role === 'admin_rw') {
+      // Ambil dari tabel RW
+      const [rows] = await pool.query('SELECT * FROM rw WHERE rw_id = ?', [userId]);
+      userData = rows[0];
+    } else {
+      // Default: Ambil dari tabel Warga
+      const [rows] = await pool.query('SELECT * FROM warga WHERE id_warga = ?', [userId]);
+      userData = rows[0];
+    }
+
+    if (!userData) {
       return res.status(404).json({ success: false, message: 'Profil tidak ditemukan' });
     }
-    return res.json({ success: true, data: rows[0] });
+
+    // Hapus password agar tidak terkirim ke frontend
+    const { password, ...safeData } = userData;
+
+    return res.json({ success: true, data: safeData });
   } catch (err) {
+    console.error("Error getProfile:", err);
     return res.status(500).json({ success: false, message: 'Gagal mengambil profil', error: err.message });
   }
 };
 
 const updateProfile = async (req, res) => {
   try {
-    const { id_warga } = req.user;
-    const {
-      nama, email, no_hp, alamat, NIK,
-      tempat_lahir, tanggal_lahir, jenis_kelamin,
-      kelurahan_desa, kecamatan, agama,
-      status_perkawinan, pekerjaan,
-    } = req.body;
+    const { id, role, id_warga } = req.user;
+    const userId = id || id_warga;
+    const fields = req.body; // Data yang dikirim dari frontend
 
-    if (NIK && !/^\d{16}$/.test(NIK)) {
-      return res.status(400).json({ success: false, message: 'NIK harus 16 digit angka' });
+    let tableName = "";
+    let idColumn = "";
+
+    if (role === 'admin_rt') {
+      tableName = "rt";
+      idColumn = "rt_id";
+    } else if (role === 'admin_rw') {
+      tableName = "rw";
+      idColumn = "rw_id";
+    } else {
+      tableName = "warga";
+      idColumn = "id_warga";
     }
 
-    await pool.query(
-      `UPDATE warga SET
-         nama=?, email=?, no_hp=?, alamat=?, NIK=?,
-         tempat_lahir=?, tanggal_lahir=?, jenis_kelamin=?,
-         kelurahan_desa=?, kecamatan=?, agama=?,
-         status_perkawinan=?, pekerjaan=?
-       WHERE id_warga=?`,
-      [
-        nama, email, no_hp, alamat, NIK,
-        tempat_lahir, tanggal_lahir, jenis_kelamin,
-        kelurahan_desa, kecamatan, agama,
-        status_perkawinan, pekerjaan,
-        id_warga,
-      ]
-    );
+    // Hanya update kolom yang dikirim dari frontend
+    // Contoh: { nama_ketua: "Budi", provinsi: "Jabar" }
+    await pool.query(`UPDATE ${tableName} SET ? WHERE ${idColumn} = ?`, [fields, userId]);
 
     return res.json({ success: true, message: 'Profil berhasil diperbarui' });
   } catch (err) {
+    console.error("Error updateProfile:", err);
     return res.status(500).json({ success: false, message: 'Gagal update profil', error: err.message });
   }
 };
 
-module.exports = { getProfile, updateProfile };
+module.exports = { getProfile, updateProfile };
