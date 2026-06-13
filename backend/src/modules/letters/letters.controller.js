@@ -75,8 +75,6 @@ class LettersController {
         fields
       };
 
-      console.log('Draft Payload:', payload);
-
       const uuid = await LettersService.createDraft(payload);
       res.status(201).json({ success: true, data: { uuid }, message: "Draft berhasil disimpan" });
     } catch (error) {

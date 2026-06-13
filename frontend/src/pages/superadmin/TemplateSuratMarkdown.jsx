@@ -129,7 +129,7 @@ export default function TemplateSuratMarkdown() {
     const [localForm, setLocalForm] = useState(initial);
 
     return (
-      <div className="bg-white border border-surface-border rounded-xl p-5 space-y-4">
+      <div className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl p-5 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium text-ink-secondary mb-1">Nama Template</label>
@@ -253,13 +253,13 @@ export default function TemplateSuratMarkdown() {
             {[1,2,3].map(i => <div key={i} className="h-20 bg-surface-muted rounded-xl animate-pulse" />)}
           </div>
         ) : templates.length === 0 ? (
-          <div className="bg-white border border-surface-border rounded-xl py-16 text-center text-ink-muted">
+          <div className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl py-16 text-center text-ink-muted">
             <p className="text-sm">Belum ada template. Klik "Buat Template" untuk mulai.</p>
           </div>
         ) : (
           <div className="space-y-4">
             {templates.map(tmpl => (
-              <div key={tmpl.id} className="bg-white border border-surface-border rounded-xl overflow-hidden">
+              <div key={tmpl.id} className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl overflow-hidden">
                 {editingId === tmpl.id ? (
                   <div className="p-5">
                     <TemplateForm
@@ -297,7 +297,7 @@ export default function TemplateSuratMarkdown() {
                             deleteMutation.mutate(tmpl.id);
                           }
                         }}
-                        className="p-2 text-ink-secondary hover:text-red-600 rounded-lg hover:bg-red-50 transition"
+                        className="p-2 text-ink-secondary hover:text-[var(--color-danger)] rounded-lg hover:bg-[var(--color-danger-light)] transition"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

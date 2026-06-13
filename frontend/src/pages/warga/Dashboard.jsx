@@ -30,20 +30,20 @@ export default function WargaDashboard() {
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'draft': return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-gray-100 text-gray-700">Draft</span>;
+      case 'draft': return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-[var(--color-surface-muted)] text-[var(--color-ink)]">Draft</span>;
       case 'submitted':
       case 'in_review_rt':
-      case 'in_review_rw': return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-blue-50 text-blue-700">Diproses</span>;
+      case 'in_review_rw': return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-[var(--color-brand-50)] text-[var(--color-primary)]">Diproses</span>;
       case 'completed': return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-emerald-50 text-emerald-700">Selesai</span>;
       case 'rejected': return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-rose-50 text-rose-700">Ditolak</span>;
-      default: return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-slate-100 text-slate-700">{status}</span>;
+      default: return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-[var(--color-surface-muted)] text-[var(--color-ink)]">{status}</span>;
     }
   };
 
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto w-full">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-[#1e3a5f] to-[#2d5282] text-white rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-white rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h3 className="text-xl font-bold mb-1">Butuh Surat Pengantar RT/RW?</h3>
           <p className="text-blue-200 text-sm max-w-xl">
@@ -52,7 +52,7 @@ export default function WargaDashboard() {
         </div>
         <Link
           to="/warga/buat-surat-v2"
-          className="bg-white text-[#1e3a5f] px-5 py-2.5 rounded-xl font-bold hover:bg-blue-50 transition shadow text-sm self-start md:self-auto whitespace-nowrap"
+          className="bg-[var(--color-surface-card)] text-[var(--color-primary)] px-5 py-2.5 rounded-xl font-bold hover:bg-[var(--color-brand-50)] transition shadow text-sm self-start md:self-auto whitespace-nowrap"
         >
           + Ajukan Surat Baru
         </Link>
@@ -61,46 +61,46 @@ export default function WargaDashboard() {
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: 'Sedang Diproses', value: pending,  icon: Clock,        bg: 'bg-blue-50',   color: 'text-blue-600' },
+          { label: 'Sedang Diproses', value: pending,  icon: Clock,        bg: 'bg-[var(--color-brand-50)]',   color: 'text-[var(--color-primary)]' },
           { label: 'Selesai / Disetujui',  value: approved, icon: CheckCircle2, bg: 'bg-emerald-50', color: 'text-emerald-600' },
           { label: 'Pengajuan Ditolak',    value: rejected, icon: XCircle,      bg: 'bg-rose-50',    color: 'text-rose-600' },
         ].map(({ label, value, icon: Icon, bg, color }) => (
-          <div key={label} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+          <div key={label} className="bg-[var(--color-surface-card)] p-5 rounded-2xl border border-[var(--color-surface-border)] shadow-sm flex items-center space-x-4">
             <div className={`p-3 ${bg} ${color} rounded-xl`}>
               <Icon className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-xs text-slate-500 font-medium">{label}</span>
-              <p className="text-2xl font-bold text-slate-800">{loading ? '—' : value}</p>
+              <span className="text-xs text-[var(--color-ink-secondary)] font-medium">{label}</span>
+              <p className="text-2xl font-bold text-[var(--color-ink)]">{loading ? '—' : value}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Recent Letters */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h4 className="font-bold text-slate-800 text-sm">Status Pengajuan Terakhir</h4>
-          <Link to="/warga/riwayat" className="text-xs text-blue-600 font-bold hover:underline">
+      <div className="bg-[var(--color-surface-card)] rounded-2xl border border-[var(--color-surface-border)] shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-[var(--color-surface-border)] flex justify-between items-center bg-[var(--color-surface)]">
+          <h4 className="font-bold text-[var(--color-ink)] text-sm">Status Pengajuan Terakhir</h4>
+          <Link to="/warga/riwayat" className="text-xs text-[var(--color-primary)] font-bold hover:underline">
             Lihat Semua →
           </Link>
         </div>
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="flex items-center justify-center py-12 gap-2 text-slate-400">
+            <div className="flex items-center justify-center py-12 gap-2 text-[var(--color-ink-muted)]">
               <Loader2 className="w-5 h-5 animate-spin" />
               <span className="text-sm">Memuat data surat...</span>
             </div>
           ) : recentSurat.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 text-sm">
+            <div className="py-12 text-center text-[var(--color-ink-muted)] text-sm">
               Belum ada pengajuan surat.{' '}
-              <Link to="/warga/buat-surat-v2" className="text-blue-600 font-semibold hover:underline">
+              <Link to="/warga/buat-surat-v2" className="text-[var(--color-primary)] font-semibold hover:underline">
                 Ajukan sekarang
               </Link>
             </div>
           ) : (
-            <table className="w-full text-left text-sm text-slate-500">
-              <thead className="bg-slate-50 text-slate-600 uppercase font-semibold text-xs border-b border-slate-100">
+            <table className="w-full text-left text-sm text-[var(--color-ink-secondary)]">
+              <thead className="bg-[var(--color-surface)] text-slate-600 uppercase font-semibold text-xs border-b border-[var(--color-surface-border)]">
                 <tr>
                   <th className="px-5 py-3">Tanggal</th>
                   <th className="px-5 py-3">Jenis Surat</th>
@@ -109,14 +109,14 @@ export default function WargaDashboard() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {recentSurat.map((s) => (
-                  <tr key={s.uuid} className="hover:bg-slate-50/60 transition">
-                    <td className="px-5 py-4 whitespace-nowrap font-medium text-slate-800">
-                      <Link to={`/warga/surat/${s.uuid}`} className="hover:text-blue-600 hover:underline">
+                  <tr key={s.uuid} className="hover:bg-[var(--color-surface)]/60 transition">
+                    <td className="px-5 py-4 whitespace-nowrap font-medium text-[var(--color-ink)]">
+                      <Link to={`/warga/surat/${s.uuid}`} className="hover:text-[var(--color-primary)] hover:underline">
                         {formatDate(s.created_at)}
                       </Link>
                     </td>
                     <td className="px-5 py-4">
-                      <Link to={`/warga/surat/${s.uuid}`} className="hover:text-blue-600 hover:underline">
+                      <Link to={`/warga/surat/${s.uuid}`} className="hover:text-[var(--color-primary)] hover:underline">
                         {s.letter_type_name || '-'}
                       </Link>
                     </td>

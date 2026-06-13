@@ -111,7 +111,7 @@ export default function ManajemenAkun() {
         </div>
 
         {/* Tabel */}
-        <div className="bg-white border border-surface-border rounded-xl overflow-hidden">
+        <div className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl overflow-hidden overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-surface-muted">
               <tr>
@@ -149,7 +149,7 @@ export default function ManajemenAkun() {
                       <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         user.is_active !== false
                           ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-red-50 text-red-600'
+                          : 'bg-[var(--color-danger-light)] text-[var(--color-danger)]'
                       }`}>
                         {user.is_active !== false ? 'Aktif' : 'Nonaktif'}
                       </span>
@@ -180,7 +180,7 @@ export default function ManajemenAkun() {
                             }
                           }}
                           title="Hapus akun"
-                          className="p-1.5 text-ink-secondary hover:text-red-600 rounded-lg hover:bg-red-50 transition"
+                          className="p-1.5 text-ink-secondary hover:text-[var(--color-danger)] rounded-lg hover:bg-[var(--color-danger-light)] transition"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

@@ -1,1 +1,0 @@
-UPDATE warga SET tempat_lahir='Tangerang', alamat='Jl. Pegangsaan Timur No. 56', rt='001', rw='002', kelurahan_desa='Menteng', kecamatan='Menteng', kota='Tangerang', provinsi='Banten' WHERE id_warga=1;

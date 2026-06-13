@@ -8,14 +8,14 @@ import { Activity, Filter } from 'lucide-react';
 
 const ACTION_COLORS = {
   LOGIN:             'bg-green-50 text-green-700',
-  LOGOUT:            'bg-slate-50 text-slate-600',
-  CREATE_LETTER:     'bg-blue-50 text-blue-700',
+  LOGOUT:            'bg-[var(--color-surface)] text-slate-600',
+  CREATE_LETTER:     'bg-[var(--color-brand-50)] text-[var(--color-primary)]',
   APPROVE_LETTER:    'bg-emerald-50 text-emerald-700',
-  REJECT_LETTER:     'bg-red-50 text-red-600',
+  REJECT_LETTER:     'bg-[var(--color-danger-light)] text-[var(--color-danger)]',
   DELETE_USER:       'bg-red-100 text-red-700',
   RESET_PASSWORD:    'bg-amber-50 text-amber-700',
   UPDATE_CONFIG:     'bg-purple-50 text-purple-700',
-  DEFAULT:           'bg-slate-100 text-slate-600',
+  DEFAULT:           'bg-[var(--color-surface-muted)] text-slate-600',
 };
 
 export default function LogSistem() {
@@ -83,7 +83,7 @@ export default function LogSistem() {
           )}
         </div>
 
-        <div className="bg-white border border-surface-border rounded-xl overflow-hidden">
+        <div className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl overflow-hidden overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-surface-muted">
               <tr>

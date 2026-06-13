@@ -1,7 +1,7 @@
 import React from 'react';
 
 const DynamicField = ({ field, value, onChange }) => {
-  const baseClasses = "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2.5 border";
+  const baseClasses = "mt-1 block w-full rounded-md border-[var(--color-surface-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm p-2.5 border";
 
   switch (field.field_type) {
     case 'textarea':
@@ -45,9 +45,9 @@ const DynamicField = ({ field, value, onChange }) => {
                 checked={value === (opt.value || opt)}
                 onChange={(e) => onChange(e.target.value)}
                 required={field.is_required}
-                className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 border-[var(--color-surface-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
               />
-              <label className="ml-3 block text-sm font-medium text-gray-700">
+              <label className="ml-3 block text-sm font-medium text-[var(--color-ink)]">
                 {opt.label || opt}
               </label>
             </div>

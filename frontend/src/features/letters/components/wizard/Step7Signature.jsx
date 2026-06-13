@@ -47,13 +47,13 @@ export default function Step7Signature({ draftUuid, letterId }) {
   return (
     <div className="space-y-6 max-w-xl mx-auto">
       <div className="text-center">
-        <h2 className="text-xl font-bold text-gray-800">Tanda Tangan Pemohon</h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <h2 className="text-xl font-bold text-[var(--color-ink)]">Tanda Tangan Pemohon</h2>
+        <p className="text-sm text-[var(--color-ink-secondary)] mt-1">
           Silakan tanda tangan di dalam kotak di bawah ini untuk mengesahkan pengajuan surat.
         </p>
       </div>
 
-      <div className="border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 p-2">
+      <div className="border-2 border-dashed border-[var(--color-surface-border)] rounded-lg bg-[var(--color-surface-muted)] p-2">
         <SignatureCanvas
           ref={sigCanvas}
           canvasProps={{
@@ -62,19 +62,19 @@ export default function Step7Signature({ draftUuid, letterId }) {
         />
       </div>
 
-      {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+      {error && <p className="text-[var(--color-danger)] text-sm text-center">{error}</p>}
 
       <div className="flex gap-3 justify-center">
         <button
           onClick={handleClear}
-          className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
+          className="px-4 py-2 border border-[var(--color-surface-border)] rounded-lg text-[var(--color-ink)] hover:bg-[var(--color-surface-muted)] font-medium"
         >
           Hapus Ulang
         </button>
         <button
           onClick={handleSubmit}
           disabled={submitMutation.isPending}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
+          className="px-6 py-2 bg-[var(--color-primary)] text-white rounded-lg font-medium hover:bg-[var(--color-primary-dark)] disabled:opacity-50"
         >
           {submitMutation.isPending ? 'Mengajukan...' : 'Selesai & Ajukan'}
         </button>

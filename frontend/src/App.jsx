@@ -27,7 +27,7 @@ import KonfigurasiInstansi    from './pages/superadmin/KonfigurasiInstansi';
 import LogSistem              from './pages/superadmin/LogSistem';
 
 const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen text-slate-400 text-sm gap-2">
+  <div className="flex items-center justify-center min-h-screen text-[var(--color-ink-muted)] text-sm gap-2">
     <div className="w-5 h-5 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
     Memuat Aplikasi...
   </div>

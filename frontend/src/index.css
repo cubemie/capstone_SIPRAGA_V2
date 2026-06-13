@@ -3,29 +3,49 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  /* Palet utama — navy government + emerald accent */
-  --color-primary:       #1e3a5f;
-  --color-primary-dark:  #152d4a;
-  --color-primary-light: #2d5282;
+  /* ===== Palet Utama CORETAX ===== */
+  --color-primary:        #112E81; /* navy - sidebar, header, tombol utama */
+  --color-primary-dark:   #0A1F5C;
+  --color-primary-light:  #2945A8;
 
-  --color-accent:        #059669;
-  --color-accent-dark:   #047857;
+  --color-accent:         #FAB95B; /* amber - highlight, badge, aksen */
+  --color-accent-dark:    #E5A23F;
+  --color-accent-light:   #FFD699;
 
-  --color-surface:       #f8fafc;
-  --color-surface-card:  #ffffff;
+  --color-surface:        #F7F1DE; /* warm neutral - background app */
+  --color-surface-card:   #FFFFFF;
+  --color-surface-muted:  #F4F1EC;
+  --color-surface-border: #DDD6CC;
+
+  --color-danger:         #D51C39; /* merah - tolak, hapus, error */
+  --color-danger-dark:    #B0152E;
+  --color-danger-light:   #FDE4E8;
+
+  /* Brand alias (dipakai beberapa komponen lama) */
+  --color-brand-50:  #EEF1FA;
+  --color-brand-100: #DCE2F4;
+  --color-brand-400: #4A63B0;
+  --color-brand-500: #112E81;
+  --color-brand-600: #0E2569;
+  --color-brand-700: #0A1F5C;
+
+  /* Ink (teks) alias */
+  --color-ink:           #1A1F36;
+  --color-ink-secondary: #5B6178;
+  --color-ink-muted:     #9CA3AF;
 
   /* Status colors */
-  --color-status-menunggu-bg:   #fefce8;
-  --color-status-menunggu-text: #92400e;
-  --color-status-disetujui-bg:  #dcfce7;
-  --color-status-disetujui-text:#15803d;
-  --color-status-ditolak-bg:    #fee2e2;
-  --color-status-ditolak-text:  #b91c1c;
+  --color-status-menunggu-bg:   #FFF4E0;
+  --color-status-menunggu-text: #B5790A;
+  --color-status-disetujui-bg:  #E2F5EA;
+  --color-status-disetujui-text:#1F8A4C;
+  --color-status-ditolak-bg:    #FBE3E7;
+  --color-status-ditolak-text:  #D51C39;
 }
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-800 font-sans antialiased;
+    @apply bg-[var(--color-surface)] text-[var(--color-ink)] font-sans antialiased;
   }
 
   h1, h2, h3, h4 {

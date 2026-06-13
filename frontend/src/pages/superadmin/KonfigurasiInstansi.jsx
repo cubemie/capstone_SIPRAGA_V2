@@ -76,7 +76,7 @@ export default function KonfigurasiInstansi() {
         ) : (
           <div className="space-y-4">
             {CONFIG_FIELDS.map(section => (
-              <div key={section.section} className="bg-white border border-surface-border rounded-xl p-5">
+              <div key={section.section} className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl p-5">
                 <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-4 flex items-center gap-2">
                   <Building2 className="w-3.5 h-3.5" />
                   {section.section}

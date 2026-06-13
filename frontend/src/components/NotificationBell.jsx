@@ -61,14 +61,14 @@ export default function NotificationBell() {
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+          <span className="absolute top-1 right-1 w-4 h-4 bg-[var(--color-danger)] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white border border-surface-border rounded-xl shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-[var(--color-surface-card)] border border-surface-border rounded-xl shadow-xl z-50 overflow-hidden">
           {/* Header dropdown */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-surface-border">
             <p className="text-sm font-semibold text-ink">Notifikasi</p>

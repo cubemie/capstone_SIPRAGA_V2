@@ -4,9 +4,9 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'CORETAX API Documentation',
+      title: 'SIPRAGA API Documentation',
       version: '1.0.0',
-      description: 'API Documentation untuk sistem informasi RT-RW CORETAX',
+      description: 'API Documentation untuk sistem informasi SIPRAGA',
     },
     servers: [
       {

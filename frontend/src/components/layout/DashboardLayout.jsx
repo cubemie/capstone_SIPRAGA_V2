@@ -20,9 +20,10 @@ export default function DashboardLayout() {
   };
 
   let menuItems = [];
-  let sidebarBg    = 'bg-[#1e3a5f]';
-  let sidebarHover = 'hover:bg-[#2d5282]';
-  let sidebarActive= 'bg-[#2d5282]';
+  // Default palette: navy primary sidebar with accent active state
+  let sidebarBg    = 'bg-[var(--color-primary)]';
+  let sidebarHover = 'hover:bg-[var(--color-primary-light)]';
+  let sidebarActive= 'bg-[var(--color-accent)] text-[var(--color-primary)]';
 
   if (user?.role === 'warga') {
     menuItems = [
@@ -32,9 +33,9 @@ export default function DashboardLayout() {
       { path: '/warga/riwayat',   label: 'Status & Riwayat', icon: History },
       { path: '/warga/inbox',     label: 'Kotak Masuk', icon: Bell },
     ];
-    sidebarBg     = 'bg-[#1e3a5f]';
-    sidebarHover  = 'hover:bg-[#2d5282]';
-    sidebarActive = 'bg-[#2d5282]';
+    sidebarBg     = 'bg-[var(--color-primary)]';
+    sidebarHover  = 'hover:bg-[var(--color-primary-light)]';
+    sidebarActive = 'bg-[var(--color-accent)] text-[var(--color-primary)]';
   } else if (user?.role === 'rt' || user?.role === 'rw') {
     menuItems = [
       { path: '/profil',         label: 'Profil Saya',          icon: UserCircle },
@@ -43,9 +44,9 @@ export default function DashboardLayout() {
       { path: '/rtrw/riwayat-v2',label: 'Riwayat Surat',   icon: History },
       { path: '/rtrw/ttd',       label: 'Tanda Tangan Digital', icon: Award },
     ];
-    sidebarBg     = 'bg-slate-900';
-    sidebarHover  = 'hover:bg-slate-800';
-    sidebarActive = 'bg-slate-800';
+    sidebarBg     = 'bg-[var(--color-primary-dark)]';
+    sidebarHover  = 'hover:bg-[var(--color-primary)]';
+    sidebarActive = 'bg-[var(--color-accent)] text-[var(--color-primary)]';
   } else if (user?.role === 'superadmin') {
     menuItems = [
       { path: '/superadmin/dashboard',   label: 'Dashboard',           icon: LayoutDashboard },
@@ -54,9 +55,9 @@ export default function DashboardLayout() {
       { path: '/superadmin/config',      label: 'Konfigurasi Instansi',icon: CheckSquare },
       { path: '/superadmin/log',         label: 'Log Sistem',          icon: History },
     ];
-    sidebarBg     = 'bg-slate-950';
-    sidebarHover  = 'hover:bg-slate-900';
-    sidebarActive = 'bg-slate-900';
+    sidebarBg     = 'bg-[#0A1F5C]';
+    sidebarHover  = 'hover:bg-[var(--color-primary)]';
+    sidebarActive = 'bg-[var(--color-accent)] text-[var(--color-primary)]';
   }
 
   const SidebarContent = () => (
@@ -80,7 +81,7 @@ export default function DashboardLayout() {
               to={item.path}
               onClick={() => setSidebarOpen(false)}
               className={`flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition text-sm ${
-                isActive ? sidebarActive + ' text-white' : 'text-slate-300 ' + sidebarHover + ' hover:text-white'
+                isActive ? sidebarActive + ' shadow-sm' : 'text-white/80 ' + sidebarHover + ' hover:text-white'
               }`}
             >
               <Icon className="w-4.5 h-4.5 shrink-0" />
@@ -102,7 +103,7 @@ export default function DashboardLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 flex font-sans text-slate-800">
+    <div className="min-h-screen bg-[var(--color-surface)] flex font-sans text-[var(--color-ink)]">
       {/* Sidebar Desktop */}
       <aside className={`w-64 ${sidebarBg} text-white flex-col hidden md:flex`}>
         <SidebarContent />
@@ -124,22 +125,22 @@ export default function DashboardLayout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Header */}
-        <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-4 flex justify-between items-center shadow-sm z-10">
+        <header className="bg-[var(--color-surface-card)] border-b border-[var(--color-surface-border)] px-4 md:px-6 py-4 flex justify-between items-center shadow-sm z-10">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden p-2 text-slate-500 hover:text-slate-700 rounded-lg hover:bg-slate-100"
+              className="md:hidden p-2 text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] rounded-lg hover:bg-[var(--color-surface-muted)]"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="hidden md:block">
-              <span className="text-slate-400 font-medium text-xs uppercase tracking-wider">
+              <span className="text-[var(--color-ink-muted)] font-medium text-xs uppercase tracking-wider">
                 {user?.role === 'superadmin' ? 'Panel Kontrol' : user?.role === 'warga' ? 'Selamat Datang' : 'Dashboard Pelayanan'}
               </span>
-              <h2 className="text-base font-bold text-slate-800 leading-tight">
+              <h2 className="text-base font-bold text-[var(--color-ink)] leading-tight">
                 {user?.nama || user?.username || 'Pengguna'}
                 {(user?.role === 'rt' || user?.role === 'rw') && (
-                  <span className="ml-2 text-xs font-semibold text-slate-400 uppercase">({user.role})</span>
+                  <span className="ml-2 text-xs font-semibold text-[var(--color-ink-muted)] uppercase">({user.role})</span>
                 )}
               </h2>
             </div>
@@ -147,7 +148,7 @@ export default function DashboardLayout() {
           <div className="flex items-center space-x-3">
             <NotificationBell />
             <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm ${
-              user?.role === 'warga' ? 'bg-blue-100 text-blue-900' : 'bg-slate-800 text-white'
+              user?.role === 'warga' ? 'bg-[var(--color-brand-100)] text-[var(--color-primary)]' : 'bg-[var(--color-primary)] text-white'
             }`}>
               {(user?.nama || user?.username || 'US')?.slice(0, 2).toUpperCase()}
             </div>
@@ -155,7 +156,7 @@ export default function DashboardLayout() {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-[var(--color-surface)]">
           <Outlet />
         </div>
       </div>

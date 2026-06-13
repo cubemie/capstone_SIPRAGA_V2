@@ -23,7 +23,7 @@ function StatCard({ icon: Icon, label, value, color = 'brand' }) {
   const c = COLORS[color] || COLORS.brand;
 
   return (
-    <div className={`bg-white border ${c.border} rounded-xl p-4 flex items-center gap-3`}>
+    <div className={`bg-[var(--color-surface-card)] border ${c.border} rounded-xl p-4 flex items-center gap-3`}>
       <div className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center flex-shrink-0`}>
         <Icon className={`w-5 h-5 ${c.text}`} />
       </div>
@@ -83,7 +83,7 @@ function RWDetailPanel({ rwId, onClose }) {
       </div>
 
       {/* Jenis kelamin */}
-      <div className="bg-white border border-surface-border rounded-xl p-4">
+      <div className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl p-4">
         <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-3">
           Distribusi Jenis Kelamin
         </p>
@@ -116,7 +116,7 @@ function RWDetailPanel({ rwId, onClose }) {
       </div>
 
       {/* Pekerjaan top 5 */}
-      <div className="bg-white border border-surface-border rounded-xl p-4">
+      <div className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl p-4">
         <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-3">
           Distribusi Pekerjaan (Top 5)
         </p>
@@ -137,7 +137,7 @@ function RWDetailPanel({ rwId, onClose }) {
       </div>
 
       {/* Daftar RT */}
-      <div className="bg-white border border-surface-border rounded-xl p-4">
+      <div className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl p-4">
         <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-3">
           Daftar RT
         </p>
@@ -201,7 +201,7 @@ export default function SuperadminDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Daftar RW */}
               {!selectedRwId && (
-                <div className="md:col-span-2 bg-white border border-surface-border rounded-xl overflow-hidden">
+                <div className="md:col-span-2 bg-[var(--color-surface-card)] border border-surface-border rounded-xl overflow-hidden">
                   <div className="px-5 py-4 border-b border-surface-border">
                     <h2 className="text-sm font-semibold text-ink">Daftar Wilayah RW</h2>
                     <p className="text-xs text-ink-muted mt-0.5">
@@ -228,7 +228,7 @@ export default function SuperadminDashboard() {
                         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                           rw.is_active
                             ? 'bg-emerald-50 text-emerald-700'
-                            : 'bg-red-50 text-red-600'
+                            : 'bg-[var(--color-danger-light)] text-[var(--color-danger)]'
                         }`}>
                           {rw.is_active ? 'Aktif' : 'Nonaktif'}
                         </span>

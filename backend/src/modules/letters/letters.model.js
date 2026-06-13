@@ -51,18 +51,22 @@ const LettersModel = {
 
   async getLetterByUuid(uuid) {
     const [rows] = await db.query(
-      `SELECT l.*, 
-              t.name as letter_type_name, 
-              w.name as workflow_name, w.steps as workflow_steps,
-              r.nama as resident_name, r.nik as resident_nik
+      `SELECT l.*,
+              lt.name  AS letter_type_name,
+              lt.code  AS letter_type_code,
+              lwo.name AS workflow_name,
+              lwo.steps AS workflow_steps,
+              lwo.code AS workflow_code,
+              w.nama   AS resident_name,
+              w.NIK    AS resident_nik
        FROM letters l
-       JOIN letter_types t ON l.letter_type_id = t.id
-       JOIN letter_workflow_options w ON l.workflow_option_id = w.id
-       JOIN warga r ON l.resident_id = r.id_warga
+       JOIN letter_types lt            ON l.letter_type_id     = lt.id
+       JOIN letter_workflow_options lwo ON l.workflow_option_id = lwo.id
+       JOIN warga w                    ON l.resident_id         = w.id_warga
        WHERE l.uuid = ?`,
       [uuid]
     );
-    return rows[0];
+    return rows[0] || null;
   },
 
   async getDetailByUuid(uuid) {
@@ -143,12 +147,13 @@ const LettersModel = {
     }
 
     const [rows] = await db.query(
-      `SELECT l.uuid, l.status, l.created_at, l.subject,
-              lt.name AS letter_type_name,
-              w.nama AS resident_name
+      `SELECT l.uuid, l.status, l.subject, l.purpose, l.created_at,
+              lt.name  AS letter_type_name,
+              w.nama   AS resident_name,
+              w.NIK    AS resident_nik
        FROM letters l
        JOIN letter_types lt ON l.letter_type_id = lt.id
-       JOIN warga w ON l.resident_id = w.id_warga
+       JOIN warga w         ON l.resident_id     = w.id_warga
        WHERE ${whereClause}
        ORDER BY l.created_at DESC`,
       params
@@ -158,12 +163,12 @@ const LettersModel = {
 
   async getMyLetters(residentId) {
     const [rows] = await db.query(
-      `SELECT l.*, 
-              t.name as letter_type_name, 
-              w.name as workflow_name
+      `SELECT l.*,
+              lt.name  AS letter_type_name,
+              lwo.name AS workflow_name
        FROM letters l
-       JOIN letter_types t ON l.letter_type_id = t.id
-       JOIN letter_workflow_options w ON l.workflow_option_id = w.id
+       JOIN letter_types lt            ON l.letter_type_id     = lt.id
+       JOIN letter_workflow_options lwo ON l.workflow_option_id = lwo.id
        WHERE l.resident_id = ?
        ORDER BY l.created_at DESC`,
       [residentId]
@@ -173,18 +178,22 @@ const LettersModel = {
 
   async getLetterById(id) {
     const [rows] = await db.query(
-      `SELECT l.*, 
-              t.name as letter_type_name, 
-              w.name as workflow_name, w.steps as workflow_steps,
-              r.nama as resident_name, r.nik as resident_nik
+      `SELECT l.*,
+              lt.name  AS letter_type_name,
+              lt.code  AS letter_type_code,
+              lwo.name AS workflow_name,
+              lwo.steps AS workflow_steps,
+              lwo.code AS workflow_code,
+              w.nama   AS resident_name,
+              w.NIK    AS resident_nik
        FROM letters l
-       JOIN letter_types t ON l.letter_type_id = t.id
-       JOIN letter_workflow_options w ON l.workflow_option_id = w.id
-       JOIN warga r ON l.resident_id = r.id_warga
+       JOIN letter_types lt            ON l.letter_type_id     = lt.id
+       JOIN letter_workflow_options lwo ON l.workflow_option_id = lwo.id
+       JOIN warga w                    ON l.resident_id         = w.id_warga
        WHERE l.id = ?`,
       [id]
     );
-    return rows[0];
+    return rows[0] || null;
   },
 
   async updateLetterStatus(id, status, current_step = 1, letter_number = null, qr_token = null) {

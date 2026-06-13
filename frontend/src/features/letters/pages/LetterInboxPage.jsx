@@ -34,10 +34,10 @@ export default function LetterInboxPage() {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Inbox Surat Masuk</h1>
+      <h1 className="text-2xl font-bold text-[var(--color-ink)] mb-6">Inbox Surat Masuk</h1>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+        <div className="mb-4 p-3 bg-[var(--color-danger-light)] border border-[var(--color-danger-light)] rounded-lg text-sm text-red-700">
           Gagal memuat inbox: {error.message}
         </div>
       )}
@@ -49,13 +49,13 @@ export default function LetterInboxPage() {
             onClick={() => setActiveTab(tab.key)}
             className={`pb-2 px-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab.key
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500'
+                ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                : 'border-transparent text-[var(--color-ink-secondary)]'
             }`}
           >
             {tab.label}
             {tab.key === 'all' && letters.length > 0 && (
-              <span className="ml-1.5 text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full">
+              <span className="ml-1.5 text-xs bg-[var(--color-brand-100)] text-[var(--color-primary)] px-1.5 py-0.5 rounded-full">
                 {letters.length}
               </span>
             )}
@@ -66,13 +66,13 @@ export default function LetterInboxPage() {
       {isLoading && (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-gray-100 rounded-lg animate-pulse" />
+            <div key={i} className="h-20 bg-[var(--color-surface-muted)] rounded-lg animate-pulse" />
           ))}
         </div>
       )}
 
       {!isLoading && filtered.length === 0 && (
-        <div className="text-center text-gray-400 py-16">
+        <div className="text-center text-[var(--color-ink-muted)] py-16">
           <p className="text-3xl mb-2">📭</p>
           <p className="font-medium">Tidak ada surat masuk</p>
         </div>
@@ -82,19 +82,19 @@ export default function LetterInboxPage() {
         {filtered.map((letter) => {
           const statusInfo = LETTER_STATUS_V2[letter.status] ?? {
             label: letter.status,
-            color: 'bg-gray-100 text-gray-600',
+            color: 'bg-[var(--color-surface-muted)] text-[var(--color-ink-secondary)]',
           };
           return (
             <Link
               key={letter.uuid}
               to={`/rtrw/surat/${letter.uuid}`}
-              className="block border rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
+              className="block border rounded-lg p-4 hover:shadow-md transition-shadow bg-[var(--color-surface-card)]"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-gray-800">{letter.resident_name}</p>
-                  <p className="text-sm text-gray-500">{letter.letter_type_name}</p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="font-medium text-[var(--color-ink)]">{letter.resident_name}</p>
+                  <p className="text-sm text-[var(--color-ink-secondary)]">{letter.letter_type_name}</p>
+                  <p className="text-xs text-[var(--color-ink-muted)] mt-1">
                     {new Date(letter.created_at).toLocaleDateString('id-ID', {
                       day: 'numeric',
                       month: 'long',
@@ -106,7 +106,7 @@ export default function LetterInboxPage() {
                   <span className={`text-xs font-medium px-2 py-1 rounded-full ${statusInfo.color}`}>
                     {statusInfo.label}
                   </span>
-                  <p className="text-xs text-blue-600 mt-2 font-medium">Proses →</p>
+                  <p className="text-xs text-[var(--color-primary)] mt-2 font-medium">Proses →</p>
                 </div>
               </div>
             </Link>

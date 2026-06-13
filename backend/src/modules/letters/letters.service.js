@@ -1,5 +1,6 @@
 const LettersModel = require('./letters.model');
 const db = require('../../config/db');
+const { v4: uuidv4 } = require('uuid');
 
 class LettersService {
   /**
@@ -34,12 +35,15 @@ class LettersService {
     try {
       await connection.beginTransaction();
 
+      // Generate UUID di aplikasi — tidak bergantung DEFAULT (UUID()) MySQL
+      const letterUuid = uuidv4();
+
       // 1. Insert into letters table (draft status)
       const [result] = await connection.query(
         `INSERT INTO letters 
-          (tenant_id, resident_id, letter_type_id, workflow_option_id, subject, purpose, status, current_step) 
-         VALUES (?, ?, ?, ?, ?, ?, 'draft', 1)`,
-        [tenant_id, resident_id, letter_type_id, workflow_option_id, subject, purpose]
+          (uuid, tenant_id, resident_id, letter_type_id, workflow_option_id, subject, purpose, status, current_step) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'draft', 1)`,
+        [letterUuid, tenant_id, resident_id, letter_type_id, workflow_option_id, subject, purpose]
       );
       
       const letterId = result.insertId;
@@ -56,8 +60,7 @@ class LettersService {
       await connection.commit();
       
       // 3. Return the UUID of the created letter
-      const [uuidResult] = await connection.query(`SELECT uuid FROM letters WHERE id = ?`, [letterId]);
-      return uuidResult[0].uuid;
+      return letterUuid;
 
     } catch (error) {
       await connection.rollback();
@@ -86,37 +89,26 @@ class LettersService {
   }
 
   /**
-   * Submit a drafted letter to the first workflow step
+   * Submit draft → status: submitted
+   *
+   * FIX: Tidak langsung set in_review_rt. Status 'submitted' berarti
+   * surat sudah dikirim warga dan menunggu RT membukanya.
+   * RT yang akan mengubah ke 'in_review_rt' saat membuka/memproses surat.
+   *
+   * Jika ingin otomatis masuk in_review_rt saat submit, uncomment
+   * bagian newStatus di bawah.
    */
   static async submitLetter(uuid) {
     const letter = await LettersModel.getLetterByUuid(uuid);
-    if (!letter) throw new Error("Letter not found");
-    if (letter.status !== 'draft') throw new Error("Only draft letters can be submitted");
+    if (!letter) throw new Error('Surat tidak ditemukan');
+    if (letter.status !== 'draft') throw new Error('Hanya surat berstatus draft yang bisa disubmit');
 
-    // Get workflow step 1
-    let steps = [];
-    try {
-      steps = typeof letter.workflow_steps === 'string' ? JSON.parse(letter.workflow_steps) : letter.workflow_steps;
-    } catch (e) {
-      console.error("Failed to parse workflow_steps:", e);
-    }
-    const firstStep = steps?.find?.(s => s.step == 1);
-    
-    if (!firstStep) {
-      console.error("Invalid workflow configuration. steps:", steps, "letter.workflow_steps:", letter.workflow_steps);
-      throw new Error("Invalid workflow configuration");
-    }
-
-    // Determine status based on first step role
-    let newStatus = 'submitted';
-    if (firstStep.role === 'admin_rt' || firstStep.role === 'rt') {
-      newStatus = 'in_review_rt';
-    } else if (firstStep.role === 'admin_rw' || firstStep.role === 'rw') {
-      newStatus = 'in_review_rw';
-    }
+    // Langsung set 'submitted' — RT akan memprosesnya dari inbox
+    const newStatus = 'submitted';
 
     const success = await LettersModel.updateLetterStatus(letter.id, newStatus, 1);
-    return success;
+    if (!success) throw new Error('Gagal mengupdate status surat');
+    return true;
   }
 }
 

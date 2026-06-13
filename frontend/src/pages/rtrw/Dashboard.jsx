@@ -32,14 +32,14 @@ function RejectModal({ suratId, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
+      <div className="bg-[var(--color-surface-card)] rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4">
         <div className="flex justify-between items-center">
           <h3 className="font-bold text-slate-900">Tolak Surat</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="text-[var(--color-ink-muted)] hover:text-slate-600">
             <X className="w-5 h-5" />
           </button>
         </div>
-        <p className="text-sm text-slate-500">Masukkan alasan penolakan agar warga dapat mengajukan ulang dengan benar.</p>
+        <p className="text-sm text-[var(--color-ink-secondary)]">Masukkan alasan penolakan agar warga dapat mengajukan ulang dengan benar.</p>
         <textarea
           value={alasan}
           onChange={(e) => setAlasan(e.target.value)}
@@ -48,7 +48,7 @@ function RejectModal({ suratId, onClose, onSuccess }) {
           className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-rose-400 focus:outline-none resize-none"
         />
         <div className="flex gap-3 justify-end">
-          <button onClick={onClose} className="px-4 py-2 text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold">
+          <button onClick={onClose} className="px-4 py-2 text-sm bg-[var(--color-surface-muted)] hover:bg-slate-200 text-[var(--color-ink)] rounded-xl font-semibold">
             Batal
           </button>
           <button
@@ -108,30 +108,30 @@ export default function RtRwDashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+        <div className="bg-[var(--color-surface-card)] p-5 rounded-2xl border border-[var(--color-surface-border)] shadow-sm flex items-center space-x-4">
           <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
             <Clock className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 font-medium block">Butuh Verifikasi</span>
-            <p className="text-xl font-bold text-slate-800">{loading ? '—' : pendingCount}</p>
+            <span className="text-xs text-[var(--color-ink-secondary)] font-medium block">Butuh Verifikasi</span>
+            <p className="text-xl font-bold text-[var(--color-ink)]">{loading ? '—' : pendingCount}</p>
           </div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+        <div className="bg-[var(--color-surface-card)] p-5 rounded-2xl border border-[var(--color-surface-border)] shadow-sm flex items-center space-x-4">
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-xs text-slate-500 font-medium block">Total Masuk</span>
-            <p className="text-xl font-bold text-slate-800">{loading ? '—' : suratMasuk.length}</p>
+            <span className="text-xs text-[var(--color-ink-secondary)] font-medium block">Total Masuk</span>
+            <p className="text-xl font-bold text-[var(--color-ink)]">{loading ? '—' : suratMasuk.length}</p>
           </div>
         </div>
       </div>
 
       {/* Surat List */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h4 className="font-bold text-slate-800 text-sm">Surat Masuk (Butuh Persetujuan)</h4>
+      <div className="bg-[var(--color-surface-card)] rounded-2xl border border-[var(--color-surface-border)] shadow-sm overflow-hidden">
+        <div className="px-5 py-4 border-b border-[var(--color-surface-border)] flex justify-between items-center bg-[var(--color-surface)]">
+          <h4 className="font-bold text-[var(--color-ink)] text-sm">Surat Masuk (Butuh Persetujuan)</h4>
           {!loading && pendingCount > 0 && (
             <span className="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">
               {pendingCount} surat pending
@@ -140,21 +140,21 @@ export default function RtRwDashboard() {
         </div>
 
         {loading && (
-          <div className="flex items-center justify-center py-16 gap-2 text-slate-400">
+          <div className="flex items-center justify-center py-16 gap-2 text-[var(--color-ink-muted)]">
             <Loader2 className="w-5 h-5 animate-spin" />
             <span className="text-sm">Memuat surat masuk...</span>
           </div>
         )}
 
         {!loading && error && (
-          <div className="m-6 flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-4">
+          <div className="m-6 flex items-center gap-2 text-sm text-red-700 bg-[var(--color-danger-light)] border border-[var(--color-danger-light)] rounded-xl px-4 py-4">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {!loading && !error && suratMasuk.length === 0 && (
-          <div className="py-16 text-center text-slate-400 text-sm">
+          <div className="py-16 text-center text-[var(--color-ink-muted)] text-sm">
             Tidak ada surat yang membutuhkan verifikasi saat ini.
           </div>
         )}
@@ -162,21 +162,21 @@ export default function RtRwDashboard() {
         {!loading && !error && suratMasuk.length > 0 && (
           <div className="divide-y divide-slate-100">
             {suratMasuk.map((surat) => (
-              <div key={surat.id} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/50 transition">
+              <div key={surat.id} className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[var(--color-surface)]/50 transition">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-slate-900 text-sm">{surat.nama_warga}</span>
-                    <span className="text-xs text-slate-400">NIK: {surat.nik_warga}</span>
+                    <span className="text-xs text-[var(--color-ink-muted)]">NIK: {surat.nik_warga}</span>
                   </div>
-                  <p className="text-slate-700 font-medium text-sm">{surat.subjek}</p>
-                  <span className="text-xs text-slate-400">
+                  <p className="text-[var(--color-ink)] font-medium text-sm">{surat.subjek}</p>
+                  <span className="text-xs text-[var(--color-ink-muted)]">
                     {new Date(surat.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   {surat.file_path && (
                     <a href={surat.file_path} target="_blank" rel="noreferrer"
-                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition">
+                      className="px-3 py-1.5 bg-[var(--color-surface-muted)] hover:bg-slate-200 text-[var(--color-ink)] rounded-lg text-xs font-semibold transition">
                       <FileText className="w-3.5 h-3.5 inline mr-1" />
                       Lihat
                     </a>
@@ -205,22 +205,22 @@ export default function RtRwDashboard() {
       {v2Pending.length > 0 && (
         <div className="mt-6">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-slate-800">📬 Surat Masuk V2 ({v2Pending.length})</h3>
-            <Link to="/rtrw/inbox" className="text-xs text-blue-600 hover:underline">Lihat semua →</Link>
+            <h3 className="font-semibold text-[var(--color-ink)]">📬 Surat Masuk V2 ({v2Pending.length})</h3>
+            <Link to="/rtrw/inbox" className="text-xs text-[var(--color-primary)] hover:underline">Lihat semua →</Link>
           </div>
           <div className="space-y-2">
             {v2Pending.slice(0, 3).map(letter => (
               <Link
                 key={letter.uuid}
                 to={`/rtrw/surat/${letter.uuid}`}
-                className="block p-3 bg-white border border-slate-200 rounded-xl hover:shadow-sm transition"
+                className="block p-3 bg-[var(--color-surface-card)] border border-[var(--color-surface-border)] rounded-xl hover:shadow-sm transition"
               >
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-sm font-medium text-slate-800">{letter.resident_name}</p>
-                    <p className="text-xs text-slate-500">{letter.letter_type_name}</p>
+                    <p className="text-sm font-medium text-[var(--color-ink)]">{letter.resident_name}</p>
+                    <p className="text-xs text-[var(--color-ink-secondary)]">{letter.letter_type_name}</p>
                   </div>
-                  <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
+                  <span className="text-xs bg-[var(--color-accent-light)] text-yellow-700 px-2 py-0.5 rounded-full">
                     {letter.status === 'submitted' ? 'Menunggu' : 'Diproses'}
                   </span>
                 </div>

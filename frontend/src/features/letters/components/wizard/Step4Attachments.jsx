@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { UploadCloud, FileText, X, File as FileIcon } from 'lucide-react';
 
 const Step4Attachments = ({ wizard }) => {
   const [previewFile, setPreviewFile] = useState(null);
@@ -25,21 +26,21 @@ const Step4Attachments = ({ wizard }) => {
     setPreviewFile(null);
   };
 
-  const requiredDocs = typeof wizard.selectedType?.required_docs === 'string' 
-    ? JSON.parse(wizard.selectedType.required_docs) 
+  const requiredDocs = typeof wizard.selectedType?.required_docs === 'string'
+    ? JSON.parse(wizard.selectedType.required_docs)
     : wizard.selectedType?.required_docs || [];
 
   return (
-    <div className="space-y-6 relative">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Lampiran Persyaratan</h2>
-        <p className="text-gray-500 text-sm">Unggah dokumen yang diperlukan untuk surat ini</p>
+    <div className="space-y-4 sm:space-y-6 relative">
+      <div className="mb-2 sm:mb-6">
+        <h2 className="text-lg sm:text-xl font-bold text-[var(--color-ink)]">Lampiran Persyaratan</h2>
+        <p className="text-[var(--color-ink-secondary)] text-sm">Unggah dokumen yang diperlukan untuk surat ini</p>
       </div>
 
       {requiredDocs.length > 0 && (
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-          <h3 className="text-sm font-medium text-blue-800">Dokumen Wajib:</h3>
-          <ul className="mt-2 text-sm text-blue-700 list-disc list-inside">
+        <div className="bg-[var(--color-accent-light)]/40 border-l-4 border-[var(--color-accent)] p-4 mb-6 rounded-r-lg">
+          <h3 className="text-sm font-medium text-[var(--color-ink)]">Dokumen Wajib:</h3>
+          <ul className="mt-2 text-sm text-[var(--color-ink-secondary)] list-disc list-inside">
             {requiredDocs.map((doc, i) => (
               <li key={i}>{doc}</li>
             ))}
@@ -47,41 +48,34 @@ const Step4Attachments = ({ wizard }) => {
         </div>
       )}
 
-      <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors">
-        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-        </svg>
-        <div className="mt-4 flex text-sm justify-center text-gray-600">
-          <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+      <div className="border-2 border-dashed border-[var(--color-surface-border)] rounded-xl p-6 sm:p-8 text-center hover:bg-[var(--color-surface-muted)] transition-colors">
+        <UploadCloud className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-[var(--color-ink-muted)]" />
+        <div className="mt-4 flex flex-col sm:flex-row text-sm justify-center items-center text-[var(--color-ink-secondary)] gap-1">
+          <label htmlFor="file-upload" className="relative cursor-pointer bg-transparent rounded-md font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] focus-within:outline-none">
             <span>Pilih file</span>
             <input id="file-upload" name="file-upload" type="file" multiple className="sr-only" onChange={handleFileUpload} accept="image/*,.pdf" />
           </label>
-          <p className="pl-1">atau drag and drop</p>
+          <p>atau drag and drop</p>
         </div>
-        <p className="text-xs text-gray-500 mt-2">PNG, JPG, PDF up to 5MB</p>
+        <p className="text-xs text-[var(--color-ink-muted)] mt-2">PNG, JPG, PDF up to 5MB</p>
       </div>
 
       {/* List of uploaded files */}
       {wizard.attachments.length > 0 && (
         <div className="mt-6 space-y-3">
-          <h4 className="text-sm font-medium text-gray-900">File Terpilih (Klik untuk melihat):</h4>
+          <h4 className="text-sm font-medium text-[var(--color-ink)]">File Terpilih (Klik untuk melihat):</h4>
           {wizard.attachments.map((file, i) => (
-            <div 
-              key={i} 
+            <div
+              key={i}
               onClick={() => openPreview(file)}
-              className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all group"
+              className="flex items-center justify-between p-3 bg-[var(--color-surface-card)] border border-[var(--color-surface-border)] rounded-lg shadow-sm cursor-pointer hover:border-[var(--color-primary-light)] hover:bg-[var(--color-brand-50)] transition-all group"
             >
               <div className="flex items-center space-x-3 truncate">
-                <svg className="w-5 h-5 text-blue-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span className="text-sm text-gray-700 truncate font-medium group-hover:text-blue-700">{file.name}</span>
+                <FileText className="w-5 h-5 text-[var(--color-primary)] flex-shrink-0" />
+                <span className="text-sm text-[var(--color-ink)] truncate font-medium">{file.name}</span>
               </div>
-              <button onClick={(e) => removeAttachment(e, i)} className="text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors">
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+              <button onClick={(e) => removeAttachment(e, i)} className="text-[var(--color-danger)] hover:bg-[var(--color-danger-light)] p-1.5 rounded-md transition-colors flex-shrink-0">
+                <X className="w-4 h-4" />
               </button>
             </div>
           ))}
@@ -90,27 +84,23 @@ const Step4Attachments = ({ wizard }) => {
 
       {/* Preview Modal */}
       {previewFile && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-gray-900/75 backdrop-blur-sm" onClick={closePreview}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-              <h3 className="font-semibold text-gray-800 truncate pr-4 text-lg">{previewFile.name}</h3>
-              <button onClick={closePreview} className="text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-full p-2 transition-colors">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={closePreview}>
+          <div className="bg-[var(--color-surface-card)] rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-muted)]">
+              <h3 className="font-semibold text-[var(--color-ink)] truncate pr-4 text-base sm:text-lg">{previewFile.name}</h3>
+              <button onClick={closePreview} className="text-[var(--color-ink-secondary)] hover:bg-[var(--color-surface-border)] rounded-full p-2 transition-colors flex-shrink-0">
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
-            <div className="p-6 flex-1 overflow-auto flex justify-center items-center bg-gray-100/50 min-h-[50vh]">
+            <div className="p-4 sm:p-6 flex-1 overflow-auto flex justify-center items-center bg-[var(--color-surface)] min-h-[50vh]">
               {previewFile.type.startsWith('image/') ? (
-                <img src={previewFile.url} alt={previewFile.name} className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-sm border border-gray-200" />
+                <img src={previewFile.url} alt={previewFile.name} className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-sm border border-[var(--color-surface-border)]" />
               ) : previewFile.type === 'application/pdf' ? (
-                <iframe src={previewFile.url} className="w-full h-[70vh] border border-gray-200 rounded-lg shadow-sm" title="PDF Preview" />
+                <iframe src={previewFile.url} className="w-full h-[70vh] border border-[var(--color-surface-border)] rounded-lg shadow-sm" title="PDF Preview" />
               ) : (
-                <div className="flex flex-col items-center justify-center text-gray-400">
-                  <svg className="w-20 h-20 mb-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <p className="text-lg font-medium text-gray-600">Preview tidak tersedia</p>
+                <div className="flex flex-col items-center justify-center text-[var(--color-ink-muted)]">
+                  <FileIcon className="w-16 h-16 sm:w-20 sm:h-20 mb-4" />
+                  <p className="text-base sm:text-lg font-medium text-[var(--color-ink-secondary)]">Preview tidak tersedia</p>
                   <p className="text-sm mt-1">Format file ini tidak dapat ditampilkan di browser.</p>
                 </div>
               )}

@@ -18,10 +18,10 @@ export default function QrVerifyPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div className="min-h-screen bg-[var(--color-surface-muted)] flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-[var(--color-surface-card)] rounded-2xl shadow-lg overflow-hidden">
         {/* Header */}
-        <div className="bg-blue-600 p-6 text-center text-white">
+        <div className="bg-[var(--color-primary)] p-6 text-center text-white">
           <p className="text-4xl mb-2">🔍</p>
           <h1 className="text-xl font-bold">Verifikasi Surat</h1>
           <p className="text-blue-100 text-sm mt-1">SIPRAGA V2</p>
@@ -29,8 +29,8 @@ export default function QrVerifyPage() {
 
         <div className="p-6">
           {isLoading && (
-            <div className="text-center text-gray-400 py-8">
-              <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3" />
+            <div className="text-center text-[var(--color-ink-muted)] py-8">
+              <div className="animate-spin w-8 h-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full mx-auto mb-3" />
               <p className="text-sm">Memverifikasi surat...</p>
             </div>
           )}
@@ -38,8 +38,8 @@ export default function QrVerifyPage() {
           {isError && (
             <div className="text-center py-8">
               <p className="text-5xl mb-3">❌</p>
-              <p className="text-red-600 font-semibold">Surat tidak valid</p>
-              <p className="text-gray-400 text-sm mt-1">
+              <p className="text-[var(--color-danger)] font-semibold">Surat tidak valid</p>
+              <p className="text-[var(--color-ink-muted)] text-sm mt-1">
                 Token QR tidak ditemukan atau sudah kedaluwarsa.
               </p>
             </div>
@@ -48,13 +48,13 @@ export default function QrVerifyPage() {
           {data && !data.valid && (
             <div className="text-center py-8">
               <p className="text-5xl mb-3">❌</p>
-              <p className="text-red-600 font-semibold">Surat tidak valid</p>
+              <p className="text-[var(--color-danger)] font-semibold">Surat tidak valid</p>
             </div>
           )}
 
           {data?.valid && (
             <div className="space-y-4">
-              <div className="flex items-center justify-center gap-2 text-green-600 bg-green-50 rounded-lg py-3">
+              <div className="flex items-center justify-center gap-2 text-[var(--color-status-disetujui-text)] bg-green-50 rounded-lg py-3">
                 <span className="text-2xl">✅</span>
                 <span className="font-semibold">Surat Terverifikasi</span>
               </div>
@@ -77,8 +77,8 @@ export default function QrVerifyPage() {
                   { label: 'Status', value: data.status },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between text-sm border-b pb-2">
-                    <dt className="text-gray-500">{label}</dt>
-                    <dd className="text-gray-800 font-medium text-right">{value}</dd>
+                    <dt className="text-[var(--color-ink-secondary)]">{label}</dt>
+                    <dd className="text-[var(--color-ink)] font-medium text-right">{value}</dd>
                   </div>
                 ))}
               </dl>

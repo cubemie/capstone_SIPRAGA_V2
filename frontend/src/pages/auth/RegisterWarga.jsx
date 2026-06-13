@@ -74,7 +74,7 @@ export default function RegisterWarga() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-[var(--color-surface-muted)] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <div className="sm:mx-auto sm:w-full sm:max-w-2xl">
         <div className="mb-8 flex justify-center">
           <Link to="/" className="inline-block hover:opacity-80 transition">
@@ -86,17 +86,17 @@ export default function RegisterWarga() {
         </h2>
         <p className="mt-2 text-center text-sm text-slate-600">
           Sudah punya akun?{' '}
-          <Link to="/login-warga" className="font-medium text-blue-600 hover:text-blue-500 transition duration-150">
+          <Link to="/login-warga" className="font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition duration-150">
             Masuk di sini
           </Link>
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-2xl">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-slate-150">
+        <div className="bg-[var(--color-surface-card)] py-8 px-4 shadow sm:rounded-2xl sm:px-10 border border-slate-150">
           <form className="space-y-6" onSubmit={handleRegister}>
             {error && (
-              <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <div className="flex items-center gap-2 text-sm text-red-700 bg-[var(--color-danger-light)] border border-[var(--color-danger-light)] rounded-xl px-4 py-3">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -110,10 +110,10 @@ export default function RegisterWarga() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* NIK */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700">NIK (Nomor Induk Kependudukan)</label>
+                <label className="block text-sm font-semibold text-[var(--color-ink)]">NIK (Nomor Induk Kependudukan)</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <CreditCard className="h-5 w-5 text-slate-400" />
+                    <CreditCard className="h-5 w-5 text-[var(--color-ink-muted)]" />
                   </div>
                   <input
                     name="nik"
@@ -122,7 +122,7 @@ export default function RegisterWarga() {
                     maxLength={16}
                     value={formData.nik}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-sm"
                     placeholder="16 Digit Nomor NIK"
                   />
                 </div>
@@ -130,10 +130,10 @@ export default function RegisterWarga() {
 
               {/* Nama Lengkap */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700">Nama Lengkap</label>
+                <label className="block text-sm font-semibold text-[var(--color-ink)]">Nama Lengkap</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-slate-400" />
+                    <User className="h-5 w-5 text-[var(--color-ink-muted)]" />
                   </div>
                   <input
                     name="nama"
@@ -141,7 +141,7 @@ export default function RegisterWarga() {
                     required
                     value={formData.nama}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-sm"
                     placeholder="Sesuai KTP"
                   />
                 </div>
@@ -149,10 +149,10 @@ export default function RegisterWarga() {
 
               {/* Email */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700">Email</label>
+                <label className="block text-sm font-semibold text-[var(--color-ink)]">Email</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-slate-400" />
+                    <Mail className="h-5 w-5 text-[var(--color-ink-muted)]" />
                   </div>
                   <input
                     name="email"
@@ -160,17 +160,17 @@ export default function RegisterWarga() {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-sm"
                     placeholder="warga@email.com"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700">Kata Sandi</label>
+                <label className="block text-sm font-semibold text-[var(--color-ink)]">Kata Sandi</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-400" />
+                    <Lock className="h-5 w-5 text-[var(--color-ink-muted)]" />
                   </div>
                   <input
                     name="password"
@@ -178,12 +178,12 @@ export default function RegisterWarga() {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-10 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                    className="block w-full pl-10 pr-10 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-sm"
                     placeholder="••••••••"
                   />
                   <button type="button" tabIndex={-1}
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition">
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--color-ink-muted)] hover:text-slate-600 transition">
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
@@ -191,10 +191,10 @@ export default function RegisterWarga() {
 
               {/* Konfirmasi Password */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700">Konfirmasi Kata Sandi</label>
+                <label className="block text-sm font-semibold text-[var(--color-ink)]">Konfirmasi Kata Sandi</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-slate-400" />
+                    <Lock className="h-5 w-5 text-[var(--color-ink-muted)]" />
                   </div>
                   <input
                     name="confirm_password"
@@ -202,12 +202,12 @@ export default function RegisterWarga() {
                     required
                     value={formData.confirm_password}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-10 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                    className="block w-full pl-10 pr-10 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-sm"
                     placeholder="••••••••"
                   />
                   <button type="button" tabIndex={-1}
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition">
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--color-ink-muted)] hover:text-slate-600 transition">
                     {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
@@ -215,24 +215,24 @@ export default function RegisterWarga() {
 
               {/* Tempat Lahir */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700">Tempat Lahir</label>
+                <label className="block text-sm font-semibold text-[var(--color-ink)]">Tempat Lahir</label>
                 <input
                   name="tempatLahir"
                   type="text"
                   required
                   value={formData.tempatLahir}
                   onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-sm"
                   placeholder="Kota / Kabupaten"
                 />
               </div>
 
               {/* Tanggal Lahir */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700">Tanggal Lahir</label>
+                <label className="block text-sm font-semibold text-[var(--color-ink)]">Tanggal Lahir</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Calendar className="h-5 w-5 text-slate-400" />
+                    <Calendar className="h-5 w-5 text-[var(--color-ink-muted)]" />
                   </div>
                   <input
                     name="tanggal_lahir"
@@ -240,19 +240,19 @@ export default function RegisterWarga() {
                     required
                     value={formData.tanggal_lahir}
                     onChange={handleChange}
-                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-sm"
                   />
                 </div>
               </div>
 
               {/* Jenis Kelamin */}
               <div>
-                <label className="block text-sm font-semibold text-slate-700">Jenis Kelamin</label>
+                <label className="block text-sm font-semibold text-[var(--color-ink)]">Jenis Kelamin</label>
                 <select
                   name="jenis_kelamin"
                   value={formData.jenis_kelamin}
                   onChange={handleChange}
-                  className="mt-1 block w-full px-3 py-2 border border-slate-300 bg-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                  className="mt-1 block w-full px-3 py-2 border border-slate-300 bg-[var(--color-surface-card)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-sm"
                 >
                   <option value="Laki-laki">Laki-laki</option>
                   <option value="Perempuan">Perempuan</option>
@@ -262,26 +262,26 @@ export default function RegisterWarga() {
               {/* RT / RW */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700">No. RT</label>
+                  <label className="block text-sm font-semibold text-[var(--color-ink)]">No. RT</label>
                   <input
                     name="rt"
                     type="text"
                     required
                     value={formData.rt}
                     onChange={handleChange}
-                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-sm"
                     placeholder="001"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700">No. RW</label>
+                  <label className="block text-sm font-semibold text-[var(--color-ink)]">No. RW</label>
                   <input
                     name="rw"
                     type="text"
                     required
                     value={formData.rw}
                     onChange={handleChange}
-                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                    className="mt-1 block w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-sm"
                     placeholder="002"
                   />
                 </div>
@@ -290,10 +290,10 @@ export default function RegisterWarga() {
 
             {/* Alamat */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700">Alamat Lengkap (Sesuai KTP)</label>
+              <label className="block text-sm font-semibold text-[var(--color-ink)]">Alamat Lengkap (Sesuai KTP)</label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute top-3 left-0 pl-3 pointer-events-none">
-                  <MapPin className="h-5 w-5 text-slate-400" />
+                  <MapPin className="h-5 w-5 text-[var(--color-ink-muted)]" />
                 </div>
                 <textarea
                   name="alamat"
@@ -301,7 +301,7 @@ export default function RegisterWarga() {
                   rows={3}
                   value={formData.alamat}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
+                  className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-[var(--color-primary)] focus:outline-none text-sm"
                   placeholder="Jl. Raya No. XX..."
                 />
               </div>
@@ -311,7 +311,7 @@ export default function RegisterWarga() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full flex justify-center items-center gap-2 py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-semibold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--color-primary)] transition duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {loading ? 'Mendaftar...' : 'Daftar Akun'}

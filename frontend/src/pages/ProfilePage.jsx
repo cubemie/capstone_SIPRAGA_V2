@@ -164,7 +164,7 @@ export default function ProfilePage() {
 
       {/* Foto KTP */}
       {profile?.foto_ktp && (
-        <div className="bg-white border border-surface-border rounded-xl p-4 mb-4">
+        <div className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl p-4 mb-4">
           <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-3 flex items-center gap-2">
             <FileText className="w-3.5 h-3.5" />
             Foto KTP
@@ -180,7 +180,7 @@ export default function ProfilePage() {
       {/* Form sections */}
       <form onSubmit={handleSubmit((data) => mutation.mutate(data))}>
         {FIELD_SECTIONS.map((section) => (
-          <div key={section.title} className="bg-white border border-surface-border rounded-xl p-4 mb-4">
+          <div key={section.title} className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl p-4 mb-4">
             <p className="text-xs font-semibold text-ink-secondary uppercase tracking-wider mb-4 flex items-center gap-2">
               <section.icon className="w-3.5 h-3.5" />
               {section.title}
@@ -202,9 +202,9 @@ export default function ProfilePage() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border resize-none transition
                         ${!isEditing || !field.editable
                           ? 'bg-surface-muted border-surface-border text-ink-secondary'
-                          : 'bg-white border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                          : 'bg-[var(--color-surface-card)] border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                         }
-                        ${errors[field.name] ? 'border-red-400 bg-red-50' : ''}
+                        ${errors[field.name] ? 'border-red-400 bg-[var(--color-danger-light)]' : ''}
                       `}
                     />
                   ) : field.type === 'select' ? (
@@ -214,7 +214,7 @@ export default function ProfilePage() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border transition
                         ${!isEditing || !field.editable
                           ? 'bg-surface-muted border-surface-border text-ink-secondary'
-                          : 'bg-white border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-500'
+                          : 'bg-[var(--color-surface-card)] border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-500'
                         }
                       `}
                     >
@@ -230,14 +230,14 @@ export default function ProfilePage() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border transition
                         ${!isEditing || !field.editable
                           ? 'bg-surface-muted border-surface-border text-ink-secondary'
-                          : 'bg-white border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent'
+                          : 'bg-[var(--color-surface-card)] border-surface-border focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent'
                         }
-                        ${errors[field.name] ? 'border-red-400 bg-red-50' : ''}
+                        ${errors[field.name] ? 'border-red-400 bg-[var(--color-danger-light)]' : ''}
                       `}
                     />
                   )}
                   {errors[field.name] && (
-                    <p className="text-xs text-red-500 mt-1">{errors[field.name].message}</p>
+                    <p className="text-xs text-[var(--color-danger)] mt-1">{errors[field.name].message}</p>
                   )}
                 </div>
               ))}

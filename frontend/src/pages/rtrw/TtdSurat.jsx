@@ -55,16 +55,16 @@ export default function TtdSurat() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Tanda Tangan Digital</h1>
+      <h1 className="text-2xl font-bold text-[var(--color-ink)] mb-6">Tanda Tangan Digital</h1>
 
       {/* TTD Tersimpan */}
       {ttdData?.ttd_digital && (
-        <div className="mb-6 p-4 border rounded-lg bg-gray-50">
-          <p className="text-sm font-medium text-gray-600 mb-2">TTD Saat Ini</p>
+        <div className="mb-6 p-4 border rounded-lg bg-[var(--color-surface-muted)]">
+          <p className="text-sm font-medium text-[var(--color-ink-secondary)] mb-2">TTD Saat Ini</p>
           <img
             src={ttdData.ttd_digital}
             alt="TTD Tersimpan"
-            className="max-h-24 border rounded bg-white p-2"
+            className="max-h-24 border rounded bg-[var(--color-surface-card)] p-2"
           />
         </div>
       )}
@@ -80,8 +80,8 @@ export default function TtdSurat() {
             onClick={() => setActiveTab(tab.key)}
             className={`pb-2 px-4 text-sm font-medium border-b-2 ${
               activeTab === tab.key
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500'
+                ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                : 'border-transparent text-[var(--color-ink-secondary)]'
             }`}
           >
             {tab.label}
@@ -101,7 +101,7 @@ export default function TtdSurat() {
           <button
             onClick={() => fileInputRef.current.click()}
             disabled={mutation.isPending}
-            className="w-full border-2 border-dashed border-gray-300 rounded-lg py-12 text-gray-400 hover:border-blue-400 hover:text-blue-500 transition-colors"
+            className="w-full border-2 border-dashed border-[var(--color-surface-border)] rounded-lg py-12 text-[var(--color-ink-muted)] hover:border-[var(--color-primary-light)] hover:text-[var(--color-primary-dark)] transition-colors"
           >
             <p className="text-lg">📎</p>
             <p className="text-sm mt-1">Klik untuk pilih file PNG/JPG</p>
@@ -111,7 +111,7 @@ export default function TtdSurat() {
 
       {activeTab === 'draw' && (
         <div>
-          <div className="border rounded-lg overflow-hidden bg-white mb-3">
+          <div className="border rounded-lg overflow-hidden bg-[var(--color-surface-card)] mb-3">
             <SignatureCanvas
               ref={sigCanvas}
               penColor="black"
@@ -125,14 +125,14 @@ export default function TtdSurat() {
           <div className="flex gap-2">
             <button
               onClick={() => sigCanvas.current.clear()}
-              className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm hover:bg-gray-50"
+              className="flex-1 border border-[var(--color-surface-border)] text-[var(--color-ink-secondary)] py-2 rounded-lg text-sm hover:bg-[var(--color-surface-muted)]"
             >
               Hapus
             </button>
             <button
               onClick={handleSaveCanvas}
               disabled={mutation.isPending}
-              className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 bg-[var(--color-primary)] text-white py-2 rounded-lg text-sm font-medium hover:bg-[var(--color-primary-dark)] disabled:opacity-50"
             >
               {mutation.isPending ? 'Menyimpan...' : 'Simpan TTD'}
             </button>

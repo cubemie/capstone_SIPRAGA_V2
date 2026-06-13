@@ -37,10 +37,10 @@ export default function LetterListPage() {
   return (
     <div className="max-w-3xl mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Surat Saya</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-ink)]">Surat Saya</h1>
         <Link
           to={newLetterPath}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+          className="bg-[var(--color-primary)] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[var(--color-primary-dark)]"
         >
           + Ajukan Surat
         </Link>
@@ -53,8 +53,8 @@ export default function LetterListPage() {
             onClick={() => setActiveTab(tab.key)}
             className={`pb-2 px-3 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab.key
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                : 'border-transparent text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)]'
             }`}
           >
             {tab.label}
@@ -65,13 +65,13 @@ export default function LetterListPage() {
       {isLoading && (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-gray-100 rounded-lg animate-pulse" />
+            <div key={i} className="h-24 bg-[var(--color-surface-muted)] rounded-lg animate-pulse" />
           ))}
         </div>
       )}
 
       {!isLoading && filtered.length === 0 && (
-        <div className="text-center text-gray-400 py-16">
+        <div className="text-center text-[var(--color-ink-muted)] py-16">
           <p className="text-lg">Belum ada surat</p>
           <p className="text-sm mt-1">Klik "+ Ajukan Surat" untuk mulai</p>
         </div>
@@ -81,20 +81,20 @@ export default function LetterListPage() {
         {filtered.map((letter) => {
           const statusInfo = LETTER_STATUS_V2[letter.status] ?? {
             label: letter.status,
-            color: 'bg-gray-100 text-gray-600',
+            color: 'bg-[var(--color-surface-muted)] text-[var(--color-ink-secondary)]',
           };
           return (
             <Link
               key={letter.uuid}
               to={`${pathPrefix}/surat/${letter.uuid}`}
-              className="block border rounded-lg p-4 hover:shadow-md transition-shadow bg-white"
+              className="block border rounded-lg p-4 hover:shadow-md transition-shadow bg-[var(--color-surface-card)]"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-gray-800">
+                  <p className="font-medium text-[var(--color-ink)]">
                     {letter.letter_type_name ?? letter.subject ?? 'Surat'}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-[var(--color-ink-muted)] mt-1">
                     {new Date(letter.created_at).toLocaleDateString('id-ID', {
                       day: 'numeric',
                       month: 'long',
