@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Input Data Warga</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-blue-900 text-white p-4 flex justify-between items-center shadow-md">
+    <h1 class="text-lg font-semibold">📝 Input Data Warga</h1>
+    <a href="dash-warga.html" class="text-white hover:underline">⬅ Kembali ke Dashboard</a>
+  </header>
+
+  <!-- Main Content -->
+  <main class="p-6">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Formulir Input Data Warga</h2>
+      <form action="#" method="POST" enctype="multipart/form-data" class="space-y-6">
+
+        <!-- Alamat Domisili -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-700 mb-2">Alamat Domisili</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Provinsi</label>
+              <input type="text" name="provinsi" required class="mt-1 block w-full border rounded px-3 py-2"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Kota/Kabupaten</label>
+              <input type="text" name="kota" required class="mt-1 block w-full border rounded px-3 py-2"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Kecamatan</label>
+              <input type="text" name="kecamatan" required class="mt-1 block w-full border rounded px-3 py-2"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Kelurahan</label>
+              <input type="text" name="kelurahan" required class="mt-1 block w-full border rounded px-3 py-2"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">RW</label>
+              <input type="text" name="rw" required class="mt-1 block w-full border rounded px-3 py-2"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">RT</label>
+              <input type="text" name="rt" required class="mt-1 block w-full border rounded px-3 py-2"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agama -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Agama</label>
+          <select name="agama" required class="mt-1 block w-full border rounded px-3 py-2">
+            <option value="">-- Pilih Agama --</option>
+            <option>Islam</option>
+            <option>Kristen</option>
+            <option>Katolik</option>
+            <option>Hindu</option>
+            <option>Buddha</option>
+            <option>Konghucu</option>
+          </select>
+        </div>
+
+        <!-- Status Perkawinan -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Status Perkawinan</label>
+          <select name="status_perkawinan" required class="mt-1 block w-full border rounded px-3 py-2">
+            <option value="">-- Pilih Status --</option>
+            <option>Belum Kawin</option>
+            <option>Kawin</option>
+            <option>Cerai Hidup</option>
+            <option>Cerai Mati</option>
+          </select>
+        </div>
+
+        <!-- Pekerjaan -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Pekerjaan</label>
+          <input type="text" name="pekerjaan" required class="mt-1 block w-full border rounded px-3 py-2"/>
+        </div>
+
+        <!-- Kewarganegaraan -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Kewarganegaraan</label>
+          <select name="kewarganegaraan" required class="mt-1 block w-full border rounded px-3 py-2">
+            <option value="">-- Pilih --</option>
+            <option>WNI</option>
+            <option>WNA</option>
+          </select>
+        </div>
+
+        <!-- Upload KTP -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Upload Foto KTP</label>
+          <input type="file" name="foto_ktp" accept=".jpg,.jpeg,.png,.pdf" required class="mt-1 block w-full border rounded px-3 py-2"/>
+        </div>
+
+        <!-- Submit -->
+        <div class="pt-4">
+          <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+            Simpan Data
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+# ============================================================
+# docker-compose.dev.yml — Development dengan hot-reload backend
+# Backend + Database + Redis semua di Docker.
+# Frontend tetap dijalankan lokal: cd frontend && npm run dev
+# ============================================================
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: coretax_db_dev
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: capstone
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data_dev:/var/lib/mysql
+      - ./database/00-base.sql:/docker-entrypoint-initdb.d/00-base.sql:ro
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - ./database/seed_workflows.sql:/docker-entrypoint-initdb.d/03-seed_workflows.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: coretax_redis_dev
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+
+  backend:
+    build: ./backend
+    container_name: coretax_backend_dev
+    ports:
+      - "3000:3000"
+    env_file: ./backend/.env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: capstone
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - ./backend/src:/app/src
+    command: npx nodemon src/server.js
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  db_data_dev:

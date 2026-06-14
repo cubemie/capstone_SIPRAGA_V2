@@ -1,0 +1,26 @@
+{
+  "name": "capstone-rtrw-coretax",
+  "services": [
+    {
+      "name": "backend",
+      "src": "backend",
+      "build": {
+        "builder": "DOCKER"
+      }
+    },
+    {
+      "name": "mysql",
+      "image": "mysql:8",
+      "env": {
+        "MYSQL_DATABASE": "capstone_rtrw",
+        "MYSQL_USER": "capstone_user",
+        "MYSQL_PASSWORD": "${{ MYSQL_PASSWORD }}",
+        "MYSQL_ROOT_PASSWORD": "${{ MYSQL_ROOT_PASSWORD }}"
+      }
+    },
+    {
+      "name": "redis",
+      "image": "redis:alpine"
+    }
+  ]
+}

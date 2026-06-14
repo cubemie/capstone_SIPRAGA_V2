@@ -1,6 +1,17 @@
 const app = require('./app');
-const PORT = 3000;
+const ensureSuratWorkflowColumns = require('./bootstrap/ensureSuratWorkflowColumns');
+require('./modules/letters/sub-modules/pdf/pdf.queue.js');
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || 3000;
+
+(async () => {
+  try {
+    await ensureSuratWorkflowColumns();
+  } catch (error) {
+    console.warn('[server] Tidak dapat menyiapkan workflow pengajuan_surat (opsional):', error.message);
+  }
+  
+  app.listen(PORT, () => {
+    console.log(`🚀 Backend running at http://localhost:${PORT}`);
+  });
+})();

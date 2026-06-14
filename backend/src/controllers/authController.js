@@ -1,77 +1,163 @@
+/**
+ * AuthController
+ *
+ * Thin controller — hanya mengekstrak data dari request,
+ * meneruskan ke AuthService, dan mengembalikan response HTTP.
+ * Error fatal diteruskan ke global errorHandler via next(err).
+ */
+
+const AuthService = require('../services/AuthService');
+const { blacklistToken } = require('../middlewares/authMiddleware');
+const { sendSuccess, sendError } = require('../utils/response');
 const db = require('../config/db');
-const bcrypt = require('bcryptjs');
 
-exports.register = async (req, res) => {
-  const { nik, nama, jenis_kelamin, tanggal_lahir, email, password, confirm_password } = req.body;
-
-  if (!nik || !nama || !jenis_kelamin || !tanggal_lahir || !email || !password || !confirm_password) {
-    return res.status(400).json({ message: 'Semua field wajib diisi.' });
-  }
-  if (password !== confirm_password) {
-    return res.status(400).json({ message: 'Konfirmasi password tidak cocok.' });
-  }
-
-  try {
-    const [existing] = await db.query('SELECT * FROM warga WHERE NIK = ? OR email = ?', [nik, email]);
-    if (existing.length > 0) {
-      return res.status(400).json({ message: 'NIK atau email sudah terdaftar.' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    await db.query(`
-      INSERT INTO warga (NIK, nama, jenis_kelamin, tanggal_lahir, email, password)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `, [nik, nama, jenis_kelamin, tanggal_lahir, email, hashedPassword]);
-
-    // Registrasi berhasil, arahkan frontend ke login
-    res.status(201).json({ message: 'Registrasi berhasil. Silakan login.', redirect: '/login.html' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Terjadi kesalahan server.' });
-  }
-};
-
-exports.login = async (req, res) => {
-    const { nik, password } = req.body;
-
-    if (!nik || !password) {
-        return res.status(400).json({ message: 'NIK dan password wajib diisi.' });
-    }
-
+class AuthController {
+  /** POST /api/auth/register */
+  static async register(req, res, next) {
     try {
-        const [rows] = await db.query('SELECT * FROM warga WHERE NIK = ?', [nik]);
-        if (rows.length === 0) {
-            return res.status(400).json({ message: 'NIK belum terdaftar.' });
-        }
-
-        const user = rows[0];
-        const validPassword = await bcrypt.compare(password, user.password);
-
-        if (!validPassword) {
-            return res.status(400).json({ message: 'Password salah.' });
-        }
-
-        // Simpan session user minimal id dan nama
-        req.session.user = {
-            id_warga: user.id_warga,
-            nama: user.nama,
-            nik: user.NIK
-        };
-
-        res.json({ message: 'Login berhasil', redirect: '/dashboard.html' });
+      const { data, error } = await AuthService.registerWarga(req.body);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Registrasi warga berhasil', 201);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Terjadi kesalahan server.' });
+      next(err);
     }
-};
+  }
+
+  /** POST /api/auth/register-rw */
+  static async registerRw(req, res, next) {
+    try {
+      const { data, error } = await AuthService.registerRw(req.body);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Registrasi RW berhasil', 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** POST /api/auth/register-rt */
+  static async registerRt(req, res, next) {
+    try {
+      const { data, error } = await AuthService.registerRt(req.body);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Registrasi RT berhasil', 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** POST /api/auth/login */
+  static async loginWarga(req, res, next) {
+    try {
+      const { nik, password } = req.body;
+      const { data, error } = await AuthService.loginWarga(nik, password);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Login warga berhasil');
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** POST /api/auth/login-rtrw */
+  static async loginRtRw(req, res, next) {
+    try {
+      const { username, password } = req.body;
+      const { data, error } = await AuthService.loginRtRw(username, password);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Login pengurus berhasil');
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** POST /api/superadmin/login */
+  static async loginSuperadmin(req, res, next) {
+    try {
+      const { username, password } = req.body;
+      const { data, error } = await AuthService.loginSuperadmin(username, password);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Login superadmin berhasil');
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** POST /api/superadmin/register */
+  static async registerSuperadmin(req, res, next) {
+    try {
+      const { data, error } = await AuthService.registerSuperadmin(req.body);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'Registrasi superadmin berhasil', 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** POST /api/auth/logout */
+  static logout(req, res) {
+    // Blacklist token agar tidak bisa dipakai lagi setelah logout
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (token) blacklistToken(token);
+    sendSuccess(res, null, 'Logout berhasil.');
+  }
+
+  /** GET /api/auth/check-session */
+  static checkSession(req, res) {
+    sendSuccess(res, { loggedIn: true, user: req.user }, 'Sesi aktif');
+  }
+
+  /** POST /api/superadmin/rt */
+  static async insertRt(req, res, next) {
+    try {
+      const { data, error } = await AuthService.createRt(req.body);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'RT berhasil ditambahkan', 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** POST /api/superadmin/rw */
+  static async insertRw(req, res, next) {
+    try {
+      const { data, error } = await AuthService.createRw(req.body);
+      if (error) return sendError(res, error, 400);
+      sendSuccess(res, data, 'RW berhasil ditambahkan', 201);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /** GET /api/superadmin/stats */
+  static async getStats(req, res, next) {
+    try {
+      const [[{ total_warga }]] = await db.query('SELECT COUNT(*) AS total_warga FROM warga');
+      const [[{ total_rt }]] = await db.query('SELECT COUNT(*) AS total_rt FROM rt');
+      const [[{ total_rw }]] = await db.query('SELECT COUNT(*) AS total_rw FROM rw');
+
+      const [suratV1] = await db.query('SELECT status, COUNT(*) AS total FROM pengajuan_surat GROUP BY status');
+      
+      let suratV2 = [];
+      try {
+        const [v2] = await db.query('SELECT status, COUNT(*) AS total FROM letters GROUP BY status');
+        suratV2 = v2;
+      } catch (e) {
+        // ignore if letters table doesn't exist yet
+      }
+
+      const data = {
+        total_warga,
+        total_rt,
+        total_rw,
+        surat_v1: suratV1,
+        surat_v2: suratV2,
+      };
+      sendSuccess(res, data, 'Statistik berhasil diambil', 200);
+    } catch (err) {
+      next(err);
+    }
+  }
+}
 
 
-exports.logout = (req, res) => {
-    req.session.destroy((err) => {
-        if (err) {
-            return res.status(500).json({ message: 'Logout gagal.' });
-        }
-        res.clearCookie('connect.sid'); // clear cookie session
-        res.json({ message: 'Logout berhasil', redirect: '/login-warga_baru.html' });
-    });
-};
+module.exports = AuthController;

@@ -1,32 +1,14 @@
-const express = require('express');
-const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const { isLoggedIn } = require('../middlewares/authMiddleware');
-const { uploadTtd, getTtd } = require('../controllers/ttdController');
+const express              = require('express');
+const router               = express.Router();
+const { verifyToken }      = require('../middlewares/authMiddleware');
+const authRtRwMiddleware   = require('../middlewares/authRtRwMiddleware');
+const { uploadTtd }        = require('../middlewares/upload');
+const wargaController      = require('../controllers/wargaController');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/ttd/');
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `ttd_${Date.now()}${ext}`);
-  }
-});
+// Upload TTD — hanya RT/RW yang boleh upload TTD mereka
+router.post('/upload-ttd',  authRtRwMiddleware, uploadTtd.single('ttdImage'), wargaController.uploadTtd);
 
-const fileFilter = (req, file, cb) => {
-  const allowed = ['image/jpeg', 'image/png'];
-  if (allowed.includes(file.mimetype)) cb(null, true);
-  else cb(new Error('Format harus JPG/PNG'));
-};
-
-const upload = multer({ storage, fileFilter });
-
-// Upload tanda tangan
-router.post('/upload-ttd', isLoggedIn, upload.single('ttdImage'), uploadTtd);
-
-// Ambil tanda tangan saat ini
-router.get('/current-ttd', isLoggedIn, getTtd);
+// Get TTD — RT/RW bisa lihat TTD mereka sendiri
+router.get('/current-ttd',  authRtRwMiddleware, wargaController.getTtd);
 
 module.exports = router;
