@@ -17,12 +17,40 @@ class SuratModel {
   /**
    * Buat pengajuan surat baru.
    */
-  static async create({ id_warga, subjek, file_path, provinsi, kota, kecamatan, kelurahan, rt, rw }) {
+  static async create({
+    id_warga,
+    subjek,
+    file_path,
+    provinsi,
+    kota,
+    kecamatan,
+    kelurahan,
+    rt,
+    rw,
+    current_reviewer_role = 'rt',
+    submission_source = 'online',
+    created_by_role = null,
+    created_by_id = null,
+  }) {
     await db.query(
       `INSERT INTO pengajuan_surat
-       (id_warga, subjek, file_path, provinsi, kota, kecamatan, kelurahan, rt, rw)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id_warga, subjek, file_path, provinsi, kota, kecamatan, kelurahan, padRtRw(rt), padRtRw(rw)]
+       (id_warga, subjek, file_path, provinsi, kota, kecamatan, kelurahan, rt, rw, current_reviewer_role, submission_source, created_by_role, created_by_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id_warga,
+        subjek,
+        file_path,
+        provinsi,
+        kota,
+        kecamatan,
+        kelurahan,
+        padRtRw(rt),
+        padRtRw(rw),
+        current_reviewer_role,
+        submission_source,
+        created_by_role,
+        created_by_id,
+      ]
     );
   }
 
@@ -34,7 +62,8 @@ class SuratModel {
   static async findById(id) {
     const [rows] = await db.query(
       `SELECT ps.id, ps.subjek, ps.status, ps.alasan_penolakan,
-              ps.file_path, ps.file_path_signed,
+              ps.file_path, ps.file_path_signed, ps.current_reviewer_role,
+              ps.submission_source, ps.created_by_role, ps.created_by_id,
               w.nama AS nama_warga, w.email AS email_warga, w.no_hp AS no_hp_warga
        FROM pengajuan_surat ps
        JOIN warga w ON ps.id_warga = w.id_warga
@@ -52,7 +81,8 @@ class SuratModel {
   static async findByWargaId(id_warga) {
     const [rows] = await db.query(
       `SELECT id, subjek, file_path, file_path_signed,
-              tanggal_ajuan AS created_at, status, alasan_penolakan
+              tanggal_ajuan AS created_at, status, alasan_penolakan,
+              current_reviewer_role, submission_source
        FROM pengajuan_surat
        WHERE id_warga = ?
        ORDER BY tanggal_ajuan DESC`,
@@ -70,11 +100,13 @@ class SuratModel {
    */
   static async findMasuk(id, role) {
     let query = `SELECT ps.id, ps.subjek, ps.file_path, ps.tanggal_ajuan AS created_at,
-              ps.status, w.nama AS nama_warga, w.NIK AS nik_warga
+              ps.status, ps.current_reviewer_role, ps.submission_source,
+              w.nama AS nama_warga, w.NIK AS nik_warga
        FROM pengajuan_surat ps
        JOIN warga w ON ps.id_warga = w.id_warga
-       WHERE ps.status = ?`;
-    const params = [SURAT_STATUS.MENUNGGU];
+       WHERE ps.status = ?
+         AND COALESCE(ps.current_reviewer_role, 'rt') = ?`;
+    const params = [SURAT_STATUS.MENUNGGU, role];
 
     if (role === 'rt') {
       const [rtRows] = await db.query(
@@ -127,10 +159,22 @@ class SuratModel {
    * @param {number} id
    * @param {string|null} file_path_signed
    */
-  static async approve(id, file_path_signed) {
+  static async approveFinal(id, file_path_signed) {
     await db.query(
-      'UPDATE pengajuan_surat SET file_path_signed = ?, status = ? WHERE id = ?',
+      'UPDATE pengajuan_surat SET file_path_signed = ?, status = ?, current_reviewer_role = NULL WHERE id = ?',
       [file_path_signed, SURAT_STATUS.DISETUJUI, id]
+    );
+  }
+
+  /**
+   * Teruskan surat ke reviewer berikutnya tanpa menutup proses.
+   * @param {number} id
+   * @param {string} reviewerRole
+   */
+  static async forwardToReviewer(id, reviewerRole) {
+    await db.query(
+      'UPDATE pengajuan_surat SET current_reviewer_role = ? WHERE id = ?',
+      [reviewerRole, id]
     );
   }
 
@@ -141,7 +185,7 @@ class SuratModel {
    */
   static async reject(id, alasan) {
     await db.query(
-      'UPDATE pengajuan_surat SET status = ?, alasan_penolakan = ? WHERE id = ?',
+      'UPDATE pengajuan_surat SET status = ?, alasan_penolakan = ?, current_reviewer_role = NULL WHERE id = ?',
       [SURAT_STATUS.DITOLAK, alasan, id]
     );
   }

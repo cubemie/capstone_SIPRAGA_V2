@@ -62,9 +62,10 @@ class SuratController {
   static async approveSurat(req, res, next) {
     try {
       const id = req.params.id;
-      const { data, error } = await SuratService.approveSurat(id, req.file);
+      const approver = req.rtRwUser || req.user;
+      const { data, error } = await SuratService.approveSurat(id, req.file, approver?.id, approver?.role);
       if (error) return sendError(res, error, 400);
-      sendSuccess(res, data, 'Surat berhasil disetujui');
+      sendSuccess(res, data, data?.message || 'Surat berhasil diproses');
     } catch (err) {
       next(err);
     }
@@ -75,7 +76,8 @@ class SuratController {
     try {
       const id = req.params.id;
       const { alasan } = req.body;
-      const { data, error } = await SuratService.rejectSurat(id, alasan);
+      const approver = req.rtRwUser || req.user;
+      const { data, error } = await SuratService.rejectSurat(id, alasan, approver?.role);
       if (error) return sendError(res, error, 400);
       sendSuccess(res, data, 'Surat berhasil ditolak');
     } catch (err) {
@@ -115,9 +117,10 @@ class SuratController {
         nama_warga,
         jenis_surat,
         alasan,
+        creator: req.rtRwUser || req.user,
       });
       if (error) return sendError(res, error, 400);
-      sendSuccess(res, data, 'Surat offline berhasil diajukan', 201);
+      sendSuccess(res, data, data?.message || 'Surat offline berhasil diajukan', 201);
     } catch (err) {
       next(err);
     }

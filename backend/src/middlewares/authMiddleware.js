@@ -42,24 +42,30 @@ function isTokenBlacklisted(token) {
  * @returns {{ decoded: Object, token: string }|null} decoded payload + raw token, atau null jika sudah response
  */
 function extractAndVerifyToken(req, res) {
+  console.log("[authMiddleware.extractAndVerifyToken] req.headers.authorization:", req.headers['authorization']);
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1]; // Format: Bearer <token>
+  console.log("[authMiddleware.extractAndVerifyToken] token:", token);
 
   if (!token) {
+    console.log("[authMiddleware.extractAndVerifyToken] No token found");
     res.status(401).json({ message: 'Akses ditolak. Token tidak ditemukan.' });
     return null;
   }
 
   // Cek blacklist sebelum verifikasi signature
   if (isTokenBlacklisted(token)) {
+    console.log("[authMiddleware.extractAndVerifyToken] Token is blacklisted");
     res.status(401).json({ message: 'Token tidak valid. Silakan login kembali.' });
     return null;
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("[authMiddleware.extractAndVerifyToken] Decoded token:", decoded);
     return { decoded, token };
   } catch (err) {
+    console.log("[authMiddleware.extractAndVerifyToken] Token verify failed:", err.message);
     res.status(403).json({ message: 'Token tidak valid atau sudah kadaluarsa.' });
     return null;
   }

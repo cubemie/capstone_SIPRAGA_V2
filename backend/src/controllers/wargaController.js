@@ -50,22 +50,28 @@ class WargaController {
 
   /** GET /api/ttd/current-ttd */
   static async getTtd(req, res, next) {
+    console.log('[WargaController.getTtd] Called with req.user:', req.user);
     try {
       const { data, error } = await WargaService.getTtd(req.user);
+      console.log('[WargaController.getTtd] Result:', { data, error });
       if (error) return sendError(res, error, 404);
       sendSuccess(res, data, 'Data TTD berhasil diambil');
     } catch (err) {
+      console.error('[WargaController.getTtd] Error:', err);
       next(err);
     }
   }
 
   /** POST /api/ttd/upload-ttd */
   static async uploadTtd(req, res, next) {
+    console.log('[WargaController.uploadTtd] Called with req.user:', req.user, 'req.file:', req.file);
     try {
       const { data, error } = await WargaService.uploadTtd(req.user, req.file);
+      console.log('[WargaController.uploadTtd] Result:', { data, error });
       if (error) return sendError(res, error, 400);
       sendSuccess(res, data, 'TTD berhasil diupload');
     } catch (err) {
+      console.error('[WargaController.uploadTtd] Error:', err);
       next(err);
     }
   }

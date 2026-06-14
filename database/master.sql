@@ -95,6 +95,10 @@ CREATE TABLE IF NOT EXISTS pengajuan_surat (
   kelurahan_desa   VARCHAR(100) NULL,
   rt               VARCHAR(10)  NULL,
   rw               VARCHAR(10)  NULL,
+  current_reviewer_role VARCHAR(10) NULL,
+  submission_source     VARCHAR(20) NULL,
+  created_by_role       VARCHAR(10) NULL,
+  created_by_id         VARCHAR(100) NULL,
   status           TINYINT(4)   DEFAULT 1,  -- 1=MENUNGGU, 2=DISETUJUI, 3=DITOLAK
   alasan_penolakan TEXT         NULL,
   tanggal_ajuan    DATETIME     DEFAULT CURRENT_TIMESTAMP,

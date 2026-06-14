@@ -13,7 +13,7 @@ const {
 } = require('../middlewares/validateSurat');
 
 // ─── Warga ────────────────────────────────────────────────────────────────────
-router.post('/ajukan',     verifyToken, validateAjukanSurat, uploadSurat.single('fileSurat'), suratController.ajukanSurat);
+router.post('/ajukan',     verifyToken, uploadSurat.single('fileSurat'), validateAjukanSurat, suratController.ajukanSurat);
 router.get('/milik-saya',  verifyToken,                                         suratController.getMySurat);
 router.get('/statistik',   verifyToken,                                         suratController.getStatistik);
 

@@ -9,7 +9,9 @@
  */
 
 const SuratModel            = require('../models/SuratModel');
+const RtRwModel             = require('../models/RtRwModel');
 const NotificationService   = require('./NotificationService');
+const SURAT_STATUS          = require('../constants/suratStatus');
 
 class SuratService {
   /**
@@ -36,6 +38,8 @@ class SuratService {
       kelurahan,
       rt,
       rw,
+      current_reviewer_role: 'rt',
+      submission_source: 'online',
     });
 
     // Kirim notifikasi konfirmasi ke warga (non-blocking)
@@ -82,19 +86,63 @@ class SuratService {
    * @param {Object} file — object dari multer (opsional)
    * @returns {{ data: Object|null, error: string|null }}
    */
-  static async approveSurat(id, file) {
-    const filePath = file ? file.path : null; // URL Cloudinary penuh
-    await SuratModel.approve(id, filePath);
+  static async approveSurat(id, file, approverId, role) {
+    const surat = await SuratModel.findById(id);
+    if (!surat) {
+      return { data: null, error: 'Surat tidak ditemukan.' };
+    }
+
+    if (surat.status !== SURAT_STATUS.MENUNGGU) {
+      return { data: null, error: 'Surat ini sudah diproses sebelumnya.' };
+    }
+
+    const currentReviewerRole = surat.current_reviewer_role || 'rt';
+    if (currentReviewerRole !== role) {
+      return {
+        data: null,
+        error: `Surat ini sedang menunggu persetujuan ${currentReviewerRole.toUpperCase()}, bukan ${String(role || '').toUpperCase() || 'role saat ini'}.`,
+      };
+    }
+
+    if (role === 'rt') {
+      await SuratModel.forwardToReviewer(id, 'rw');
+      return {
+        data: {
+          message: 'Persetujuan RT berhasil. Surat diteruskan ke inbox RW.',
+          next_reviewer: 'rw',
+        },
+        error: null,
+      };
+    }
+
+    let filePath = file ? file.path : null;
+
+    if (!filePath && approverId && ['rt', 'rw'].includes(role)) {
+      const approver = role === 'rt'
+        ? await RtRwModel.findRtById(approverId)
+        : await RtRwModel.findRwById(approverId);
+
+      filePath = approver?.ttd_digital || null;
+    }
+
+    if (!filePath) {
+      return {
+        data: null,
+        error: 'TTD digital belum tersedia. Unggah TTD terlebih dahulu atau lampirkan file surat yang sudah ditandatangani.',
+      };
+    }
+
+    await SuratModel.approveFinal(id, filePath);
 
     // Kirim notifikasi ke warga (non-blocking)
     try {
-      const surat = await SuratModel.findById(id);
-      if (surat && surat.email_warga) {
+      const updatedSurat = await SuratModel.findById(id);
+      if (updatedSurat && updatedSurat.email_warga) {
         NotificationService.kirimNotifikasi({
-          email: surat.email_warga,
-          no_hp: surat.no_hp_warga || null,
+          email: updatedSurat.email_warga,
+          no_hp: updatedSurat.no_hp_warga || null,
           event: 'DISETUJUI',
-          data: { nama: surat.nama_warga, subjek: surat.subjek },
+          data: { nama: updatedSurat.nama_warga, subjek: updatedSurat.subjek },
         }).catch(err => console.error('[SuratService] Notif approve error:', err.message));
       }
     } catch (_) { /* notif gagal tidak block flow */ }
@@ -108,10 +156,27 @@ class SuratService {
    * @param {string} alasan
    * @returns {{ data: Object|null, error: string|null }}
    */
-  static async rejectSurat(id, alasan) {
+  static async rejectSurat(id, alasan, approverRole) {
     if (!alasan) {
       return { data: null, error: 'Alasan penolakan harus diisi.' };
     }
+
+    const surat = await SuratModel.findById(id);
+    if (!surat) {
+      return { data: null, error: 'Surat tidak ditemukan.' };
+    }
+    if (surat.status !== SURAT_STATUS.MENUNGGU) {
+      return { data: null, error: 'Surat ini sudah diproses sebelumnya.' };
+    }
+
+    const currentReviewerRole = surat.current_reviewer_role || 'rt';
+    if (approverRole && currentReviewerRole !== approverRole) {
+      return {
+        data: null,
+        error: `Surat ini sedang menunggu persetujuan ${currentReviewerRole.toUpperCase()}.`,
+      };
+    }
+
     await SuratModel.reject(id, alasan);
 
     // Kirim notifikasi ke warga (non-blocking)
@@ -162,7 +227,7 @@ class SuratService {
    * @param {{ nik_warga: string, nama_warga: string, jenis_surat: string, alasan: string }} data
    * @returns {{ data: Object|null, error: string|null }}
    */
-  static async ajukanSuratOffline({ nik_warga, nama_warga, jenis_surat, alasan }) {
+  static async ajukanSuratOffline({ nik_warga, nama_warga, jenis_surat, alasan, creator }) {
     if (!nik_warga || !nama_warga || !jenis_surat) {
       return { data: null, error: 'NIK warga, nama warga, dan jenis surat wajib diisi.' };
     }
@@ -172,6 +237,13 @@ class SuratService {
     if (!warga) {
       return { data: null, error: `Warga dengan NIK ${nik_warga} tidak ditemukan.` };
     }
+
+    const creatorRole = creator?.role;
+    if (!['rt', 'rw'].includes(creatorRole)) {
+      return { data: null, error: 'Pengaju offline harus login sebagai RT atau RW.' };
+    }
+
+    const currentReviewerRole = creatorRole === 'rw' ? 'rt' : 'rw';
 
     await SuratModel.create({
       id_warga: warga.id_warga,
@@ -183,9 +255,19 @@ class SuratService {
       kelurahan: warga.kelurahan_desa || '',
       rt: warga.rt || '000',
       rw: warga.rw || '000',
+      current_reviewer_role: currentReviewerRole,
+      submission_source: 'offline',
+      created_by_role: creatorRole,
+      created_by_id: String(creator.id),
     });
 
-    return { data: { message: 'Surat offline berhasil dibuat.' }, error: null };
+    return {
+      data: {
+        message: `Surat offline berhasil dibuat dan dikirim ke ${currentReviewerRole.toUpperCase()} untuk persetujuan.`,
+        next_reviewer: currentReviewerRole,
+      },
+      error: null,
+    };
   }
 }
 

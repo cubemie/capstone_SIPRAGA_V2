@@ -17,12 +17,47 @@ const { createClient } = require('@supabase/supabase-js');
 
 // ─── Konfigurasi Supabase ────────────────────────────────────────────────────
 
-// Kita gunakan env jika ada, fallback ke hardcoded info dari user
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://avlwwbkhsrubhsfwbgpr.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bHd3Ymtoc3J1YmhzZndiZ3ByIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTA4MTgxOSwiZXhwIjoyMDk2NjU3ODE5fQ.dJRzNTWroMDCkJ3Zd9PXxsJklG02XzwjT6iHdlt_-yc';
-const BUCKET_NAME = process.env.SUPABASE_BUCKET || 'sipraga-storage';
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const BUCKET_NAME = process.env.SUPABASE_BUCKET;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+function decodeJwtPayload(token) {
+  try {
+    const [, payload] = String(token || '').split('.');
+    if (!payload) return null;
+
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    return JSON.parse(Buffer.from(padded, 'base64').toString('utf8'));
+  } catch (_) {
+    return null;
+  }
+}
+
+function assertSupabaseConfig() {
+  const missing = [];
+  if (!SUPABASE_URL) missing.push('SUPABASE_URL');
+  if (!SUPABASE_KEY) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+  if (!BUCKET_NAME) missing.push('SUPABASE_BUCKET');
+
+  if (missing.length > 0) {
+    throw new Error(`[upload.js] Konfigurasi Supabase belum lengkap: ${missing.join(', ')}`);
+  }
+
+  const payload = decodeJwtPayload(SUPABASE_KEY);
+  if (!payload || payload.role !== 'service_role') {
+    throw new Error('[upload.js] SUPABASE_SERVICE_ROLE_KEY tidak valid. Pastikan menggunakan service_role key, bukan anon key.');
+  }
+}
+
+assertSupabaseConfig();
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
 
 // ─── Custom Multer Storage untuk Supabase ───────────────────────────────────
 

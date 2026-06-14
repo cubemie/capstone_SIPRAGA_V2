@@ -4,7 +4,9 @@ import { ArrowRight, FileText, Inbox, Clock, CheckCircle2, Loader2, AlertCircle,
 import { useQuery } from '@tanstack/react-query';
 import { useSurat } from '../../hooks/useSurat';
 import { suratService } from '../../services/suratService';
+import { getTtd } from '../../services/ttdService';
 import { api } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { SURAT_STATUS } from '../../constants/suratStatus';
 
@@ -66,9 +68,16 @@ function RejectModal({ suratId, onClose, onSuccess }) {
 }
 
 export default function RtRwDashboard() {
+  const { user } = useAuth();
   const { data: suratMasuk, loading, error, refetch } = useSurat('masuk');
   const [actionLoading, setActionLoading] = useState(null);
   const [rejectModalId, setRejectModalId] = useState(null);
+
+  const { data: currentTtdResponse } = useQuery({
+    queryKey: ['current-ttd-dashboard'],
+    queryFn: getTtd,
+    staleTime: 30000,
+  });
 
   const { data: v2Inbox = [] } = useQuery({
     queryKey: ['inbox-rtrw'],
@@ -80,17 +89,23 @@ export default function RtRwDashboard() {
   });
 
   const v2Pending = v2Inbox.filter(l => ['submitted', 'in_review_rt', 'approved_rt', 'in_review_rw'].includes(l.status));
+  const currentTtd = currentTtdResponse?.data?.ttd_url || null;
 
   const handleApprove = async (id) => {
+    if (user?.role === 'rw' && !currentTtd) {
+      toast.error('TTD digital belum tersedia. Silakan unggah TTD terlebih dahulu di menu Tanda Tangan.');
+      return;
+    }
+
     setActionLoading(id);
     const formData = new FormData();
-    const { error: err } = await suratService.approveSurat(id, formData);
+    const { data: result, error: err } = await suratService.approveSurat(id, formData);
     setActionLoading(null);
     if (err) {
       toast.error(err);
       return;
     }
-    toast.success('Surat berhasil disetujui.');
+    toast.success(result?.message || 'Surat berhasil diproses.');
     refetch();
   };
 
@@ -131,7 +146,14 @@ export default function RtRwDashboard() {
       {/* Surat List */}
       <div className="bg-[var(--color-surface-card)] rounded-2xl border border-[var(--color-surface-border)] shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-[var(--color-surface-border)] flex justify-between items-center bg-[var(--color-surface)]">
-          <h4 className="font-bold text-[var(--color-ink)] text-sm">Surat Masuk (Butuh Persetujuan)</h4>
+          <div>
+            <h4 className="font-bold text-[var(--color-ink)] text-sm">Surat Masuk (Butuh Persetujuan)</h4>
+            <p className="text-xs text-[var(--color-ink-secondary)] mt-1">
+              {user?.role === 'rw'
+                ? 'TTD digital yang tersimpan akan dipakai otomatis saat persetujuan final.'
+                : 'Persetujuan RT akan meneruskan surat ke inbox RW untuk persetujuan final.'}
+            </p>
+          </div>
           {!loading && pendingCount > 0 && (
             <span className="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">
               {pendingCount} surat pending

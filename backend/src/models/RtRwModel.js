@@ -13,7 +13,9 @@ class RtRwModel {
   }
 
   static async findRtById(id) {
+    console.log('[RtRwModel.findRtById] Called with id:', id);
     const [rows] = await db.query('SELECT * FROM rt WHERE rt_id = ?', [id]);
+    console.log('[RtRwModel.findRtById] Result:', rows);
     return rows[0] || null;
   }
 
@@ -44,10 +46,12 @@ class RtRwModel {
   }
 
   static async updateTtdRt(id, ttdUrl) {
+    console.log('[RtRwModel.updateTtdRt] Called with id:', id, 'ttdUrl:', ttdUrl);
     const [result] = await db.query(
       'UPDATE rt SET ttd_digital = ? WHERE rt_id = ?',
       [ttdUrl, id]
     );
+    console.log('[RtRwModel.updateTtdRt] Result:', result);
     return result.affectedRows > 0;
   }
 
@@ -59,7 +63,9 @@ class RtRwModel {
   }
 
   static async findRwById(id) {
+    console.log('[RtRwModel.findRwById] Called with id:', id);
     const [rows] = await db.query('SELECT * FROM rw WHERE rw_id = ?', [id]);
+    console.log('[RtRwModel.findRwById] Result:', rows);
     return rows[0] || null;
   }
 
@@ -88,10 +94,12 @@ class RtRwModel {
   }
 
   static async updateTtdRw(id, ttdUrl) {
+    console.log('[RtRwModel.updateTtdRw] Called with id:', id, 'ttdUrl:', ttdUrl);
     const [result] = await db.query(
       'UPDATE rw SET ttd_digital = ? WHERE rw_id = ?',
       [ttdUrl, id]
     );
+    console.log('[RtRwModel.updateTtdRw] Result:', result);
     return result.affectedRows > 0;
   }
 

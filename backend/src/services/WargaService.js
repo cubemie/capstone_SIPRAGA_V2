@@ -76,16 +76,21 @@ class WargaService {
    * @returns {{ data: Object|null, error: string|null }}
    */
   static async getTtd(user) {
+    console.log('[WargaService.getTtd] Called with user:', user);
     if (!user || !user.role || !['rt', 'rw'].includes(user.role)) {
       return { data: null, error: 'Role tidak valid.' };
     }
 
     let record;
     if (user.role === 'rt') {
+      console.log('[WargaService.getTtd] Finding RT by id:', user.id);
       record = await RtRwModel.findRtById(user.id);
     } else {
+      console.log('[WargaService.getTtd] Finding RW by id:', user.id);
       record = await RtRwModel.findRwById(user.id);
     }
+
+    console.log('[WargaService.getTtd] Found record:', record);
 
     if (!record) {
       return { data: null, error: 'Akun RT/RW tidak ditemukan.' };
@@ -118,6 +123,7 @@ class WargaService {
    * @returns {{ data: Object|null, error: string|null }}
    */
   static async uploadTtd(user, file) {
+    console.log('[WargaService.uploadTtd] Called with user:', user, 'file:', file);
     if (!file) {
       return { data: null, error: 'File tanda tangan wajib diunggah.' };
     }
@@ -127,10 +133,13 @@ class WargaService {
 
     // file.path berisi URL file publik hasil upload storage.
     const storageUrl = file.path;
+    console.log('[WargaService.uploadTtd] Storage URL:', storageUrl);
 
     const updated = user.role === 'rt'
       ? await RtRwModel.updateTtdRt(user.id, storageUrl)
       : await RtRwModel.updateTtdRw(user.id, storageUrl);
+
+    console.log('[WargaService.uploadTtd] Update result:', updated);
 
     if (!updated) {
       return { data: null, error: 'Akun RT/RW tidak ditemukan sehingga TTD gagal disimpan.' };
