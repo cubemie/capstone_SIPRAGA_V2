@@ -34,6 +34,8 @@ function decodeJwtPayload(token) {
   }
 }
 
+let supabase = null;
+
 function assertSupabaseConfig() {
   const missing = [];
   if (!SUPABASE_URL) missing.push('SUPABASE_URL');
@@ -41,23 +43,26 @@ function assertSupabaseConfig() {
   if (!BUCKET_NAME) missing.push('SUPABASE_BUCKET');
 
   if (missing.length > 0) {
-    throw new Error(`[upload.js] Konfigurasi Supabase belum lengkap: ${missing.join(', ')}`);
+    console.warn(`[upload.js] Konfigurasi Supabase belum lengkap: ${missing.join(', ')}. Upload fitur mungkin tidak berfungsi.`);
+    return false;
   }
 
   const payload = decodeJwtPayload(SUPABASE_KEY);
   if (!payload || payload.role !== 'service_role') {
-    throw new Error('[upload.js] SUPABASE_SERVICE_ROLE_KEY tidak valid. Pastikan menggunakan service_role key, bukan anon key.');
+    console.warn('[upload.js] SUPABASE_SERVICE_ROLE_KEY tidak valid. Pastikan menggunakan service_role key, bukan anon key.');
+    return false;
   }
+  return true;
 }
 
-assertSupabaseConfig();
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-});
+if (assertSupabaseConfig()) {
+  supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
 
 // ─── Custom Multer Storage untuk Supabase ───────────────────────────────────
 
@@ -66,6 +71,10 @@ function SupabaseStorage(opts) {
 }
 
 SupabaseStorage.prototype._handleFile = function _handleFile(req, file, cb) {
+  if (!supabase || !BUCKET_NAME) {
+    return cb(new Error('Upload tidak tersedia: Konfigurasi Supabase tidak lengkap.'));
+  }
+
   const ext = file.originalname.split('.').pop();
   const filename = `rt-rw/${this.folder}/${Date.now()}-${Math.round(Math.random() * 1E9)}.${ext}`;
   

@@ -95,9 +95,15 @@ export default function TtdSurat() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
 
-  const handleSaveCanvas = async () => {
+  const isCanvasEmpty = (canvas) => {
+  const ctx = canvas.getContext('2d');
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  return !imageData.data.some(channel => channel !== 0);
+};
+
+const handleSaveCanvas = async () => {
     if (!sigCanvas.current) return;
-    if (sigCanvas.current.isEmpty?.()) {
+    if (isCanvasEmpty(sigCanvas.current)) {
       toast.error('Tanda tangan masih kosong');
       return;
     }
