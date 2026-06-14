@@ -80,6 +80,7 @@ async function notifySuperadmins(title, message, link, letterUuid = null) {
 }
 
 const approveLetter = async (letterUuid, role, notes = null, signatureUrl = null, approverId) => {
+  console.log('[ApprovalsService.approveLetter] Called with params:', { letterUuid, role, notes, signatureUrl, approverId });
   const [[letter]] = await pool.query(
     `SELECT l.*, lwo.code AS workflow_code, lt.code AS letter_type_code
      FROM letters l
@@ -89,17 +90,22 @@ const approveLetter = async (letterUuid, role, notes = null, signatureUrl = null
     [letterUuid]
   );
 
+  console.log('[ApprovalsService.approveLetter] Found letter:', letter);
   if (!letter) throw new Error('Surat tidak ditemukan');
 
   const workflow = STATUS_TRANSITIONS[letter.workflow_code];
+  console.log('[ApprovalsService.approveLetter] Workflow code:', letter.workflow_code, 'Workflow config:', workflow);
   if (!workflow) throw new Error(`Workflow tidak dikenal: ${letter.workflow_code}`);
 
   const normalizedRole = role === 'admin_rt' ? 'rt' : role === 'admin_rw' ? 'rw' : role;
+  console.log('[ApprovalsService.approveLetter] Normalized role:', normalizedRole);
 
   const transition = workflow[normalizedRole];
+  console.log('[ApprovalsService.approveLetter] Transition for role:', transition);
   if (!transition) {
     throw new Error(`Role "${normalizedRole}" tidak bisa approve di workflow "${letter.workflow_code}"`);
   }
+  console.log('[ApprovalsService.approveLetter] Letter status:', letter.status, 'Allowed from states:', transition.from);
   if (!transition.from.includes(letter.status)) {
     throw new Error(
       `Status saat ini "${letter.status}" tidak bisa di-approve. Harus salah satu dari: ${transition.from.join(', ')}`

@@ -1,88 +1,151 @@
-![Logo/Banner](frontend/src/images.jpeg)
+# SIPRAGA - Sistem Pengelolaan Surat RT/RW Digital
 
-# Aplikasi RT-RW CORETAX
+Sistem manajemen surat pengantar berbasis web untuk RT/RW dengan dukungan tanda tangan digital dan verifikasi QR.
 
-## Latar Belakang
-[Akan ditambahkan nanti]
-
-## Tujuan
-[Akan ditambahkan nanti]
+---
 
 ## Fitur Utama
-- **Multi-Role Access**: Mendukung login dan hak akses spesifik untuk 3 tingkat pengguna: *Warga*, *Pengurus RT/RW*, dan *Super Admin*.
-- **Manajemen Warga**: Pencatatan, pembaruan, dan pengelolaan profil kependudukan atau data warga.
-- **Pengajuan Surat Mandiri**: Warga dapat memohon berbagai jenis surat pengantar secara online tanpa harus langsung datang ke pengurus.
-- **Persetujuan & Tanda Tangan Elektronik**: Pengurus RT/RW dapat mereview ajuan, menyetujui, dan membubuhkan tanda tangan elektronik (TTD) langsung ke dalam surat.
-- **Manajemen Template Surat**: Template surat yang dinamis, dikelola langsung oleh sistem untuk berbagai kebutuhan administrasi kelurahan/desa.
-- **Dashboard Terintegrasi**: Tampilan dashboard khusus yang informatif untuk RT/RW guna memantau permohonan surat masuk dan statistik warganya.
 
-## Arsitektur Sistem
-Aplikasi ini dibangun dengan arsitektur *Client-Server*:
-- **Frontend**: Aplikasi antarmuka pengguna berbasis komponen (React) yang berinteraksi dengan API backend.
-- **Backend**: REST API Server (Node.js) yang memproses logika bisnis dan melayani permintaan data.
-- **Database**: Relational Database menggunakan MySQL.
+- **Multi-Role Access**:
+  - Warga: Ajukan surat, lihat riwayat, cek status
+  - RT/RW: Review surat, berikan persetujuan, tanda tangan digital
+  - Superadmin: Manajemen akun, template surat, konfigurasi instansi
+- **Pengajuan Surat Mandiri**: Wizard langkah demi langkah dengan template dinamis
+- **Tanda Tangan Digital (TTD)**: Canvas drawing + upload gambar, tersimpan di Supabase Storage
+- **Persetujuan Bertahap**: Workflow RT-only atau RT-then-RW
+- **PDF Generation**: Render surat otomatis dengan TTD, QR untuk verifikasi
+- **Notifikasi Real-time**: Notifikasi in-app dan email/SMS (configurable)
+- **Audit Logging**: Log aktivitas sistem untuk kebutuhan audit
+- **QR Verification**: Halaman verifikasi surat via scan QR tanpa login
+
+---
 
 ## Tech Stack
-- **Frontend**: React, Vite, Tailwind CSS, React Router DOM
-- **Backend**: Node.js, Express.js, MySQL2, JWT (JSON Web Token), Multer, Cloudinary, PDF-Lib
-- **Database**: MySQL 8.0
-- **Deployment & Environment**: Docker, Docker Compose
 
-## Struktur Folder
+### Backend
+- **Runtime**: Node.js 18+
+- **Framework**: Express.js 5.x
+- **Database**: MySQL 8.0 (via mysql2)
+- **Auth**: JWT (jsonwebtoken) + bcryptjs
+- **Storage**: Supabase Storage (@supabase/supabase-js)
+- **Queue**: BullMQ + Redis (ioredis)
+- **PDF**: PDF-Lib, Puppeteer
+- **Validation**: Zod, express-validator
+- **Logging**: Winston + Morgan
+- **API Docs**: Swagger (swagger-jsdoc + swagger-ui-express)
+- **Rate Limiting**: express-rate-limit
+
+### Frontend
+- **Framework**: React 19.x
+- **Build Tool**: Vite 8.x
+- **Styling**: Tailwind CSS 4.x
+- **Routing**: React Router DOM 7.x
+- **State Management**: TanStack React Query 5.x
+- **Form Handling**: React Hook Form 7.x + Zod
+- **Signature**: react-signature-canvas
+- **PDF Rendering**: @react-pdf/renderer, react-pdf
+- **Notifications**: Sonner
+- **Icons**: Lucide React
+
+---
+
+## Struktur Proyek
+
 ```text
 capstone_RT-RW_CORETAX/
-├── backend/            # Source code backend API (Node.js/Express)
-├── frontend/           # Source code antarmuka pengguna (React/Vite)
-├── database/           # Script inisialisasi struktur database (init.sql)
-└── docker-compose.yml  # Konfigurasi orkestrasi container Docker
+├── .github/workflows/      # CI/CD untuk GitHub Actions
+├── backend/                # Backend API (Express.js)
+│   ├── src/
+│   │   ├── bootstrap/      # Inisialisasi kolom database
+│   │   ├── config/         # DB, Redis, Supabase, Swagger
+│   │   ├── constants/      # Konstanta (status surat, dll.)
+│   │   ├── controllers/    # HTTP request handlers
+│   │   ├── middlewares/    # Auth, error handling, upload
+│   │   ├── models/         # Database models
+│   │   ├── modules/        # Fitur modular (letters, public)
+│   │   ├── routes/         # Definisi rute API
+│   │   ├── services/       # Logika bisnis
+│   │   └── utils/          # Helper functions
+│   ├── Dockerfile
+│   └── package.json
+├── database/               # Script migrasi & seeding database
+├── docs/                   # Dokumentasi (ERD, API ref, legacy)
+├── frontend/               # Frontend React
+│   ├── src/
+│   │   ├── assets/         # Gambar & file statis
+│   │   ├── components/     # Komponen reusable
+│   │   ├── constants/      # Konstanta frontend
+│   │   ├── context/        # React Context (AuthContext)
+│   │   ├── features/       # Fitur fitur utama (letters)
+│   │   ├── hooks/          # Custom hooks
+│   │   ├── pages/          # Halaman aplikasi
+│   │   ├── services/       # Helper API calls
+│   │   └── utils/          # Helper functions
+│   ├── vercel.json         # Konfigurasi Vercel
+│   └── package.json
+├── docker-compose.yml      # Orkestrasi Docker (prod)
+├── docker-compose.dev.yml  # Orkestrasi Docker (dev with hot-reload)
+├── railway.json            # Konfigurasi Railway deployment
+└── README.md
 ```
 
-## Panduan Setup untuk Tim
+---
 
-Backend dan database **wajib dijalankan via Docker Compose**. Frontend dijalankan lokal dengan Vite.
+## Panduan Setup Lokal (Development)
 
-### 1. Persiapan Awal (Prasyarat)
-- **Docker Desktop**: Wajib terinstal dan menyala.
-- **Node.js**: v18+ (hanya untuk menjalankan frontend).
-- **Git**: Untuk pull/push kode.
+### Prasyarat
+- Docker Desktop (untuk backend + DB + Redis)
+- Node.js 18+ (untuk frontend)
+- Git
 
-### 2. Setup Environment Backend
-1. Salin template environment:
-   ```bash
-   cp backend/.env.example backend/.env
-   ```
-2. **Jangan ubah** `DB_HOST=db` dan `REDIS_HOST=redis` — itu nama service Docker, bukan localhost.
-3. Sesuaikan `JWT_SECRET` dan kredensial opsional (Supabase, SMTP, dll.) jika perlu.
+### 1. Clone Repository & Setup Environment
 
-### 3. Jalankan Backend + Database + Redis (Docker)
-Dari root proyek:
 ```bash
-# Production-like
-docker compose up --build -d
+# Clone repo
+git clone <repo-url>
+cd capstone_RT-RW_CORETAX
 
-# Atau development (hot-reload backend)
-docker compose -f docker-compose.dev.yml up --build
+# Setup backend env
+cd backend
+cp .env.example .env
+# Edit .env sesuai kebutuhan (JWT_SECRET, Supabase credentials, dll.)
+cd ..
+
+# Setup frontend env
+cd frontend
+cp .env.example .env
+# Pastikan VITE_API_URL=http://localhost:3000/api (untuk local dev)
+cd ..
 ```
 
-Setelah container healthy:
+### 2. Jalankan Backend via Docker
+
+```bash
+# Development mode (hot-reload backend)
+docker compose -f docker-compose.dev.yml up --build -d
+
+# Atau production-like
+docker compose up --build -d
+```
+
+Setelah container sehat:
 - Backend API: `http://localhost:3000`
-- MySQL (akses dari host): `localhost:3307` (user `root`, password `root`, db `capstone`)
+- Swagger Docs: `http://localhost:3000/api-docs`
+- MySQL (host): `localhost:3307` (user: root, password: root, db: capstone)
 - Redis: `localhost:6379`
 
-Database otomatis diinisialisasi dari:
-`00-base.sql` → `init.sql` → `seed.sql` → `seed_workflows.sql`
+### 3. Jalankan Frontend
 
-### 4. Jalankan Frontend (Lokal)
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-Buka browser: `http://localhost:5173`
 
-Frontend mem-proxy request `/api` ke `http://localhost:3000` (backend Docker).
+Buka browser di `http://localhost:5173`
 
-### 5. Perintah Docker Berguna
+### 4. Perintah Docker Berguna
+
 ```bash
 # Lihat log backend
 docker compose logs -f backend
@@ -92,68 +155,60 @@ docker compose down
 
 # Reset database (hapus volume)
 docker compose down -v
-docker compose up --build -d
+docker compose -f docker-compose.dev.yml up --build -d
 ```
 
 ---
 
-## Setup Manual (Tidak Direkomendasikan)
-Jika benar-benar perlu menjalankan backend tanpa Docker, ubah `DB_HOST=localhost` di `.env` dan siapkan MySQL/Redis lokal sendiri. **Tim development menggunakan Docker sebagai standar.**
+## Panduan Deployment (Production)
 
-<details>
-<summary>Instruksi manual lama (legacy)</summary>
+### 1. Deploy Backend ke Railway
 
-### Setup Database Lokal
-1. Buat database `capstone`.
-2. Import `database/init.sql`, `database/seed.sql`, dan `database/seed_workflows.sql`.
+1. Push branch utama ke GitHub
+2. Buka [Railway.app](https://railway.app)
+3. Klik **New Project** → Pilih repo kamu
+4. Railway akan otomatis mendeteksi `railway.json` dan membuat service:
+   - Backend
+   - MySQL 8.0
+   - Redis
+5. Setelah deployment selesai:
+   - Masuk ke service **Backend** → **Variables**
+   - Tambahkan variabel:
+     - `JWT_SECRET`: random string yang aman
+     - `SUPABASE_URL`: URL Supabase kamu
+     - `SUPABASE_KEY`: Service role key Supabase
+     - `SUPABASE_BUCKET`: Nama bucket di Supabase
+     - `CLIENT_URL`: URL frontend Vercel kamu (misal: `https://your-app.vercel.app`)
+6. Salin **Public URL** backend (misal: `https://your-backend.up.railway.app`)
 
-### Backend Manual
-```bash
-cd backend
-cp .env.example .env
-# Ubah DB_HOST=localhost, REDIS_HOST=localhost di .env
-npm install
-npm run dev
-```
+### 2. Deploy Frontend ke Vercel
 
-</details>
+1. Buka [Vercel.com](https://vercel.com)
+2. Klik **New Project** → Pilih repo kamu
+3. Di bagian **Root Directory**, masukkan `frontend`
+4. Klik **Environment Variables** → Tambahkan:
+   - Name: `VITE_API_URL`
+   - Value: `<RAILWAY_BACKEND_PUBLIC_URL>/api` (misal: `https://your-backend.up.railway.app/api`)
+5. Klik **Deploy**
 
+Selesai! 🚀 Aplikasi kamu siap digunakan!
 
+---
 
-## API Endpoint
-Berikut adalah rute dasar (*base URL*) untuk masing-masing layanan yang tersedia di Backend:
+## Dokumentasi API
 
-| Base Route | Deskripsi Fungsi |
-|---|---|
-| `/api/auth` | Autentikasi (Register, Login Warga, Login RT/RW, dan Logout) |
-| `/api/warga` | Manajemen profil, validasi, dan data kependudukan Warga |
-| `/api/surat` | Operasi terkait pengajuan, riwayat, dan penerbitan Surat Pengantar |
-| `/api/template-surat` | Manajemen CRUD template surat administrasi |
-| `/api/ttd` | Mengelola *file* tanda tangan digital milik pengurus RT/RW |
-| `/api/superadmin` | Manajemen platform level atas untuk Super Admin |
-| `/api/dashboard-rt-rw` | Endpoint khusus analitik/statistik untuk dashboard Pengurus |
+Untuk detail endpoint dan penggunaan API, lihat:
+- Swagger UI (di lokal/railway): `/api-docs`
+- API Reference: `docs/API_REFERENCE.md`
 
-*(Note: Detail dokumentasi endpoint, request body, dan response JSON dapat dilihat selengkapnya di [API_REFERENCE.md](docs/API_REFERENCE.md)).*
-
-## Strategi Migrasi Database
-Untuk meminimalisir masalah perubahan schema database antar tim, gunakan folder `database/migrations/`:
-- **Jangan pernah merubah skema** `init.sql` jika fitur tersebut baru.
-- Buat file `.sql` baru di folder `database/migrations/` (misal: `001_add_no_hp_to_warga.sql`) dan komunikasikan ke grup tim agar semua menjalankan file SQL tersebut.
-- Baca detail selengkapnya di [database/migrations/README.md](database/migrations/README.md).
-
-## Deployment
-[Akan ditambahkan nanti]
+---
 
 ## Tim Pengembang
-[Akan ditambahkan nanti]
 
-## Progress Sementara
+[Daftar tim pengembang akan ditambahkan di sini]
 
-### Login Page
-![alt text](login.png)
-
-### Register Page
-![alt text](register.png)
+---
 
 ## Lisensi
-[Akan ditambahkan nanti]
+
+[Lisensi akan ditambahkan di sini]
