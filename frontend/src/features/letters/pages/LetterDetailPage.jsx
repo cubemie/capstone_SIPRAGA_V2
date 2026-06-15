@@ -9,17 +9,14 @@ import { useAuth } from '../../../context/AuthContext';
 import { toast } from 'sonner';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import LetterPdfTemplate from '../components/pdf/LetterPdfTemplate';
+import StatusTimeline from '../../../components/ui/StatusTimeline';
+import RejectionBanner from '../../../components/ui/RejectionBanner';
 
 const fetchLetterDetail = async (uuid) => {
   const res = await api.get(`/v2/letters/${uuid}`);
   if (res.error) throw new Error(res.error);
   return res.data?.data;
 };
-
-const STATUS_ORDER = [
-  'draft', 'submitted', 'in_review_rt', 'approved_rt',
-  'in_review_rw', 'approved_rw', 'completed',
-];
 
 function SignatureStatusCard({ letter }) {
   const workflowCode = letter?.workflow_code || 'RT_ONLY';
@@ -273,8 +270,6 @@ export default function LetterDetailPage() {
     color: 'bg-[var(--color-surface-muted)] text-[var(--color-ink-secondary)]',
   };
 
-  const currentStatusIndex = STATUS_ORDER.indexOf(letter.status);
-
   // Extract signatures from approval history
   const signatures = letter.approvals
     ?.filter((a) => a.action === 'approved' && a.signature_url)
@@ -337,36 +332,16 @@ export default function LetterDetailPage() {
         </span>
       </div>
 
-      {/* Status Tracker */}
-      <div className="bg-[var(--color-surface-card)] border rounded-lg p-4">
-        <p className="text-sm font-medium text-[var(--color-ink-secondary)] mb-3">Progres</p>
-        <div className="flex items-center gap-0">
-          {STATUS_ORDER.filter((s) => !['approved_rw'].includes(s)).map((s, i, arr) => {
-            const done = STATUS_ORDER.indexOf(s) <= currentStatusIndex;
-            const isLast = i === arr.length - 1;
-            return (
-              <div key={s} className="flex items-center flex-1">
-                <div
-                  className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                    done ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-surface-border)]'
-                  }`}
-                />
-                {!isLast && (
-                  <div
-                    className={`h-0.5 flex-1 ${
-                      done ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-surface-border)]'
-                    }`}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
-        <div className="flex justify-between mt-1">
-          <span className="text-xs text-[var(--color-ink-muted)]">Draft</span>
-          <span className="text-xs text-[var(--color-ink-muted)]">Selesai</span>
-        </div>
-      </div>
+      {/* Rejection Banner */}
+      <RejectionBanner letter={letter} role={user?.role} />
+
+      {/* Status Timeline */}
+      <StatusTimeline
+        status={letter.status}
+        workflowCode={letter.workflow_code || 'RT_ONLY'}
+        approvals={letter.approvals || []}
+        createdAt={letter.created_at}
+      />
 
       {/* Data Surat */}
       {letter.field_values?.length > 0 && (
