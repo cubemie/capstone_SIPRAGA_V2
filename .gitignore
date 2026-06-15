@@ -45,3 +45,6 @@ backend/public/uploads/*
 
 # Temporary test scripts
 test-*.js
+
+# Implementation docs
+implementasi-improve.md

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Clock, Plus, XCircle, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../utils/api';
+import ProfileWarningBanner from '../../components/ui/ProfileWarningBanner';
 
 function formatDate(dateStr) {
   if (!dateStr) return '-';
@@ -22,6 +23,20 @@ export default function WargaDashboard() {
     staleTime: 60 * 1000, // Sinkron cache dengan LetterListPage
     retry: false
   });
+
+  const { data: profile } = useQuery({
+    queryKey: ['warga-profile'],
+    queryFn: async () => {
+      const res = await api.get('/warga/profile');
+      return res.data?.data || res.data;
+    },
+    retry: false
+  });
+
+  const REQUIRED_PROFILE_FIELDS = ['no_hp', 'NIK', 'alamat', 'tanggal_lahir'];
+  const missingFields = profile
+    ? REQUIRED_PROFILE_FIELDS.filter(f => !profile[f] || String(profile[f]).trim() === '')
+    : [];
 
   const pending  = suratList.filter(s => s.status === 'submitted' || s.status === 'in_review_rt' || s.status === 'in_review_rw').length;
   const approved = suratList.filter(s => s.status === 'completed').length;
@@ -58,6 +73,11 @@ export default function WargaDashboard() {
           Ajukan Surat Baru
         </Link>
       </div>
+
+      {/* Profile Warning Banner */}
+      {missingFields.length > 0 && (
+        <ProfileWarningBanner missingFields={missingFields} />
+      )}
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
