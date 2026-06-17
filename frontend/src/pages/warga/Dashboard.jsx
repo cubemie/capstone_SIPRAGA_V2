@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Clock, Plus, XCircle, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../utils/api';
+import ProfileWarningBanner from '../../components/ui/ProfileWarningBanner';
 
 function formatDate(dateStr) {
   if (!dateStr) return '-';
@@ -12,6 +13,21 @@ function formatDate(dateStr) {
 }
 
 export default function WargaDashboard() {
+  // Fetch profile for profile warning
+  const { data: profile } = useQuery({
+    queryKey: ['warga-profile'],
+    queryFn: async () => {
+      const res = await api.get('/warga/profile');
+      return res.data?.data || res.data;
+    },
+    retry: false,
+  });
+
+  const REQUIRED_PROFILE_FIELDS = ['no_hp', 'NIK', 'alamat', 'tanggal_lahir'];
+  const missingFields = profile
+    ? REQUIRED_PROFILE_FIELDS.filter(f => !profile[f] || String(profile[f]).trim() === '')
+    : [];
+
   const { data: suratList = [], isLoading: loading } = useQuery({
     queryKey: ['my-v2-letters'],
     queryFn: async () => {
@@ -42,6 +58,11 @@ export default function WargaDashboard() {
 
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto w-full">
+      {/* Profile Warning Banner */}
+      {missingFields.length > 0 && (
+        <ProfileWarningBanner missingFields={missingFields} />
+      )}
+
       {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-light)] text-white rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

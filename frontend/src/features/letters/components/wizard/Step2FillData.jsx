@@ -1,6 +1,20 @@
 import React from 'react';
 import DynamicField from '../shared/DynamicField';
 
+const validateField = (key, value) => {
+  if (key.toLowerCase().includes('nik')) {
+    if (value && !/^\d{16}$/.test(value)) {
+      return 'NIK harus tepat 16 digit angka';
+    }
+  }
+  if (key.toLowerCase().includes('no_hp') || key.toLowerCase().includes('no_telp')) {
+    if (value && !/^(\+62|08)\d{8,12}$/.test(value)) {
+      return 'Format nomor HP tidak valid (contoh: 081234567890)';
+    }
+  }
+  return null;
+};
+
 const Step2FillData = ({ wizard }) => {
   if (!wizard.selectedType) {
     return <div className="p-8 text-center text-[var(--color-danger)]">Silakan pilih jenis surat terlebih dahulu.</div>;
@@ -29,25 +43,26 @@ const Step2FillData = ({ wizard }) => {
       </div>
 
       <div className="space-y-5 bg-[var(--color-surface-muted)] p-4 sm:p-6 rounded-xl border border-[var(--color-surface-border)]">
-        {fields.map((field) => (
-          <div key={field.id}>
-            <label className="block text-sm font-medium text-[var(--color-ink)] mb-1">
-              {field.label} {field.is_required && <span className="text-[var(--color-danger)]">*</span>}
-            </label>
+        {fields.map((field) => {
+          const value = wizard.fieldValues[field.field_key];
+          const error = validateField(field.field_key, value);
+          return (
+            <div key={field.id}>
+              <label className="block text-sm font-medium text-[var(--color-ink)] mb-1">
+                {field.label} {field.is_required && <span className="text-[var(--color-danger)]">*</span>}
+              </label>
 
-            <DynamicField
-              field={field}
-              value={wizard.fieldValues[field.field_key]}
-              onChange={(val) => {
-                wizard.setFieldValues(prev => ({ ...prev, [field.field_key]: val }));
-              }}
-            />
-
-            {field.help_text && (
-              <p className="mt-1 text-xs text-[var(--color-ink-secondary)]">{field.help_text}</p>
-            )}
-          </div>
-        ))}
+              <DynamicField
+                field={field}
+                value={value}
+                onChange={(val) => {
+                  wizard.setFieldValues(prev => ({ ...prev, [field.field_key]: val }));
+                }}
+                error={error}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -9,6 +9,8 @@ import { useAuth } from '../../../context/AuthContext';
 import { toast } from 'sonner';
 import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer';
 import LetterPdfTemplate from '../components/pdf/LetterPdfTemplate';
+import StatusTimeline from '../../../components/ui/StatusTimeline';
+import RejectionBanner from '../../../components/ui/RejectionBanner';
 
 const fetchLetterDetail = async (uuid) => {
   const res = await api.get(`/v2/letters/${uuid}`);
@@ -16,10 +18,7 @@ const fetchLetterDetail = async (uuid) => {
   return res.data?.data;
 };
 
-const STATUS_ORDER = [
-  'draft', 'submitted', 'in_review_rt', 'approved_rt',
-  'in_review_rw', 'approved_rw', 'completed',
-];
+
 
 function SignatureStatusCard({ letter }) {
   const workflowCode = letter?.workflow_code || 'RT_ONLY';
@@ -273,7 +272,7 @@ export default function LetterDetailPage() {
     color: 'bg-[var(--color-surface-muted)] text-[var(--color-ink-secondary)]',
   };
 
-  const currentStatusIndex = STATUS_ORDER.indexOf(letter.status);
+
 
   // Extract signatures from approval history
   const signatures = letter.approvals
@@ -337,35 +336,18 @@ export default function LetterDetailPage() {
         </span>
       </div>
 
-      {/* Status Tracker */}
-      <div className="bg-[var(--color-surface-card)] border rounded-lg p-4">
-        <p className="text-sm font-medium text-[var(--color-ink-secondary)] mb-3">Progres</p>
-        <div className="flex items-center gap-0">
-          {STATUS_ORDER.filter((s) => !['approved_rw'].includes(s)).map((s, i, arr) => {
-            const done = STATUS_ORDER.indexOf(s) <= currentStatusIndex;
-            const isLast = i === arr.length - 1;
-            return (
-              <div key={s} className="flex items-center flex-1">
-                <div
-                  className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                    done ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-surface-border)]'
-                  }`}
-                />
-                {!isLast && (
-                  <div
-                    className={`h-0.5 flex-1 ${
-                      done ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-surface-border)]'
-                    }`}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
-        <div className="flex justify-between mt-1">
-          <span className="text-xs text-[var(--color-ink-muted)]">Draft</span>
-          <span className="text-xs text-[var(--color-ink-muted)]">Selesai</span>
-        </div>
+      {/* Rejection Banner */}
+      <RejectionBanner letter={letter} role={user?.role} />
+
+      {/* Status Timeline */}
+      <div className="bg-[var(--color-surface-card)] border rounded-xl p-5">
+        <p className="text-sm font-medium text-[var(--color-ink)] mb-4">Progress Surat</p>
+        <StatusTimeline
+          status={letter.status}
+          workflowCode={letter.workflow_code || 'RT_ONLY'}
+          approvals={letter.approvals || []}
+          createdAt={letter.created_at}
+        />
       </div>
 
       {/* Data Surat */}
@@ -385,47 +367,7 @@ export default function LetterDetailPage() {
         </div>
       )}
 
-      {/* Timeline Approval */}
-      {letter.approvals?.length > 0 && (
-        <div className="bg-[var(--color-surface-card)] border rounded-lg p-4">
-          <p className="text-sm font-medium text-[var(--color-ink-secondary)] mb-3">Riwayat Proses</p>
-          <div className="space-y-3">
-            {letter.approvals.map((a) => (
-              <div key={a.id} className="flex gap-3 text-sm">
-                <div
-                  className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
-                    a.action === 'approved'
-                      ? 'bg-green-500'
-                      : a.action === 'rejected'
-                      ? 'bg-[var(--color-danger)]'
-                      : 'bg-yellow-500'
-                  }`}
-                />
-                <div>
-                  <p className="text-[var(--color-ink)]">
-                    <span className="font-medium">{a.approver_name}</span>{' '}
-                    {a.action === 'approved'
-                      ? 'Menyetujui'
-                      : a.action === 'rejected'
-                      ? 'Menolak'
-                      : 'Minta Revisi'}
-                  </p>
-                  {a.notes && (
-                    <p className="text-[var(--color-ink-muted)] text-xs mt-0.5">{a.notes}</p>
-                  )}
-                  <p className="text-[var(--color-ink-muted)] text-xs">
-                    {new Date(a.acted_at).toLocaleDateString('id-ID', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+
 
       {/* Action RT/RW */}
       <TtdApprovalPanel uuid={uuid} status={letter?.status} userTtdUrl={myTtd} />

@@ -6,8 +6,10 @@ import { toast } from 'sonner';
 import { useAuth } from '../../../context/AuthContext';
 import { PDFViewer, pdf } from '@react-pdf/renderer';
 import { FileText, X, Send, Eye } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../../../utils/api';
 
-// Import Steps
+// Import Steps & Components
 import Step1PickTemplate from '../components/wizard/Step1PickTemplate';
 import Step2FillData from '../components/wizard/Step2FillData';
 import Step3ContentBuilder from '../components/wizard/Step3ContentBuilder';
@@ -15,12 +17,34 @@ import Step4Attachments from '../components/wizard/Step4Attachments';
 import Step5PickWorkflow from '../components/wizard/Step5PickWorkflow';
 import Step8Success from '../components/wizard/Step8Success';
 import LetterPdfTemplate from '../components/pdf/LetterPdfTemplate';
+import ConfirmationModal from '../../../components/ui/ConfirmationModal';
+import WizardStepper from '../../../components/ui/WizardStepper';
+import SubmitOverlay from '../../../components/ui/SubmitOverlay';
+import ProfileWarningBanner from '../../../components/ui/ProfileWarningBanner';
 
 const LetterWizardPage = () => {
   const wizard = useLetterWizard();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showPreview, setShowPreview] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [submitStep, setSubmitStep] = useState(0);
+
+  // Query for profile (reuses cache from Dashboard)
+  const { data: profile } = useQuery({
+    queryKey: ['warga-profile'],
+    queryFn: async () => {
+      const res = await api.get('/warga/profile');
+      return res.data?.data || res.data;
+    },
+    retry: false,
+    enabled: user?.role === 'warga',
+  });
+
+  const REQUIRED_PROFILE_FIELDS = ['no_hp', 'NIK', 'alamat'];
+  const missingProfileFields = profile
+    ? REQUIRED_PROFILE_FIELDS.filter(f => !profile[f] || String(profile[f]).trim() === '')
+    : [];
 
   // Create real-time preview data for the PDF
   const previewData = useMemo(() => {
@@ -38,26 +62,50 @@ const LetterWizardPage = () => {
     };
   }, [wizard.selectedType, wizard.letterContent, wizard.fieldValues, user]);
 
-  const handleSubmit = async () => {
-    if (!wizard.selectedType) return toast.error('Harap pilih jenis surat');
-    if (!wizard.letterContent.subject || !wizard.letterContent.purpose) return toast.error('Harap isi subjek dan keperluan surat');
-    if (!wizard.selectedWorkflow) return toast.error('Harap pilih alur persetujuan');
+  // Calculate completed steps for stepper
+  const completedSteps = useMemo(() => {
+    const steps = [];
+    if (wizard.selectedType) steps.push('type');
+    if (wizard.fieldValues && Object.keys(wizard.fieldValues).length > 0) steps.push('data');
+    if (wizard.letterContent?.purpose) steps.push('content');
+    if (wizard.selectedWorkflow || wizard.attachments?.length > 0) steps.push('attachments');
+    if (wizard.selectedWorkflow) steps.push('workflow');
+    return steps;
+  }, [wizard.selectedType, wizard.fieldValues, wizard.letterContent, wizard.attachments, wizard.selectedWorkflow]);
 
+  const handleOpenConfirm = () => {
+    if (!wizard.selectedType) return toast.error('Harap pilih jenis surat');
+    if (!wizard.letterContent.subject || !wizard.letterContent.purpose) 
+      return toast.error('Harap isi subjek dan keperluan surat');
+    if (!wizard.selectedWorkflow) return toast.error('Harap pilih alur persetujuan');
+    
+    if (missingProfileFields.length > 0) {
+      toast.error('Lengkapi profil Anda terlebih dahulu sebelum mengajukan surat', {
+        description: `Data belum diisi: ${missingProfileFields.join(', ')}`,
+        action: { label: 'Ke Profil', onClick: () => navigate('/warga/profile') },
+      });
+      return;
+    }
+    
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSubmit = async () => {
     try {
-      // 1. Simpan Draft
+      setSubmitStep(0);
       const draftData = await wizard.saveDraftAsync();
       const uuid = draftData.uuid;
-
-      // 2. Upload Lampiran (jika ada)
+      
       if (wizard.attachments && wizard.attachments.length > 0) {
+        setSubmitStep(1);
         await wizard.uploadAttachmentsAsync({ uuid, files: wizard.attachments });
       }
-
-      // 3. Submit Final
+      
+      setSubmitStep(2);
       await wizard.submitLetterAsync(uuid);
+      setShowConfirmModal(false);
     } catch (error) {
       console.error('Submit Flow Error:', error);
-      // errors already toasted in hook
     }
   };
 
@@ -80,9 +128,14 @@ const LetterWizardPage = () => {
 
   const previewPanel = (
     <div className="bg-[var(--color-surface-card)] w-full h-full rounded-xl shadow-inner overflow-hidden border border-[var(--color-surface-border)] flex flex-col">
-      <div className="bg-[var(--color-surface-muted)] border-b border-[var(--color-surface-border)] px-4 py-2 flex justify-between items-center text-xs text-[var(--color-ink-secondary)] uppercase font-bold tracking-wider">
-        <span>Live Preview PDF</span>
-        <span>Dokumen Dinamis</span>
+      <div className="bg-[var(--color-surface-muted)] border-b border-[var(--color-surface-border)] px-4 py-2 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+          <span className="text-xs text-[var(--color-ink-secondary)] font-semibold uppercase tracking-wider">
+            Live Preview PDF
+          </span>
+        </div>
+        <span className="text-xs text-[var(--color-ink-muted)]">Update otomatis saat Anda mengisi data</span>
       </div>
       <div className="flex-1 min-h-0">
         {wizard.selectedType ? (
@@ -114,9 +167,11 @@ const LetterWizardPage = () => {
           {wizard.selectedType && (
             <button
               onClick={() => setShowPreview(true)}
-              className="lg:hidden inline-flex items-center gap-1.5 text-[var(--color-primary)] font-medium text-sm border border-[var(--color-surface-border)] rounded-lg px-3 py-2 hover:bg-[var(--color-surface-muted)]"
+              className="lg:hidden inline-flex items-center gap-1.5 bg-[var(--color-primary)] text-white font-medium text-sm rounded-lg px-3 py-2 hover:bg-[var(--color-primary-dark)]"
             >
-              <Eye className="w-4 h-4" /> Preview
+              <Eye className="w-4 h-4" /> 
+              Lihat Surat
+              <span className="w-2 h-2 rounded-full bg-green-400 ml-0.5" title="Live preview aktif" />
             </button>
           )}
           <button
@@ -130,7 +185,7 @@ const LetterWizardPage = () => {
             Batal
           </button>
           <button
-            onClick={handleSubmit}
+            onClick={handleOpenConfirm}
             disabled={wizard.isSubmitting}
             className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-lg bg-[var(--color-primary)] text-white font-medium hover:bg-[var(--color-primary-dark)] transition-colors shadow-sm disabled:opacity-70 disabled:cursor-wait text-sm sm:text-base"
           >
@@ -141,10 +196,18 @@ const LetterWizardPage = () => {
         </div>
       </header>
 
+      {/* Wizard Stepper */}
+      <WizardStepper completedSteps={completedSteps} />
+
       {/* Main Content Area: Split Screen on desktop, single column on mobile */}
       <main className="flex-1 flex overflow-hidden">
         {/* KIRI: Form Input (Scrollable) */}
         <div className="w-full lg:w-1/2 h-full overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-6 bg-[var(--color-surface-muted)]">
+          {missingProfileFields.length > 0 && (
+            <div className="bg-[var(--color-surface-card)] p-4 rounded-xl border border-[var(--color-surface-border)] shadow-sm">
+              <ProfileWarningBanner missingFields={missingProfileFields} />
+            </div>
+          )}
           <section className="bg-[var(--color-surface-card)] p-4 sm:p-6 rounded-xl border border-[var(--color-surface-border)] shadow-sm">
             <Step1PickTemplate wizard={wizard} />
           </section>
@@ -195,6 +258,29 @@ const LetterWizardPage = () => {
           </div>
         </div>
       )}
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmSubmit}
+        isLoading={wizard.isSubmitting}
+        data={{
+          jenisSurat: wizard.selectedType?.name,
+          alurPersetujuan: wizard.selectedWorkflow?.name,
+          subjek: wizard.letterContent?.subject,
+          keperluan: wizard.letterContent?.purpose,
+          jumlahLampiran: wizard.attachments?.length,
+          namaPemohon: user?.nama,
+          nik: user?.nik,
+        }}
+      />
+
+      {/* Submit Overlay */}
+      <SubmitOverlay 
+        isVisible={wizard.isSubmitting} 
+        currentStep={submitStep} 
+      />
     </div>
   );
 };
