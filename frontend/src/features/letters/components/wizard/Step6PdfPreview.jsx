@@ -8,10 +8,6 @@ import { api } from '../../../../utils/api';
 // Setup worker react-pdf
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
-const fetchPreviewPdf = async (uuid) => {
-  const res = await api.get(`/v2/letters/${uuid}/preview-pdf`);
-  return res.data.data.pdf_url;
-};
 
 export default function Step6PdfPreview({ draftUuid }) {
   const [numPages, setNumPages] = useState(null);

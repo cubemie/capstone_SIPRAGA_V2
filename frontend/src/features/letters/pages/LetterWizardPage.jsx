@@ -1,15 +1,18 @@
-
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useLetterWizard } from '../hooks/useLetterWizard';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '../../../context/AuthContext';
-import { PDFViewer, pdf } from '@react-pdf/renderer';
-import { FileText, X, Send, Eye } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { PDFViewer } from '@react-pdf/renderer';
+import { FileText, X, Send, Eye } from 'lucide-react';
 import { api } from '../../../utils/api';
 
-// Import Steps & Components
+// Import Components & Steps
+import ConfirmationModal from '../../../components/ui/ConfirmationModal';
+import WizardStepper from '../../../components/ui/WizardStepper';
+import SubmitOverlay from '../../../components/ui/SubmitOverlay';
+import ProfileWarningBanner from '../../../components/ui/ProfileWarningBanner';
 import Step1PickTemplate from '../components/wizard/Step1PickTemplate';
 import Step2FillData from '../components/wizard/Step2FillData';
 import Step3ContentBuilder from '../components/wizard/Step3ContentBuilder';
@@ -17,10 +20,6 @@ import Step4Attachments from '../components/wizard/Step4Attachments';
 import Step5PickWorkflow from '../components/wizard/Step5PickWorkflow';
 import Step8Success from '../components/wizard/Step8Success';
 import LetterPdfTemplate from '../components/pdf/LetterPdfTemplate';
-import ConfirmationModal from '../../../components/ui/ConfirmationModal';
-import WizardStepper from '../../../components/ui/WizardStepper';
-import SubmitOverlay from '../../../components/ui/SubmitOverlay';
-import ProfileWarningBanner from '../../../components/ui/ProfileWarningBanner';
 
 const LetterWizardPage = () => {
   const wizard = useLetterWizard();
@@ -30,7 +29,7 @@ const LetterWizardPage = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [submitStep, setSubmitStep] = useState(0);
 
-  // Query for profile (reuses cache from Dashboard)
+  // Fetch profile to check completeness
   const { data: profile } = useQuery({
     queryKey: ['warga-profile'],
     queryFn: async () => {
@@ -41,10 +40,22 @@ const LetterWizardPage = () => {
     enabled: user?.role === 'warga',
   });
 
+  // Calculate missing fields
   const REQUIRED_PROFILE_FIELDS = ['no_hp', 'NIK', 'alamat'];
   const missingProfileFields = profile
     ? REQUIRED_PROFILE_FIELDS.filter(f => !profile[f] || String(profile[f]).trim() === '')
     : [];
+
+  // Calculate completed steps for stepper
+  const completedSteps = useMemo(() => {
+    const steps = [];
+    if (wizard.selectedType) steps.push('type');
+    if (wizard.fieldValues && Object.keys(wizard.fieldValues).length > 0) steps.push('data');
+    if (wizard.letterContent?.purpose) steps.push('content');
+    if (wizard.selectedWorkflow || wizard.attachments?.length > 0) steps.push('attachments');
+    if (wizard.selectedWorkflow) steps.push('workflow');
+    return steps;
+  }, [wizard.selectedType, wizard.fieldValues, wizard.letterContent, wizard.attachments, wizard.selectedWorkflow]);
 
   // Create real-time preview data for the PDF
   const previewData = useMemo(() => {
@@ -62,17 +73,6 @@ const LetterWizardPage = () => {
     };
   }, [wizard.selectedType, wizard.letterContent, wizard.fieldValues, user]);
 
-  // Calculate completed steps for stepper
-  const completedSteps = useMemo(() => {
-    const steps = [];
-    if (wizard.selectedType) steps.push('type');
-    if (wizard.fieldValues && Object.keys(wizard.fieldValues).length > 0) steps.push('data');
-    if (wizard.letterContent?.purpose) steps.push('content');
-    if (wizard.selectedWorkflow || wizard.attachments?.length > 0) steps.push('attachments');
-    if (wizard.selectedWorkflow) steps.push('workflow');
-    return steps;
-  }, [wizard.selectedType, wizard.fieldValues, wizard.letterContent, wizard.attachments, wizard.selectedWorkflow]);
-
   const handleOpenConfirm = () => {
     if (!wizard.selectedType) return toast.error('Harap pilih jenis surat');
     if (!wizard.letterContent.subject || !wizard.letterContent.purpose) 
@@ -86,21 +86,17 @@ const LetterWizardPage = () => {
       });
       return;
     }
-    
     setShowConfirmModal(true);
   };
-
   const handleConfirmSubmit = async () => {
     try {
       setSubmitStep(0);
       const draftData = await wizard.saveDraftAsync();
       const uuid = draftData.uuid;
-      
       if (wizard.attachments && wizard.attachments.length > 0) {
         setSubmitStep(1);
         await wizard.uploadAttachmentsAsync({ uuid, files: wizard.attachments });
       }
-      
       setSubmitStep(2);
       await wizard.submitLetterAsync(uuid);
       setShowConfirmModal(false);

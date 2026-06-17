@@ -17,9 +17,6 @@ const fetchLetterDetail = async (uuid) => {
   if (res.error) throw new Error(res.error);
   return res.data?.data;
 };
-
-
-
 function SignatureStatusCard({ letter }) {
   const workflowCode = letter?.workflow_code || 'RT_ONLY';
   
@@ -27,7 +24,6 @@ function SignatureStatusCard({ letter }) {
   const rtApproval = letter?.approvals?.find(a => a.step === 1 && a.action === 'approved');
   const rwApproval = letter?.approvals?.find(a => a.step === 2 && a.action === 'approved');
 
-  const isFinal = letter?.status === 'completed';
 
   // Tentukan tahap TTD berdasarkan workflow
   const ttdSteps = workflowCode === 'RT_ONLY'
@@ -200,31 +196,6 @@ export default function LetterDetailPage() {
   const { user } = useAuth();
   const backPath = user?.role === 'warga' ? '/warga/riwayat' : '/rtrw/inbox';
   const backLabel = user?.role === 'warga' ? 'Riwayat Surat' : 'Kotak Masuk';
-  const queryClient = useQueryClient();
-  const [rejectNotes, setRejectNotes] = useState('');
-  const [approveNotes, setApproveNotes] = useState('');
-
-  const approveMutation = useMutation({
-    mutationFn: () =>
-      api.post(`/v2/letters/${uuid}/approve`, { notes: approveNotes }),
-    onSuccess: () => {
-      toast.success('Surat berhasil disetujui');
-      queryClient.invalidateQueries({ queryKey: ['letter-detail', uuid] });
-    },
-    onError: () => toast.error('Gagal menyetujui surat'),
-  });
-
-  const rejectMutation = useMutation({
-    mutationFn: () =>
-      api.post(`/v2/letters/${uuid}/reject`, { notes: rejectNotes }),
-    onSuccess: () => {
-      toast.success('Surat ditolak');
-      queryClient.invalidateQueries({ queryKey: ['letter-detail', uuid] });
-    },
-    onError: () => toast.error('Gagal menolak surat'),
-  });
-
-
   const { data: myTtd } = useQuery({
     queryKey: ['my-ttd'],
     queryFn: async () => {
@@ -271,9 +242,6 @@ export default function LetterDetailPage() {
     label: letter.status,
     color: 'bg-[var(--color-surface-muted)] text-[var(--color-ink-secondary)]',
   };
-
-
-
   // Extract signatures from approval history
   const signatures = letter.approvals
     ?.filter((a) => a.action === 'approved' && a.signature_url)

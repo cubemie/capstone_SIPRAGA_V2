@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../../components/Logo';
 import {
@@ -43,7 +43,7 @@ export default function RegisterRtRw() {
       ? authService.registerRw(form)
       : authService.registerRt(form);
 
-    const { data, error: err } = await service;
+    const { error: err } = await service;
     setLoading(false);
 
     if (err) { setError(err); return; }
@@ -150,7 +150,6 @@ export default function RegisterRtRw() {
 
   // ─── Step 1: Form ──────────────────────────────────────────────────────────
   const isRw = role === 'rw';
-  const accent = isRw ? 'blue' : 'slate';
 
   return (
     <div className="min-h-screen bg-[var(--color-surface-muted)] flex flex-col justify-center py-10 sm:px-6 lg:px-8 font-sans">

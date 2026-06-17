@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 import { authService } from '../services/authService';
 
 const AuthContext = createContext(null);
@@ -23,35 +23,25 @@ function decodeToken(token) {
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem('token'));
-  const [user, setUser] = useState(() => {
-    const t = localStorage.getItem('token');
-    return t ? decodeToken(t) : null;
-  });
-
-  // Sinkronisasi state jika token berubah
-  useEffect(() => {
-    if (token) {
-      const decoded = decodeToken(token);
-      // Cek apakah token sudah expire
-      if (decoded && decoded.exp * 1000 > Date.now()) {
-        setUser(decoded);
-        localStorage.setItem('token', token);
-      } else {
-        logout();
-      }
-    } else {
-      setUser(null);
+  const user = useMemo(() => {
+    if (!token) return null;
+    const decoded = decodeToken(token);
+    if (!decoded || decoded.exp * 1000 <= Date.now()) {
       localStorage.removeItem('token');
+      return null;
     }
+    return decoded;
   }, [token]);
 
   function login(newToken) {
-    setToken(newToken);
     const decoded = decodeToken(newToken);
     if (decoded && decoded.exp * 1000 > Date.now()) {
-      setUser(decoded);
       localStorage.setItem('token', newToken);
+      setToken(newToken);
+      return;
     }
+    localStorage.removeItem('token');
+    setToken(null);
   }
 
   function logout() {
@@ -59,7 +49,6 @@ export function AuthProvider({ children }) {
     // Hapus token di client tetap dilakukan meski request backend gagal.
     authService.logout().catch(() => { /* abaikan network error saat logout */ });
     setToken(null);
-    setUser(null);
     localStorage.removeItem('token');
   }
 
@@ -70,6 +59,7 @@ export function AuthProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth harus digunakan di dalam <AuthProvider>');

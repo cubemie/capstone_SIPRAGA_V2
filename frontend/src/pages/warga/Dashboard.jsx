@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, Clock, Plus, XCircle, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';

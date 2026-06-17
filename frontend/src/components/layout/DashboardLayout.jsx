@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../Logo';
@@ -7,6 +7,57 @@ import {
   LayoutDashboard, LogOut, Bell, Menu, X, UserCircle,
 } from 'lucide-react';
 import NotificationBell from '../NotificationBell';
+
+function SidebarContent({
+  menuItems,
+  location,
+  sidebarActive,
+  sidebarHover,
+  handleLogout,
+  setSidebarOpen,
+}) {
+  return (
+    <>
+      <div className="p-5 flex items-center justify-between border-b border-white/10">
+        <Logo className="text-white [&_svg]:text-white [&_span]:text-white" />
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="md:hidden text-white/60 hover:text-white"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+      <nav className="flex-1 p-4 space-y-1">
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={() => setSidebarOpen(false)}
+              className={`flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition text-sm ${
+                isActive ? sidebarActive + ' shadow-sm' : 'text-white/80 ' + sidebarHover + ' hover:text-white'
+              }`}
+            >
+              <Icon className="w-4.5 h-4.5 shrink-0" />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+      <div className="p-4 border-t border-white/10">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition text-slate-400 hover:bg-red-800/60 hover:text-white text-sm"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>Keluar</span>
+        </button>
+      </div>
+    </>
+  );
+}
 
 export default function DashboardLayout({ children }) {
   const { user, logout } = useAuth();
@@ -61,53 +112,18 @@ export default function DashboardLayout({ children }) {
     sidebarActive = 'bg-[var(--color-accent)] text-[var(--color-primary)]';
   }
 
-  const SidebarContent = () => (
-    <>
-      <div className="p-5 flex items-center justify-between border-b border-white/10">
-        <Logo className="text-white [&_svg]:text-white [&_span]:text-white" />
-        <button
-          onClick={() => setSidebarOpen(false)}
-          className="md:hidden text-white/60 hover:text-white"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-      <nav className="flex-1 p-4 space-y-1">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition text-sm ${
-                isActive ? sidebarActive + ' shadow-sm' : 'text-white/80 ' + sidebarHover + ' hover:text-white'
-              }`}
-            >
-              <Icon className="w-4.5 h-4.5 shrink-0" />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-      <div className="p-4 border-t border-white/10">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition text-slate-400 hover:bg-red-800/60 hover:text-white text-sm"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Keluar</span>
-        </button>
-      </div>
-    </>
-  );
-
   return (
     <div className="min-h-screen bg-[var(--color-surface)] flex font-sans text-[var(--color-ink)]">
       {/* Sidebar Desktop */}
       <aside className={`w-64 ${sidebarBg} text-white flex-col hidden md:flex`}>
-        <SidebarContent />
+        <SidebarContent
+          menuItems={menuItems}
+          location={location}
+          sidebarActive={sidebarActive}
+          sidebarHover={sidebarHover}
+          handleLogout={handleLogout}
+          setSidebarOpen={setSidebarOpen}
+        />
       </aside>
 
       {/* Sidebar Mobile Overlay */}
@@ -118,7 +134,14 @@ export default function DashboardLayout({ children }) {
             onClick={() => setSidebarOpen(false)}
           />
           <aside className={`relative w-64 h-full ${sidebarBg} text-white flex flex-col z-50`}>
-            <SidebarContent />
+            <SidebarContent
+              menuItems={menuItems}
+              location={location}
+              sidebarActive={sidebarActive}
+              sidebarHover={sidebarHover}
+              handleLogout={handleLogout}
+              setSidebarOpen={setSidebarOpen}
+            />
           </aside>
         </div>
       )}

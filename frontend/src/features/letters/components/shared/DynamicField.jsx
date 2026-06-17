@@ -1,5 +1,3 @@
-import React from 'react';
-
 const DynamicField = ({ field, value, onChange, error }) => {
   const baseClasses = "mt-1 block w-full rounded-md border-[var(--color-surface-border)] shadow-sm focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] sm:text-sm p-2.5 border transition-colors";
   const errorClasses = "mt-1 block w-full rounded-md border-red-400 bg-red-50 shadow-sm focus:border-red-500 focus:ring-red-200 sm:text-sm p-2.5 border transition-colors";
@@ -28,7 +26,7 @@ const DynamicField = ({ field, value, onChange, error }) => {
         </>
       );
     
-    case 'select':
+    case 'select': {
       const options = typeof field.options === 'string' ? JSON.parse(field.options) : field.options;
       return (
         <>
@@ -54,8 +52,9 @@ const DynamicField = ({ field, value, onChange, error }) => {
           )}
         </>
       );
+    }
 
-    case 'radio':
+    case 'radio': {
       const radioOpts = typeof field.options === 'string' ? JSON.parse(field.options) : field.options;
       return (
         <>
@@ -88,6 +87,7 @@ const DynamicField = ({ field, value, onChange, error }) => {
           )}
         </>
       );
+    }
 
     case 'date':
       return (

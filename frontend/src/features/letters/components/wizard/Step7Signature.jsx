@@ -1,18 +1,17 @@
 import { useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { api } from '../../../../../utils/api';
 
-export default function Step7Signature({ draftUuid, letterId }) {
+export default function Step7Signature({ draftUuid }) {
   const sigCanvas = useRef(null);
   const navigate = useNavigate();
   const [error, setError] = useState(null);
-  const queryClient = useQueryClient();
 
   const submitMutation = useMutation({
-    mutationFn: async (payload) => {
+    mutationFn: async () => {
       // 1. Submit final (Ubah status dari draft -> submitted)
       await api.post(`/v2/letters/${draftUuid}/submit`);
       // 2. Upload signature jika ada endpoint (opsional sesuai backend)

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../../components/Logo';
 import { User, Mail, Lock, CreditCard, MapPin, Calendar, Loader2, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
@@ -46,7 +46,7 @@ export default function RegisterWarga() {
     }
 
     setLoading(true);
-    const { data, error: err } = await authService.registerWarga({
+    const { error: err } = await authService.registerWarga({
       nik: formData.nik,
       nama: formData.nama,
       email: formData.email,

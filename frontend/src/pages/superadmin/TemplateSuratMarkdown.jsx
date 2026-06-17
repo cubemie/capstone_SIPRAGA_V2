@@ -57,6 +57,92 @@ Kepala Kelurahan {{nama_desa}}
 NIP. {{nip_kepala}}
 `;
 
+function TemplateForm({ initial, onSave, onCancel, saving, letterTypes }) {
+  const [localForm, setLocalForm] = useState(initial);
+
+  return (
+    <div className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl p-5 space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-medium text-ink-secondary mb-1">Nama Template</label>
+          <input
+            value={localForm.name}
+            onChange={e => setLocalForm(p => ({ ...p, name: e.target.value }))}
+            placeholder="Contoh: Template Domisili v1"
+            className="w-full px-3 py-2 text-sm border border-surface-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-ink-secondary mb-1">Jenis Surat</label>
+          <select
+            value={localForm.letter_type_id}
+            onChange={e => setLocalForm(p => ({ ...p, letter_type_id: e.target.value }))}
+            className="w-full px-3 py-2 text-sm border border-surface-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+          >
+            <option value="">-- Pilih Jenis Surat --</option>
+            {letterTypes.map(t => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <p className="text-xs font-medium text-ink-secondary mb-2">Variabel yang tersedia (klik untuk menyalin):</p>
+        <div className="flex flex-wrap gap-1.5">
+          {VARIABLE_HINTS.map(v => (
+            <button
+              key={v.key}
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(v.key);
+                toast.info(`Disalin: ${v.key}`);
+              }}
+              className="text-xs bg-brand-50 text-brand-700 border border-brand-100 px-2 py-0.5 rounded font-mono hover:bg-brand-100 transition"
+              title={v.label}
+            >
+              {v.key}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-ink-secondary mb-1">
+          Konten Template (Markdown)
+        </label>
+        <textarea
+          value={localForm.markdown_content}
+          onChange={e => setLocalForm(p => ({ ...p, markdown_content: e.target.value }))}
+          rows={20}
+          className="w-full px-3 py-2 text-sm border border-surface-border rounded-lg font-mono resize-y focus:outline-none focus:ring-2 focus:ring-brand-500"
+          placeholder="Tulis template surat dalam format Markdown..."
+        />
+        <p className="text-xs text-ink-muted mt-1">
+          Gunakan Markdown standar: **tebal**, *miring*, ## heading, | tabel |, ---garis---
+        </p>
+      </div>
+
+      <div className="flex gap-3 justify-end">
+        <button
+          onClick={onCancel}
+          className="px-4 py-2 text-sm text-ink-secondary border border-surface-border rounded-lg hover:bg-surface-muted transition"
+        >
+          Batal
+        </button>
+        <button
+          onClick={() => onSave(localForm)}
+          disabled={saving || !localForm.name || !localForm.markdown_content}
+          className="flex items-center gap-2 px-4 py-2 text-sm bg-brand-500 text-white font-medium rounded-lg hover:bg-brand-600 transition disabled:opacity-50"
+        >
+          <Save className="w-3.5 h-3.5" />
+          {saving ? 'Menyimpan...' : 'Simpan Template'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function TemplateSuratMarkdown() {
   const [editingId, setEditingId]   = useState(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -140,101 +226,17 @@ export default function TemplateSuratMarkdown() {
       const previewWindow = window.open(objectUrl, '_blank', 'noopener,noreferrer');
 
       if (!previewWindow) {
-        window.location.href = objectUrl;
+        const fallbackLink = document.createElement('a');
+        fallbackLink.href = objectUrl;
+        fallbackLink.target = '_blank';
+        fallbackLink.rel = 'noopener noreferrer';
+        fallbackLink.click();
       }
 
       window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
     } catch (error) {
       toast.error(error.message || 'Preview template gagal dibuka.');
     }
-  };
-
-  const TemplateForm = ({ initial, onSave, onCancel, saving }) => {
-    const [localForm, setLocalForm] = useState(initial);
-
-    return (
-      <div className="bg-[var(--color-surface-card)] border border-surface-border rounded-xl p-5 space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-ink-secondary mb-1">Nama Template</label>
-            <input
-              value={localForm.name}
-              onChange={e => setLocalForm(p => ({ ...p, name: e.target.value }))}
-              placeholder="Contoh: Template Domisili v1"
-              className="w-full px-3 py-2 text-sm border border-surface-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-ink-secondary mb-1">Jenis Surat</label>
-            <select
-              value={localForm.letter_type_id}
-              onChange={e => setLocalForm(p => ({ ...p, letter_type_id: e.target.value }))}
-              className="w-full px-3 py-2 text-sm border border-surface-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
-            >
-              <option value="">-- Pilih Jenis Surat --</option>
-              {letterTypes.map(t => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Panduan variabel */}
-        <div>
-          <p className="text-xs font-medium text-ink-secondary mb-2">Variabel yang tersedia (klik untuk menyalin):</p>
-          <div className="flex flex-wrap gap-1.5">
-            {VARIABLE_HINTS.map(v => (
-              <button
-                key={v.key}
-                type="button"
-                onClick={() => {
-                  navigator.clipboard.writeText(v.key);
-                  toast.info(`Disalin: ${v.key}`);
-                }}
-                className="text-xs bg-brand-50 text-brand-700 border border-brand-100 px-2 py-0.5 rounded font-mono hover:bg-brand-100 transition"
-                title={v.label}
-              >
-                {v.key}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Editor Markdown */}
-        <div>
-          <label className="block text-xs font-medium text-ink-secondary mb-1">
-            Konten Template (Markdown)
-          </label>
-          <textarea
-            value={localForm.markdown_content}
-            onChange={e => setLocalForm(p => ({ ...p, markdown_content: e.target.value }))}
-            rows={20}
-            className="w-full px-3 py-2 text-sm border border-surface-border rounded-lg font-mono resize-y focus:outline-none focus:ring-2 focus:ring-brand-500"
-            placeholder="Tulis template surat dalam format Markdown..."
-          />
-          <p className="text-xs text-ink-muted mt-1">
-            Gunakan Markdown standar: **tebal**, *miring*, ## heading, | tabel |, ---garis---
-          </p>
-        </div>
-
-        <div className="flex gap-3 justify-end">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-sm text-ink-secondary border border-surface-border rounded-lg hover:bg-surface-muted transition"
-          >
-            Batal
-          </button>
-          <button
-            onClick={() => onSave(localForm)}
-            disabled={saving || !localForm.name || !localForm.markdown_content}
-            className="flex items-center gap-2 px-4 py-2 text-sm bg-brand-500 text-white font-medium rounded-lg hover:bg-brand-600 transition disabled:opacity-50"
-          >
-            <Save className="w-3.5 h-3.5" />
-            {saving ? 'Menyimpan...' : 'Simpan Template'}
-          </button>
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -265,6 +267,7 @@ export default function TemplateSuratMarkdown() {
             <TemplateForm
               initial={form}
               saving={createMutation.isPending}
+              letterTypes={letterTypes}
               onSave={(data) => createMutation.mutate(data)}
               onCancel={() => setIsCreating(false)}
             />
@@ -289,6 +292,7 @@ export default function TemplateSuratMarkdown() {
                     <TemplateForm
                       initial={{ name: tmpl.name, letter_type_id: tmpl.letter_type_id, markdown_content: tmpl.markdown_content }}
                       saving={updateMutation.isPending}
+                      letterTypes={letterTypes}
                       onSave={(data) => updateMutation.mutate({ id: tmpl.id, payload: data })}
                       onCancel={() => setEditingId(null)}
                     />

@@ -1,6 +1,4 @@
-import React from 'react';
 import { CheckCircle2, ClipboardList, Home, Bell, Clock } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const Step8Success = ({ wizard, navigate }) => {
   const shortId = wizard.draftUuid

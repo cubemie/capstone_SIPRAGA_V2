@@ -225,8 +225,11 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!profile) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFormData(buildInitialForm(profile));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAvatarPreview(profile.avatar_url || '');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAvatarFile(null);
   }, [profile]);
 

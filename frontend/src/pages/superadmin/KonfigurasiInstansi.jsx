@@ -1,15 +1,15 @@
 // frontend/src/pages/superadmin/KonfigurasiInstansi.jsx — FILE BARU
 
-import React, { useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api } from '../../utils/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { Save, Upload, Building2 } from 'lucide-react';
+import { Save, Building2 } from 'lucide-react';
 
 export default function KonfigurasiInstansi() {
   const queryClient = useQueryClient();
-  const [values, setValues] = useState({});
+  const [values, setValues] = useState(null);
 
   const { data: config, isLoading } = useQuery({
     queryKey: ['instance-config'],
@@ -20,13 +20,16 @@ export default function KonfigurasiInstansi() {
     },
   });
 
-  useEffect(() => {
-    if (config) {
-      const flat = {};
-      Object.entries(config).forEach(([k, v]) => { flat[k] = v.value || ''; });
-      setValues(flat);
-    }
-  }, [config]);
+  const resolvedValues = useMemo(() => {
+    if (values) return values;
+    if (!config) return {};
+
+    const flat = {};
+    Object.entries(config).forEach(([k, v]) => {
+      flat[k] = v.value || '';
+    });
+    return flat;
+  }, [config, values]);
 
   const updateMutation = useMutation({
     mutationFn: (updates) => api.put('/superadmin/config', updates),
@@ -89,8 +92,8 @@ export default function KonfigurasiInstansi() {
                       </label>
                       <input
                         type={field.type || 'text'}
-                        value={values[field.key] || ''}
-                        onChange={e => setValues(p => ({ ...p, [field.key]: e.target.value }))}
+                        value={resolvedValues[field.key] || ''}
+                        onChange={e => setValues(p => ({ ...(p || resolvedValues), [field.key]: e.target.value }))}
                         className="w-full px-3 py-2 text-sm border border-surface-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
                         placeholder={config?.[field.key]?.label}
                       />
@@ -104,7 +107,7 @@ export default function KonfigurasiInstansi() {
             ))}
 
             <button
-              onClick={() => updateMutation.mutate(values)}
+              onClick={() => updateMutation.mutate(resolvedValues)}
               disabled={updateMutation.isPending}
               className="flex items-center justify-center gap-2 w-full py-3 bg-brand-500 text-white text-sm font-semibold rounded-xl hover:bg-brand-600 transition disabled:opacity-50"
             >
@@ -116,4 +119,4 @@ export default function KonfigurasiInstansi() {
       </div>
     </DashboardLayout>
   );
-}
+}

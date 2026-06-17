@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Logo from '../../components/Logo';
 import { Lock, ShieldAlert, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';

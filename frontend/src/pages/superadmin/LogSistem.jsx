@@ -1,6 +1,6 @@
 // frontend/src/pages/superadmin/LogSistem.jsx — FILE BARU
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../utils/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';

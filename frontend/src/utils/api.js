@@ -31,7 +31,7 @@ async function request(endpoint, options = {}) {
     }
 
     return { data, error: null };
-  } catch (err) {
+  } catch {
     return { data: null, error: 'Tidak dapat terhubung ke server.' };
   }
 }

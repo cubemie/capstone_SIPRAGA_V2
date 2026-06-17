@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { UploadCloud, FileText, X, File as FileIcon } from 'lucide-react';
 
 const Step4Attachments = ({ wizard }) => {

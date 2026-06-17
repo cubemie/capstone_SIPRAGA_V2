@@ -1,4 +1,3 @@
-import React from 'react';
 import DynamicField from '../shared/DynamicField';
 
 const validateField = (key, value) => {

@@ -1,13 +1,13 @@
 // frontend/src/pages/superadmin/Dashboard.jsx
 // GANTI SELURUH ISI
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../utils/api';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import {
-  Users, MapPin, FileText, CheckCircle, Building2,
-  ChevronRight, ArrowLeft, BarChart3, UserCheck, Briefcase,
+  Users, MapPin, FileText, Building2,
+  ChevronRight, ArrowLeft, BarChart3, UserCheck,
 } from 'lucide-react';
 
 const formatNum = (n) => (n ?? 0).toLocaleString('id-ID');

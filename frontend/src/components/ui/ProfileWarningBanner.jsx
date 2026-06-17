@@ -1,4 +1,4 @@
-﻿import { AlertTriangle, ArrowRight } from 'lucide-react';
+import { AlertTriangle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function ProfileWarningBanner({ missingFields = [] }) {
@@ -29,7 +29,7 @@ export default function ProfileWarningBanner({ missingFields = [] }) {
           </span>
         </p>
         <Link
-          to="/profil"
+          to="/warga/profile"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 underline hover:text-amber-900"
         >
           Lengkapi Profil <ArrowRight className="w-3.5 h-3.5" />
@@ -38,4 +38,3 @@ export default function ProfileWarningBanner({ missingFields = [] }) {
     </div>
   );
 }
-

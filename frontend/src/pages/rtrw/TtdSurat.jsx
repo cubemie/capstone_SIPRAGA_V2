@@ -1,22 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Eraser, Save, PenTool } from 'lucide-react';
 import { toast } from 'sonner';
 import { getTtd, uploadTtd } from '../../services/ttdService';
-import { useAuth } from '../../context/AuthContext';
 
-const dataURLtoBlob = (dataUrl) => {
-  const [header, data] = dataUrl.split(',');
-  const mimeMatch = header.match(/:(.*?);/);
-  const mime = mimeMatch?.[1] || 'image/png';
-  const binary = atob(data);
-  const array = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) array[i] = binary.charCodeAt(i);
-  return new Blob([array], { type: mime });
-};
 
 export default function TtdSurat() {
-  const { user } = useAuth();
   const sigCanvas = useRef(null);
   const fileInputRef = useRef(null);
   const [activeTab, setActiveTab] = useState('draw');
@@ -119,7 +108,7 @@ const handleSaveCanvas = async () => {
       await uploadTtd(formData);
       await loadSignatureProfile();
       toast.success('Tanda tangan berhasil disimpan');
-    } catch (err) {
+    } catch {
       toast.error('Gagal menyimpan tanda tangan');
     } finally {
       setSaving(false);

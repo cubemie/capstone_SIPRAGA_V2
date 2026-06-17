@@ -47,9 +47,10 @@ export function useSurat(mode = 'my') {
 
     // Backend bisa mengembalikan array langsung atau { data: [...] }
     setData(Array.isArray(result) ? result : result?.data ?? []);
-  }, [mode]);
+  }, [fetcher, mode]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, [fetchData]);
 
