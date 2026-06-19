@@ -112,6 +112,23 @@ const approveLetter = async (letterUuid, role, notes = null, signatureUrl = null
     );
   }
 
+  // ─── Auto-fetch TTD dari DB berdasarkan role approver ───────────────────
+  // Prioritas: signature_url dari frontend (jika ada), fallback ke ttd_digital di DB.
+  // Ini memastikan TTD yang tersimpan di letter_approvals selalu milik approver yang benar.
+  let finalSignatureUrl = signatureUrl || null;
+  if (!finalSignatureUrl) {
+    if (normalizedRole === 'rt') {
+      const [[rtRow]] = await pool.query('SELECT ttd_digital FROM rt WHERE rt_id = ?', [approverId]);
+      finalSignatureUrl = rtRow?.ttd_digital || null;
+      console.log('[ApprovalsService.approveLetter] Auto-fetched TTD RT:', finalSignatureUrl ? 'found' : 'not found');
+    } else if (normalizedRole === 'rw') {
+      const [[rwRow]] = await pool.query('SELECT ttd_digital FROM rw WHERE rw_id = ?', [approverId]);
+      finalSignatureUrl = rwRow?.ttd_digital || null;
+      console.log('[ApprovalsService.approveLetter] Auto-fetched TTD RW:', finalSignatureUrl ? 'found' : 'not found');
+    }
+  }
+  // ────────────────────────────────────────────────────────────────────────
+
   const nextStatus = transition.to;
   const isCompleted = nextStatus === 'completed';
 
@@ -129,7 +146,7 @@ const approveLetter = async (letterUuid, role, notes = null, signatureUrl = null
     await conn.query(
       `INSERT INTO letter_approvals (letter_id, approver_id, step, action, notes, signature_url, acted_at)
        VALUES (?, ?, ?, 'approved', ?, ?, NOW())`,
-      [letter.id, approverId, letter.current_step, notes, signatureUrl]
+      [letter.id, approverId, letter.current_step, notes, finalSignatureUrl]
     );
 
     if (isCompleted) {

@@ -20,9 +20,9 @@ const fetchLetterDetail = async (uuid) => {
 function SignatureStatusCard({ letter }) {
   const workflowCode = letter?.workflow_code || 'RT_ONLY';
   
-  // Find signatures in approvals history
-  const rtApproval = letter?.approvals?.find(a => a.step === 1 && a.action === 'approved');
-  const rwApproval = letter?.approvals?.find(a => a.step === 2 && a.action === 'approved');
+  // Find signatures in approvals history — gunakan approver_role bukan step number
+  const rtApproval = letter?.approvals?.find(a => a.approver_role === 'rt' && a.action === 'approved');
+  const rwApproval = letter?.approvals?.find(a => a.approver_role === 'rw' && a.action === 'approved');
 
 
   // Tentukan tahap TTD berdasarkan workflow
@@ -246,7 +246,7 @@ export default function LetterDetailPage() {
   const signatures = letter.approvals
     ?.filter((a) => a.action === 'approved' && a.signature_url)
     .map((a) => ({
-      role: a.step === 1 ? 'Ketua RT' : 'Ketua RW',
+      role: a.approver_role === 'rt' ? 'Ketua RT' : 'Ketua RW',
       name: a.approver_name,
       url: a.signature_url,
     })) || [];

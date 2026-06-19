@@ -96,7 +96,8 @@ const LettersModel = {
     // Approval history
     const [approvals] = await db.query(
       `SELECT la.*, 
-              COALESCE(r.nama_ketua, rw.nama_ketua) AS approver_name
+              COALESCE(r.nama_ketua, rw.nama_ketua) AS approver_name,
+              CASE WHEN r.rt_id IS NOT NULL THEN 'rt' ELSE 'rw' END AS approver_role
        FROM letter_approvals la
        LEFT JOIN rt r ON la.approver_id = r.rt_id
        LEFT JOIN rw rw ON la.approver_id = rw.rw_id
