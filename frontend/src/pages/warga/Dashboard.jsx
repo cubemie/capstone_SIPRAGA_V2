@@ -59,6 +59,11 @@ export default function WargaDashboard() {
 
   return (
     <div className="p-4 md:p-0 space-y-6 w-full">
+      <div className="mb-2">
+        <h1 className="text-2xl font-bold text-[var(--color-ink)]">Dashboard Warga</h1>
+        <p className="text-sm text-[var(--color-ink-secondary)] mt-1">Layanan pengajuan surat pengantar</p>
+      </div>
+
       {/* Profile Warning Banner */}
       {missingFields.length > 0 && (
         <ProfileWarningBanner missingFields={missingFields} />

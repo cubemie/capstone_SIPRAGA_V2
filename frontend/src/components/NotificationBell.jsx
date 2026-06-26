@@ -59,16 +59,16 @@ export default function NotificationBell() {
         onClick={() => setOpen(!open)}
         className="relative p-2 rounded-lg text-ink-secondary hover:bg-surface-muted transition"
       >
-        <Bell className="w-5 h-5" />
+        <Bell className="w-7 h-7 text-[var(--color-ink)]" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-4 h-4 bg-[var(--color-danger)] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+          <span className="absolute top-1 right-1 w-5 h-5 bg-[var(--color-danger)] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-96 sm:w-[400px] bg-[var(--color-surface-card)] border border-surface-border rounded-xl shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 sm:right-[-10px] top-full mt-3 w-[90vw] sm:w-[400px] bg-[var(--color-surface-card)] border border-surface-border rounded-xl shadow-2xl z-[9999] overflow-hidden">
           {/* Header dropdown */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-surface-border">
             <p className="text-base font-semibold text-ink">Notifikasi</p>

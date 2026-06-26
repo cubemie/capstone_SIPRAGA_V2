@@ -40,29 +40,55 @@ class LettersController {
     try {
       console.log('--- createDraft triggered ---');
       console.log('req.user:', req.user);
-      console.log('req.body:', req.body);
       
       const { letter_type_id, workflow_option_id, subject, purpose, fields } = req.body;
-      
-      // The token payload might have `id` instead of `id_warga` depending on the auth implementation
-      const residentId = req.user?.id_warga || req.user?.id || req.user?.id_user;
-      
-      if (!residentId) {
-        throw new Error('Resident ID tidak ditemukan di dalam token JWT');
-      }
+      const userRole = req.user?.role;
+      const isRtOrRw = userRole === 'rt' || userRole === 'rw' || userRole === 'admin_rt' || userRole === 'admin_rw';
 
-      const [wargaRows] = await pool.query('SELECT rt, rw FROM warga WHERE id_warga = ?', [residentId]);
-      const warga = wargaRows[0];
+      let residentId;
       let tenantId = 'RW001';
 
-      if (warga?.rw) {
-        const rwVal = String(warga.rw).trim();
-        const rwCandidate = rwVal.startsWith('RW') ? rwVal : `RW${rwVal.padStart(3, '0')}`;
-        const [rwRows] = await pool.query(
-          `SELECT rw_id FROM rw WHERE rw_id = ? OR no_rw = ? OR rw_id = ? LIMIT 1`,
-          [rwVal, rwVal, rwCandidate]
-        );
-        tenantId = rwRows[0]?.rw_id || 'RW001';
+      if (isRtOrRw) {
+        // RT/RW membuat surat — tidak punya id_warga
+        // Gunakan null sebagai penanda "surat dibuat oleh RT/RW"
+        residentId = null;
+
+        // Ambil tenantId (rw_id) langsung dari JWT token
+        // Token RT/RW sudah berisi rw_id yang benar
+        tenantId = req.user?.rw_id || req.tenantId;
+
+        // Jika masih belum ada, query DB sebagai fallback
+        if (!tenantId) {
+          const approverId = req.user?.id;
+          const roleStr = (userRole === 'rt' || userRole === 'admin_rt') ? 'rt' : 'rw';
+          if (roleStr === 'rt') {
+            const [rtRows] = await pool.query('SELECT rw_id FROM rt WHERE rt_id = ? LIMIT 1', [approverId]);
+            tenantId = rtRows[0]?.rw_id || 'RW001';
+          } else {
+            const [rwRows] = await pool.query('SELECT rw_id FROM rw WHERE rw_id = ? LIMIT 1', [approverId]);
+            tenantId = rwRows[0]?.rw_id || 'RW001';
+          }
+        }
+
+      } else {
+        // Warga biasa
+        residentId = req.user?.id_warga || req.user?.id;
+        if (!residentId) {
+          throw new Error('Resident ID tidak ditemukan di dalam token JWT');
+        }
+
+        const [wargaRows] = await pool.query('SELECT rt, rw FROM warga WHERE id_warga = ?', [residentId]);
+        const warga = wargaRows[0];
+
+        if (warga?.rw) {
+          const rwVal = String(warga.rw).trim();
+          const rwCandidate = rwVal.startsWith('RW') ? rwVal : `RW${rwVal.padStart(3, '0')}`;
+          const [rwRows] = await pool.query(
+            `SELECT rw_id FROM rw WHERE rw_id = ? OR no_rw = ? OR rw_id = ? LIMIT 1`,
+            [rwVal, rwVal, rwCandidate]
+          );
+          tenantId = rwRows[0]?.rw_id || 'RW001';
+        }
       }
 
       const payload = {
@@ -83,6 +109,7 @@ class LettersController {
     }
   }
 
+
   static async getInbox(req, res) {
     try {
       const { role } = req.user;
@@ -97,7 +124,27 @@ class LettersController {
 
   static async getMyLetters(req, res) {
     try {
-      const residentId = req.user.id_warga;
+      const userRole = req.user?.role;
+      const isRtOrRw = userRole === 'rt' || userRole === 'rw' || userRole === 'admin_rt' || userRole === 'admin_rw';
+
+      if (isRtOrRw) {
+        // RT/RW: ambil surat yang mereka buat (resident_id IS NULL, tenant_id sesuai)
+        const tenantId = req.tenantId || req.user?.rw_id || req.user?.id;
+        const [letters] = await pool.query(
+          `SELECT l.*, lt.name AS letter_type_name, lwo.name AS workflow_name,
+                  (SELECT value FROM letter_field_values lfv WHERE lfv.letter_id = l.id AND lfv.field_key = '_pemohon_nama' LIMIT 1) AS resident_name,
+                  (SELECT value FROM letter_field_values lfv2 WHERE lfv2.letter_id = l.id AND lfv2.field_key = '_pemohon_nik' LIMIT 1) AS resident_nik
+           FROM letters l
+           JOIN letter_types lt ON l.letter_type_id = lt.id
+           JOIN letter_workflow_options lwo ON l.workflow_option_id = lwo.id
+           WHERE l.resident_id IS NULL AND l.tenant_id = ?
+           ORDER BY l.created_at DESC`,
+          [tenantId]
+        );
+        return res.json({ success: true, data: letters });
+      }
+
+      const residentId = req.user?.id_warga;
       const letters = await LettersService.getMyLetters(residentId);
       res.json({ success: true, data: letters });
     } catch (error) {
@@ -105,6 +152,7 @@ class LettersController {
       res.status(500).json({ success: false, message: "Gagal memuat surat" });
     }
   }
+
 
   static async getLetterDetail(req, res) {
     try {
@@ -275,7 +323,12 @@ class LettersController {
         return res.status(401).json({ success: false, message: 'Data user tidak valid' });
       }
 
-      await ApprovalsService.rejectLetter(uuid, role, notes || reason, approverId);
+      const finalNotes = (notes || reason || '').trim();
+      if (!finalNotes) {
+        return res.status(400).json({ success: false, message: 'Alasan penolakan wajib diisi' });
+      }
+
+      await ApprovalsService.rejectLetter(uuid, role, finalNotes, approverId);
       res.json({ success: true, message: 'Surat berhasil ditolak' });
     } catch (error) {
       console.error('Error rejectLetter:', error);

@@ -59,11 +59,18 @@ const LetterWizardPage = () => {
 
   // Create real-time preview data for the PDF
   const previewData = useMemo(() => {
+    const isRtOrRw = user?.role === 'rt' || user?.role === 'rw';
+    const pemohonNama = wizard.fieldValues?.['_pemohon_nama'];
+    const pemohonNik  = wizard.fieldValues?.['_pemohon_nik'];
     return {
       letter_type_name: wizard.selectedType?.name || 'Surat Pengantar',
       letter_number: '___/RT.___/RW.___/2026',
-      resident_name: user?.nama || 'Nama Lengkap Pemohon',
-      resident_nik: user?.nik || '3374xxxxxxxxxxxx',
+      resident_name: isRtOrRw
+        ? (pemohonNama || 'Nama Lengkap Pemohon')
+        : (user?.nama || 'Nama Lengkap Pemohon'),
+      resident_nik: isRtOrRw
+        ? (pemohonNik || '3374xxxxxxxxxxxx')
+        : (user?.nik || '3374xxxxxxxxxxxx'),
       purpose: wizard.letterContent?.purpose || '',
       dynamic_fields: wizard.fieldValues || {},
       approver_name: 'Ketua RT / RW',
@@ -72,6 +79,7 @@ const LetterWizardPage = () => {
       }),
     };
   }, [wizard.selectedType, wizard.letterContent, wizard.fieldValues, user]);
+
 
   const handleOpenConfirm = () => {
     if (!wizard.selectedType) return toast.error('Harap pilih jenis surat');
@@ -267,8 +275,12 @@ const LetterWizardPage = () => {
           subjek: wizard.letterContent?.subject,
           keperluan: wizard.letterContent?.purpose,
           jumlahLampiran: wizard.attachments?.length,
-          namaPemohon: user?.nama,
-          nik: user?.nik,
+          namaPemohon: (user?.role === 'rt' || user?.role === 'rw') 
+            ? (wizard.fieldValues?.['_pemohon_nama'] || 'Belum diisi') 
+            : user?.nama,
+          nik: (user?.role === 'rt' || user?.role === 'rw') 
+            ? (wizard.fieldValues?.['_pemohon_nik'] || '-') 
+            : user?.nik,
         }}
       />
 

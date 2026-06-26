@@ -81,4 +81,22 @@ app.use((req, res) => {
 // ─── Global Error Handler — HARUS PALING AKHIR ───────────────────────────────
 app.use(errorHandler);
 
+// --- Seed RW_ONLY workflow dynamically ---
+const pool = require('./config/db');
+(async () => {
+  try {
+    const [rows] = await pool.query("SELECT id FROM letter_workflow_options WHERE code = 'RW_ONLY'");
+    if (rows.length === 0) {
+      await pool.query(
+        "INSERT INTO letter_workflow_options (code, name, description, steps, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?)",
+        ['RW_ONLY', 'Kirim ke RW Saja', 'Pengajuan surat hanya akan dikirimkan ke Ketua RW untuk disetujui.', '["rw"]', 3, 1]
+      );
+      console.log("[Seeder] Inserted RW_ONLY workflow option");
+    }
+  } catch (err) {
+    console.error("[Seeder] Error inserting RW_ONLY workflow:", err.message);
+  }
+})();
+// -----------------------------------------
+
 module.exports = app;

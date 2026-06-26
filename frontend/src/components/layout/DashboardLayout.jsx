@@ -78,7 +78,7 @@ export default function DashboardLayout({ children }) {
 
   if (user?.role === 'warga') {
     menuItems = [
-      { path: '/warga/dashboard', label: 'Dashboard',    icon: LayoutDashboard },
+      { path: '/warga/dashboard', label: 'Dashboard Warga',    icon: LayoutDashboard },
       { path: '/profil',          label: 'Profil Saya',  icon: UserCircle },
       { path: '/warga/buat-surat-v2', label: 'Ajukan Surat Baru', icon: Send },
       { path: '/warga/riwayat',   label: 'Status & Riwayat', icon: History },
@@ -87,8 +87,9 @@ export default function DashboardLayout({ children }) {
     sidebarBg     = 'bg-[var(--color-primary)]';
     sidebarHover  = 'hover:bg-[var(--color-primary-light)]';
     sidebarActive = 'bg-[var(--color-accent)] text-[var(--color-primary)]';
-  } else if (user?.role === 'rt' || user?.role === 'rw') {
+  } else if (user?.role === 'rt' || user?.role === 'rw' || user?.role === 'admin_rt' || user?.role === 'admin_rw') {
     menuItems = [
+      { path: '/rtrw/dashboard', label: user?.role?.includes('rw') ? 'Dashboard RW' : 'Dashboard RT', icon: LayoutDashboard },
       { path: '/profil',         label: 'Profil Saya',          icon: UserCircle },
       { path: '/rtrw/inbox',     label: 'Tugas & Kotak Masuk', icon: Bell },
       { path: '/rtrw/buat-surat-v2', label: 'Buat Surat Pengantar', icon: FileText },
@@ -100,7 +101,7 @@ export default function DashboardLayout({ children }) {
     sidebarActive = 'bg-[var(--color-accent)] text-[var(--color-primary)]';
   } else if (user?.role === 'superadmin') {
     menuItems = [
-      { path: '/superadmin/dashboard',   label: 'Dashboard',           icon: LayoutDashboard },
+      { path: '/superadmin/dashboard',   label: 'Dashboard Superadmin',           icon: LayoutDashboard },
       { path: '/profil',                 label: 'Profil Saya',         icon: UserCircle },
       { path: '/superadmin/akun',        label: 'Manajemen Akun',      icon: User },
       { path: '/superadmin/template-md', label: 'Template Markdown',   icon: FileText },
@@ -113,7 +114,7 @@ export default function DashboardLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-surface)] flex font-sans text-[var(--color-ink)]">
+    <div className="h-screen overflow-hidden bg-white flex font-sans text-[var(--color-ink)]">
       {/* Sidebar Desktop */}
       <aside className={`w-64 ${sidebarBg} text-white flex-col hidden md:flex`}>
         <SidebarContent
@@ -180,9 +181,9 @@ export default function DashboardLayout({ children }) {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto bg-[var(--color-surface)] p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto bg-white p-4 md:p-6 lg:p-8">
           {children || <Outlet />}
-        </div>
+        </main>
       </div>
     </div>
   );

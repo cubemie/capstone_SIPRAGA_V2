@@ -44,18 +44,18 @@ router.post('/:uuid/reject',
   LettersController.rejectLetter
 );
 
-// ── Warga only routes ──────────────────────────────────────────────────────
-router.post('/drafts', verifyToken, LettersController.createDraft);
+// ── Warga + RT/RW routes (pembuatan surat) ────────────────────────────────
+router.post('/drafts', flexibleAuth, LettersController.createDraft);
 router.post('/:uuid/submit',
-  verifyToken,
+  flexibleAuth,
   createAuditLog('SUBMIT_LETTER', 'letter', (req) => req.params.uuid),
   LettersController.submitLetter
 );
-router.post('/:uuid/upload-pdf', verifyToken, upload.single('pdf'), LettersController.uploadPdfClient);
-router.post('/:uuid/attachments', verifyToken, upload.array('attachments', 10), LettersController.uploadAttachments);
+router.post('/:uuid/upload-pdf', flexibleAuth, upload.single('pdf'), LettersController.uploadPdfClient);
+router.post('/:uuid/attachments', flexibleAuth, upload.array('attachments', 10), LettersController.uploadAttachments);
 
 // ── Shared routes (warga + RT/RW) ──────────────────────────────────────────
-router.get('/', verifyToken, LettersController.getMyLetters);
+router.get('/', flexibleAuth, LettersController.getMyLetters);
 router.get('/:uuid', flexibleAuth, LettersController.getLetterDetail);
 router.get('/:uuid/preview-pdf', flexibleAuth, LettersController.getPreviewPdf);
 

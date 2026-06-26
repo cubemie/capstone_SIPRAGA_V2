@@ -57,12 +57,18 @@ const LettersModel = {
               lwo.name AS workflow_name,
               lwo.steps AS workflow_steps,
               lwo.code AS workflow_code,
-              w.nama   AS resident_name,
-              w.NIK    AS resident_nik
+              COALESCE(
+                w.nama,
+                (SELECT value FROM letter_field_values lfv2 JOIN letters l2 ON lfv2.letter_id=l2.id WHERE l2.uuid=l.uuid AND lfv2.field_key='_pemohon_nama' LIMIT 1)
+              ) AS resident_name,
+              COALESCE(
+                w.NIK,
+                (SELECT value FROM letter_field_values lfv3 JOIN letters l3 ON lfv3.letter_id=l3.id WHERE l3.uuid=l.uuid AND lfv3.field_key='_pemohon_nik' LIMIT 1)
+              ) AS resident_nik
        FROM letters l
        JOIN letter_types lt            ON l.letter_type_id     = lt.id
        JOIN letter_workflow_options lwo ON l.workflow_option_id = lwo.id
-       JOIN warga w                    ON l.resident_id         = w.id_warga
+       LEFT JOIN warga w               ON l.resident_id = w.id_warga AND l.resident_id IS NOT NULL
        WHERE l.uuid = ?`,
       [uuid]
     );
@@ -74,11 +80,18 @@ const LettersModel = {
       `SELECT l.*,
               lt.name AS letter_type_name,
               lwo.code AS workflow_code,
-              w.nama AS resident_name, w.NIK AS resident_nik,
+              COALESCE(
+                w.nama,
+                (SELECT value FROM letter_field_values lfv JOIN letters lx ON lfv.letter_id=lx.id WHERE lx.uuid=l.uuid AND lfv.field_key='_pemohon_nama' LIMIT 1)
+              ) AS resident_name,
+              COALESCE(
+                w.NIK,
+                (SELECT value FROM letter_field_values lfv2 JOIN letters lx2 ON lfv2.letter_id=lx2.id WHERE lx2.uuid=l.uuid AND lfv2.field_key='_pemohon_nik' LIMIT 1)
+              ) AS resident_nik,
               lwo.name AS workflow_name, lwo.steps AS workflow_steps
        FROM letters l
        JOIN letter_types lt ON l.letter_type_id = lt.id
-       JOIN warga w ON l.resident_id = w.id_warga
+       LEFT JOIN warga w ON l.resident_id = w.id_warga AND l.resident_id IS NOT NULL
        JOIN letter_workflow_options lwo ON l.workflow_option_id = lwo.id
        WHERE l.uuid = ?`,
       [uuid]
@@ -137,10 +150,10 @@ const LettersModel = {
     let whereClause;
     let params;
 
-    if (role === 'rt') {
+    if (role === 'rt' || role === 'admin_rt') {
       whereClause = `l.status IN ('submitted', 'in_review_rt') AND l.tenant_id = ?`;
       params = [tenantId];
-    } else if (role === 'rw') {
+    } else if (role === 'rw' || role === 'admin_rw') {
       whereClause = `l.status IN ('approved_rt', 'in_review_rw') AND l.tenant_id = ?`;
       params = [tenantId];
     } else {
@@ -150,11 +163,17 @@ const LettersModel = {
     const [rows] = await db.query(
       `SELECT l.uuid, l.status, l.subject, l.purpose, l.created_at,
               lt.name  AS letter_type_name,
-              w.nama   AS resident_name,
-              w.NIK    AS resident_nik
+              COALESCE(
+                w.nama,
+                (SELECT value FROM letter_field_values lfv WHERE lfv.letter_id = l.id AND lfv.field_key = '_pemohon_nama' LIMIT 1)
+              ) AS resident_name,
+              COALESCE(
+                w.NIK,
+                (SELECT value FROM letter_field_values lfv2 WHERE lfv2.letter_id = l.id AND lfv2.field_key = '_pemohon_nik' LIMIT 1)
+              ) AS resident_nik
        FROM letters l
        JOIN letter_types lt ON l.letter_type_id = lt.id
-       JOIN warga w         ON l.resident_id     = w.id_warga
+       LEFT JOIN warga w    ON l.resident_id = w.id_warga AND l.resident_id IS NOT NULL
        WHERE ${whereClause}
        ORDER BY l.created_at DESC`,
       params
@@ -185,12 +204,18 @@ const LettersModel = {
               lwo.name AS workflow_name,
               lwo.steps AS workflow_steps,
               lwo.code AS workflow_code,
-              w.nama   AS resident_name,
-              w.NIK    AS resident_nik
+              COALESCE(
+                w.nama,
+                (SELECT value FROM letter_field_values lfv WHERE lfv.letter_id = l.id AND lfv.field_key = '_pemohon_nama' LIMIT 1)
+              ) AS resident_name,
+              COALESCE(
+                w.NIK,
+                (SELECT value FROM letter_field_values lfv2 WHERE lfv2.letter_id = l.id AND lfv2.field_key = '_pemohon_nik' LIMIT 1)
+              ) AS resident_nik
        FROM letters l
        JOIN letter_types lt            ON l.letter_type_id     = lt.id
        JOIN letter_workflow_options lwo ON l.workflow_option_id = lwo.id
-       JOIN warga w                    ON l.resident_id         = w.id_warga
+       LEFT JOIN warga w               ON l.resident_id = w.id_warga AND l.resident_id IS NOT NULL
        WHERE l.id = ?`,
       [id]
     );
