@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { getLettersV2 } from '../../../services/suratService';
+import { lettersService } from '../../../services/lettersService';
 import { LETTER_STATUS_V2 } from '../../../constants/suratStatus';
 import { useAuth } from '../../../context/AuthContext';
 
@@ -22,8 +22,9 @@ export default function LetterListPage() {
   const newLetterPath = user?.role === 'warga' ? '/warga/buat-surat-v2' : '/rtrw/buat-surat-v2';
 
   const { data: letters = [], isLoading } = useQuery({
-    queryKey: ['letters-v2'],
-    queryFn: getLettersV2,
+    queryKey: ['my-v2-letters'],
+    queryFn: lettersService.getMyLetters,
+    staleTime: 60 * 1000, // sinkron cache dengan warga Dashboard
   });
 
   const filtered = letters.filter((l) => {
@@ -35,7 +36,7 @@ export default function LetterListPage() {
   });
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="w-full">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[var(--color-ink)]">Surat Saya</h1>
         <Link

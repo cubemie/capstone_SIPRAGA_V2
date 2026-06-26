@@ -4,7 +4,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../utils/api';
-import DashboardLayout from '../../components/layout/DashboardLayout';
 import {
   Users, MapPin, FileText, Building2,
   ChevronRight, ArrowLeft, BarChart3, UserCheck,
@@ -176,8 +175,7 @@ export default function SuperadminDashboard() {
   });
 
   return (
-    <DashboardLayout>
-      <div className="max-w-6xl mx-auto">
+    <div className="w-full">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-ink">Dashboard Superadmin</h1>
           <p className="text-sm text-ink-secondary mt-0.5">Ringkasan data seluruh wilayah</p>
@@ -248,7 +246,6 @@ export default function SuperadminDashboard() {
             </div>
           </>
         )}
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

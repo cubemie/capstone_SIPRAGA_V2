@@ -3,10 +3,31 @@ import { UploadCloud, FileText, X, File as FileIcon } from 'lucide-react';
 
 const Step4Attachments = ({ wizard }) => {
   const [previewFile, setPreviewFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
     wizard.setAttachments(prev => [...prev, ...files]);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const files = Array.from(e.dataTransfer.files);
+      wizard.setAttachments(prev => [...prev, ...files]);
+    }
   };
 
   const removeAttachment = (e, index) => {
@@ -48,8 +69,17 @@ const Step4Attachments = ({ wizard }) => {
         </div>
       )}
 
-      <div className="border-2 border-dashed border-[var(--color-surface-border)] rounded-xl p-6 sm:p-8 text-center hover:bg-[var(--color-surface-muted)] transition-colors">
-        <UploadCloud className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-[var(--color-ink-muted)]" />
+      <div 
+        className={`border-2 border-dashed rounded-xl p-6 sm:p-8 text-center transition-colors ${
+          isDragging 
+            ? 'border-[var(--color-primary)] bg-[var(--color-brand-50)]' 
+            : 'border-[var(--color-surface-border)] hover:bg-[var(--color-surface-muted)]'
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <UploadCloud className={`mx-auto h-10 w-10 sm:h-12 sm:w-12 ${isDragging ? 'text-[var(--color-primary)]' : 'text-[var(--color-ink-muted)]'}`} />
         <div className="mt-4 flex flex-col sm:flex-row text-sm justify-center items-center text-[var(--color-ink-secondary)] gap-1">
           <label htmlFor="file-upload" className="relative cursor-pointer bg-transparent rounded-md font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] focus-within:outline-none">
             <span>Pilih file</span>

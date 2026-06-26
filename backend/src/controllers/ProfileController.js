@@ -50,7 +50,8 @@ function getProfileConfig(user) {
 function pickAllowedFields(source, fieldNames) {
   return fieldNames.reduce((acc, field) => {
     if (Object.prototype.hasOwnProperty.call(source, field) && source[field] !== undefined) {
-      acc[field] = source[field];
+      // Konversi string kosong menjadi null untuk menghindari error MySQL (terutama pada kolom ENUM dan DATE)
+      acc[field] = source[field] === '' ? null : source[field];
     }
     return acc;
   }, {});
@@ -186,7 +187,7 @@ const updateProfile = async (req, res) => {
       ]);
 
       if (avatarUrl) {
-        baseUpdates.avatar = avatarUrl;
+        extraUpdates.avatar_url = avatarUrl;
       }
     } else if (config.role === 'rt' || config.role === 'rw') {
       baseUpdates = pickAllowedFields(body, [

@@ -2,6 +2,7 @@ const express = require('express');
 const LettersController = require('./letters.controller');
 const { verifyToken } = require('../../middlewares/authMiddleware');
 const authRtRwMiddleware = require('../../middlewares/authRtRwMiddleware');
+const { createAuditLog } = require('../../middlewares/auditLogger');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 
@@ -32,12 +33,24 @@ router.get('/verify/:qrToken', LettersController.verifyByQrToken);
 
 // ── RT/RW only routes ──────────────────────────────────────────────────────
 router.get('/inbox', authRtRwMiddleware, LettersController.getInbox);
-router.post('/:uuid/approve', authRtRwMiddleware, LettersController.approveLetter);
-router.post('/:uuid/reject', authRtRwMiddleware, LettersController.rejectLetter);
+router.post('/:uuid/approve',
+  authRtRwMiddleware,
+  createAuditLog('APPROVE_LETTER', 'letter', (req) => req.params.uuid),
+  LettersController.approveLetter
+);
+router.post('/:uuid/reject',
+  authRtRwMiddleware,
+  createAuditLog('REJECT_LETTER', 'letter', (req) => req.params.uuid),
+  LettersController.rejectLetter
+);
 
 // ── Warga only routes ──────────────────────────────────────────────────────
 router.post('/drafts', verifyToken, LettersController.createDraft);
-router.post('/:uuid/submit', verifyToken, LettersController.submitLetter);
+router.post('/:uuid/submit',
+  verifyToken,
+  createAuditLog('SUBMIT_LETTER', 'letter', (req) => req.params.uuid),
+  LettersController.submitLetter
+);
 router.post('/:uuid/upload-pdf', verifyToken, upload.single('pdf'), LettersController.uploadPdfClient);
 router.post('/:uuid/attachments', verifyToken, upload.array('attachments', 10), LettersController.uploadAttachments);
 

@@ -22,6 +22,9 @@ const STATUS_TRANSITIONS = {
     rt: { from: ['submitted', 'in_review_rt'], to: 'approved_rt' },
     rw: { from: ['approved_rt', 'in_review_rw'], to: 'completed' },
   },
+  RW_ONLY: {
+    rw: { from: ['submitted', 'in_review_rw'], to: 'completed' },
+  },
 };
 
 async function generateLetterNumber(letterTypeCode, tenantId) {

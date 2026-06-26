@@ -34,7 +34,7 @@ export default function LetterInboxPage() {
   });
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="w-full">
       <h1 className="text-2xl font-bold text-[var(--color-ink)] mb-6">Inbox Surat Masuk</h1>
 
       {error && (

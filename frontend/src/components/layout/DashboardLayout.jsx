@@ -36,11 +36,11 @@ function SidebarContent({
               key={item.path}
               to={item.path}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition text-sm ${
+              className={`flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition text-base ${
                 isActive ? sidebarActive + ' shadow-sm' : 'text-white/80 ' + sidebarHover + ' hover:text-white'
               }`}
             >
-              <Icon className="w-4.5 h-4.5 shrink-0" />
+              <Icon className="w-5 h-5 shrink-0" />
               <span>{item.label}</span>
             </Link>
           );
@@ -49,9 +49,9 @@ function SidebarContent({
       <div className="p-4 border-t border-white/10">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl font-medium transition text-slate-400 hover:bg-red-800/60 hover:text-white text-sm"
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition text-slate-400 hover:bg-red-800/60 hover:text-white text-base"
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-5 h-5" />
           <span>Keluar</span>
         </button>
       </div>
@@ -82,7 +82,7 @@ export default function DashboardLayout({ children }) {
       { path: '/profil',          label: 'Profil Saya',  icon: UserCircle },
       { path: '/warga/buat-surat-v2', label: 'Ajukan Surat Baru', icon: Send },
       { path: '/warga/riwayat',   label: 'Status & Riwayat', icon: History },
-      { path: '/warga/inbox',     label: 'Kotak Masuk', icon: Bell },
+
     ];
     sidebarBg     = 'bg-[var(--color-primary)]';
     sidebarHover  = 'hover:bg-[var(--color-primary-light)]';
@@ -149,7 +149,7 @@ export default function DashboardLayout({ children }) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Header */}
-        <header className="bg-[var(--color-surface-card)] border-b border-[var(--color-surface-border)] px-4 md:px-6 py-4 flex justify-between items-center shadow-sm z-10">
+        <header className="relative bg-[var(--color-surface-card)] border-b border-[var(--color-surface-border)] px-4 md:px-6 py-4 flex justify-between items-center shadow-sm z-50">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
@@ -180,7 +180,7 @@ export default function DashboardLayout({ children }) {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto bg-[var(--color-surface)]">
+        <div className="flex-1 overflow-y-auto bg-[var(--color-surface)] p-4 sm:p-6 lg:p-8">
           {children || <Outlet />}
         </div>
       </div>

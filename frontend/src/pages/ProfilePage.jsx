@@ -31,21 +31,21 @@ function buildSections(role) {
         title: 'Data Registrasi',
         icon: User,
         fields: [
-          { name: 'nama', label: 'Nama Lengkap', type: 'text', editable: true },
+          { name: 'nama', label: 'Nama Lengkap', type: 'text', editable: true, required: true },
           { name: 'NIK', label: 'NIK', type: 'text', editable: false },
           { name: 'email', label: 'Email', type: 'email', editable: true },
-          { name: 'no_hp', label: 'Nomor HP', type: 'text', editable: true },
+          { name: 'no_hp', label: 'Nomor HP', type: 'text', editable: true, required: true },
         ],
       },
       {
         title: 'Data Pribadi',
         icon: FileText,
         fields: [
-          { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', editable: true },
-          { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', editable: true },
-          { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true, options: GENDER_OPTIONS },
-          { name: 'agama', label: 'Agama', type: 'select', editable: true, options: RELIGION_OPTIONS },
-          { name: 'status_perkawinan', label: 'Status Perkawinan', type: 'select', editable: true, options: MARITAL_STATUS_OPTIONS },
+          { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', editable: true, required: true },
+          { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', editable: true, required: true },
+          { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true, options: GENDER_OPTIONS, required: true },
+          { name: 'agama', label: 'Agama', type: 'select', editable: true, options: RELIGION_OPTIONS, required: true },
+          { name: 'status_perkawinan', label: 'Status Perkawinan', type: 'select', editable: true, options: MARITAL_STATUS_OPTIONS, required: true },
           { name: 'pekerjaan', label: 'Pekerjaan', type: 'text', editable: true },
         ],
       },
@@ -53,13 +53,13 @@ function buildSections(role) {
         title: 'Alamat',
         icon: MapPin,
         fields: [
-          { name: 'alamat', label: 'Alamat Lengkap', type: 'textarea', editable: true },
+          { name: 'alamat', label: 'Alamat Lengkap', type: 'textarea', editable: true, required: true },
           { name: 'rt', label: 'RT', type: 'text', editable: false },
           { name: 'rw', label: 'RW', type: 'text', editable: false },
-          { name: 'kelurahan_desa', label: 'Kelurahan/Desa', type: 'text', editable: true },
-          { name: 'kecamatan', label: 'Kecamatan', type: 'text', editable: true },
-          { name: 'kota', label: 'Kota/Kabupaten', type: 'text', editable: true },
-          { name: 'provinsi', label: 'Provinsi', type: 'text', editable: true },
+          { name: 'kelurahan_desa', label: 'Kelurahan/Desa', type: 'text', editable: true, required: true },
+          { name: 'kecamatan', label: 'Kecamatan', type: 'text', editable: true, required: true },
+          { name: 'kota', label: 'Kota/Kabupaten', type: 'text', editable: true, required: true },
+          { name: 'provinsi', label: 'Provinsi', type: 'text', editable: true, required: true },
         ],
       },
     ];
@@ -71,7 +71,7 @@ function buildSections(role) {
         title: 'Akun RT',
         icon: Shield,
         fields: [
-          { name: 'nama_ketua', label: 'Nama Ketua RT', type: 'text', editable: true },
+          { name: 'nama_ketua', label: 'Nama Ketua RT', type: 'text', editable: true, required: true },
           { name: 'username', label: 'Username', type: 'text', editable: false },
           { name: 'no_rt', label: 'Nomor RT', type: 'text', editable: false },
           { name: 'rw_id', label: 'ID RW Induk', type: 'text', editable: false },
@@ -82,27 +82,27 @@ function buildSections(role) {
         icon: Phone,
         fields: [
           { name: 'email', label: 'Email', type: 'email', editable: true },
-          { name: 'no_hp', label: 'Nomor HP', type: 'text', editable: true },
-          { name: 'alamat', label: 'Alamat Lengkap', type: 'textarea', editable: true },
+          { name: 'no_hp', label: 'Nomor HP', type: 'text', editable: true, required: true },
+          { name: 'alamat', label: 'Alamat Lengkap', type: 'textarea', editable: true, required: true },
         ],
       },
       {
         title: 'Wilayah',
         icon: MapPin,
         fields: [
-          { name: 'kelurahan_desa', label: 'Kelurahan/Desa', type: 'text', editable: true },
-          { name: 'kecamatan', label: 'Kecamatan', type: 'text', editable: true },
-          { name: 'kota', label: 'Kota/Kabupaten', type: 'text', editable: true },
-          { name: 'provinsi', label: 'Provinsi', type: 'text', editable: true },
+          { name: 'kelurahan_desa', label: 'Kelurahan/Desa', type: 'text', editable: true, required: true },
+          { name: 'kecamatan', label: 'Kecamatan', type: 'text', editable: true, required: true },
+          { name: 'kota', label: 'Kota/Kabupaten', type: 'text', editable: true, required: true },
+          { name: 'provinsi', label: 'Provinsi', type: 'text', editable: true, required: true },
         ],
       },
       {
         title: 'Data Tambahan',
         icon: User,
         fields: [
-          { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', editable: true },
-          { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', editable: true },
-          { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true, options: GENDER_OPTIONS },
+          { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', editable: true, required: true },
+          { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', editable: true, required: true },
+          { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true, options: GENDER_OPTIONS, required: true },
         ],
       },
     ];
@@ -114,7 +114,7 @@ function buildSections(role) {
         title: 'Akun RW',
         icon: Shield,
         fields: [
-          { name: 'nama_ketua', label: 'Nama Ketua RW', type: 'text', editable: true },
+          { name: 'nama_ketua', label: 'Nama Ketua RW', type: 'text', editable: true, required: true },
           { name: 'username', label: 'Username', type: 'text', editable: false },
           { name: 'rw_id', label: 'ID RW', type: 'text', editable: false },
           { name: 'no_rw', label: 'Nomor RW', type: 'text', editable: false },
@@ -125,27 +125,27 @@ function buildSections(role) {
         icon: Phone,
         fields: [
           { name: 'email', label: 'Email', type: 'email', editable: true },
-          { name: 'no_hp', label: 'Nomor HP', type: 'text', editable: true },
-          { name: 'alamat', label: 'Alamat Lengkap', type: 'textarea', editable: true },
+          { name: 'no_hp', label: 'Nomor HP', type: 'text', editable: true, required: true },
+          { name: 'alamat', label: 'Alamat Lengkap', type: 'textarea', editable: true, required: true },
         ],
       },
       {
         title: 'Wilayah',
         icon: MapPin,
         fields: [
-          { name: 'kelurahan_desa', label: 'Kelurahan/Desa', type: 'text', editable: true },
-          { name: 'kecamatan', label: 'Kecamatan', type: 'text', editable: true },
-          { name: 'kota', label: 'Kota/Kabupaten', type: 'text', editable: true },
-          { name: 'provinsi', label: 'Provinsi', type: 'text', editable: true },
+          { name: 'kelurahan_desa', label: 'Kelurahan/Desa', type: 'text', editable: true, required: true },
+          { name: 'kecamatan', label: 'Kecamatan', type: 'text', editable: true, required: true },
+          { name: 'kota', label: 'Kota/Kabupaten', type: 'text', editable: true, required: true },
+          { name: 'provinsi', label: 'Provinsi', type: 'text', editable: true, required: true },
         ],
       },
       {
         title: 'Data Tambahan',
         icon: User,
         fields: [
-          { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', editable: true },
-          { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', editable: true },
-          { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true, options: GENDER_OPTIONS },
+          { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', editable: true, required: true },
+          { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', editable: true, required: true },
+          { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true, options: GENDER_OPTIONS, required: true },
         ],
       },
     ];
@@ -157,19 +157,19 @@ function buildSections(role) {
       icon: Shield,
       fields: [
         { name: 'username', label: 'Username', type: 'text', editable: false },
-        { name: 'nama_lengkap', label: 'Nama Lengkap', type: 'text', editable: true },
+        { name: 'nama_lengkap', label: 'Nama Lengkap', type: 'text', editable: true, required: true },
         { name: 'email', label: 'Email', type: 'email', editable: true },
-        { name: 'no_hp', label: 'Nomor HP', type: 'text', editable: true },
+        { name: 'no_hp', label: 'Nomor HP', type: 'text', editable: true, required: true },
       ],
     },
     {
       title: 'Data Tambahan',
       icon: MapPin,
       fields: [
-        { name: 'alamat', label: 'Alamat Lengkap', type: 'textarea', editable: true },
-        { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', editable: true },
-        { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', editable: true },
-        { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true, options: GENDER_OPTIONS },
+        { name: 'alamat', label: 'Alamat Lengkap', type: 'textarea', editable: true, required: true },
+        { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', editable: true, required: true },
+        { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', editable: true, required: true },
+        { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', editable: true, options: GENDER_OPTIONS, required: true },
       ],
     },
   ];
@@ -210,6 +210,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({});
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState('');
+  const [errors, setErrors] = useState({});
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile'],
@@ -231,6 +232,7 @@ export default function ProfilePage() {
     setAvatarPreview(profile.avatar_url || '');
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setAvatarFile(null);
+    setErrors({});
   }, [profile]);
 
   const mutation = useMutation({
@@ -254,6 +256,7 @@ export default function ProfilePage() {
       queryClient.invalidateQueries({ queryKey: ['profile'] });
       setIsEditing(false);
       setAvatarFile(null);
+      setErrors({});
     },
     onError: (error) => {
       toast.error(error.message || 'Gagal memperbarui profil');
@@ -262,6 +265,9 @@ export default function ProfilePage() {
 
   const handleChange = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: null }));
+    }
   };
 
   const handleAvatarChange = (event) => {
@@ -289,15 +295,34 @@ export default function ProfilePage() {
     }
     setAvatarFile(null);
     setIsEditing(false);
+    setErrors({});
   };
 
   const handleSave = () => {
+    const newErrors = {};
+    let hasError = false;
+
+    sections.forEach((section) => {
+      section.fields.forEach((field) => {
+        if (field.required && (!formData[field.name] || formData[field.name].toString().trim() === '')) {
+          newErrors[field.name] = `${field.label} wajib diisi`;
+          hasError = true;
+        }
+      });
+    });
+
+    if (hasError) {
+      setErrors(newErrors);
+      toast.error('Harap lengkapi semua field yang wajib diisi (*)');
+      return;
+    }
+
     mutation.mutate({ values: formData, file: avatarFile });
   };
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-4xl space-y-4">
+      <div className="w-full space-y-4">
         {[1, 2, 3].map((item) => (
           <div key={item} className="h-40 animate-pulse rounded-xl bg-surface-muted" />
         ))}
@@ -306,7 +331,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="w-full">
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-xl font-bold text-ink">Profil Saya</h1>
@@ -412,6 +437,7 @@ export default function ProfilePage() {
                   <div key={field.name} className={wrapperClass}>
                     <label className="mb-1 block text-xs font-medium text-ink-secondary">
                       {field.label}
+                      {field.required && <span className="ml-0.5 text-red-500">*</span>}
                       {!field.editable && (
                         <span className="ml-1 font-normal text-ink-muted">(tetap)</span>
                       )}
@@ -426,6 +452,8 @@ export default function ProfilePage() {
                         className={`w-full resize-none rounded-lg border px-3 py-2 text-sm transition ${
                           disabled
                             ? 'border-surface-border bg-surface-muted text-ink-secondary'
+                            : errors[field.name]
+                            ? 'border-red-500 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
                             : 'border-surface-border bg-[var(--color-surface-card)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-500'
                         }`}
                       />
@@ -437,6 +465,8 @@ export default function ProfilePage() {
                         className={`w-full rounded-lg border px-3 py-2 text-sm transition ${
                           disabled
                             ? 'border-surface-border bg-surface-muted text-ink-secondary'
+                            : errors[field.name]
+                            ? 'border-red-500 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
                             : 'border-surface-border bg-[var(--color-surface-card)] focus:outline-none focus:ring-2 focus:ring-brand-500'
                         }`}
                       >
@@ -456,9 +486,14 @@ export default function ProfilePage() {
                         className={`w-full rounded-lg border px-3 py-2 text-sm transition ${
                           disabled
                             ? 'border-surface-border bg-surface-muted text-ink-secondary'
+                            : errors[field.name]
+                            ? 'border-red-500 bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500'
                             : 'border-surface-border bg-[var(--color-surface-card)] focus:border-transparent focus:outline-none focus:ring-2 focus:ring-brand-500'
                         }`}
                       />
+                    )}
+                    {errors[field.name] && (
+                      <p className="mt-1 text-xs text-red-500">{errors[field.name]}</p>
                     )}
                   </div>
                 );

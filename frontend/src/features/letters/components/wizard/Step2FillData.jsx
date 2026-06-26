@@ -1,12 +1,15 @@
 import DynamicField from '../shared/DynamicField';
 
 const validateField = (key, value) => {
-  if (key.toLowerCase().includes('nik')) {
+  const keyLower = key.toLowerCase();
+  const parts = keyLower.split('_');
+  
+  if (parts.includes('nik')) {
     if (value && !/^\d{16}$/.test(value)) {
       return 'NIK harus tepat 16 digit angka';
     }
   }
-  if (key.toLowerCase().includes('no_hp') || key.toLowerCase().includes('no_telp')) {
+  if (parts.includes('hp') || parts.includes('telp') || keyLower.includes('no_hp') || keyLower.includes('no_telp')) {
     if (value && !/^(\+62|08)\d{8,12}$/.test(value)) {
       return 'Format nomor HP tidak valid (contoh: 081234567890)';
     }

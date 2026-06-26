@@ -14,6 +14,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         richColors
         closeButton
         duration={4000}
+        toastOptions={{
+          style: { fontSize: '1rem', padding: '16px 20px' }
+        }}
       />
       <App />
     </QueryClientProvider>

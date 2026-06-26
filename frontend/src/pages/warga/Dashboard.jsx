@@ -38,9 +38,9 @@ export default function WargaDashboard() {
     retry: false
   });
 
-  const pending  = suratList.filter(s => s.status === 'submitted' || s.status === 'in_review_rt' || s.status === 'in_review_rw').length;
+  const pending  = suratList.filter(s => ['submitted', 'in_review_rt', 'approved_rt', 'in_review_rw'].includes(s.status)).length;
   const approved = suratList.filter(s => s.status === 'completed').length;
-  const rejected = suratList.filter(s => s.status === 'rejected').length;
+  const rejected = suratList.filter(s => ['rejected', 'cancelled'].includes(s.status)).length;
   const recentSurat = suratList.slice(0, 3);
 
   const getStatusBadge = (status) => {
@@ -48,15 +48,17 @@ export default function WargaDashboard() {
       case 'draft': return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-[var(--color-surface-muted)] text-[var(--color-ink)]">Draft</span>;
       case 'submitted':
       case 'in_review_rt':
-      case 'in_review_rw': return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-[var(--color-brand-50)] text-[var(--color-primary)]">Diproses</span>;
+      case 'approved_rt':
+      case 'in_review_rw': return <span className="text-xs px-2.5 py-1 rounded-full font-bold border border-amber-200 bg-amber-50 text-amber-700">Diproses</span>;
       case 'completed': return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-emerald-50 text-emerald-700">Selesai</span>;
-      case 'rejected': return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-rose-50 text-rose-700">Ditolak</span>;
+      case 'rejected':
+      case 'cancelled': return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-rose-50 text-rose-700">Ditolak</span>;
       default: return <span className="text-xs px-2.5 py-1 rounded-full font-bold border bg-[var(--color-surface-muted)] text-[var(--color-ink)]">{status}</span>;
     }
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto w-full">
+    <div className="p-4 md:p-0 space-y-6 w-full">
       {/* Profile Warning Banner */}
       {missingFields.length > 0 && (
         <ProfileWarningBanner missingFields={missingFields} />
@@ -82,7 +84,7 @@ export default function WargaDashboard() {
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: 'Sedang Diproses', value: pending,  icon: Clock,        bg: 'bg-[var(--color-brand-50)]',   color: 'text-[var(--color-primary)]' },
+          { label: 'Sedang Diproses', value: pending,  icon: Clock,        bg: 'bg-amber-50',   color: 'text-amber-700' },
           { label: 'Selesai / Disetujui',  value: approved, icon: CheckCircle2, bg: 'bg-emerald-50', color: 'text-emerald-600' },
           { label: 'Pengajuan Ditolak',    value: rejected, icon: XCircle,      bg: 'bg-rose-50',    color: 'text-rose-600' },
         ].map(({ label, value, icon: Icon, bg, color }) => (

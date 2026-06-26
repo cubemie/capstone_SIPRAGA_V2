@@ -79,14 +79,14 @@ const Step5PickWorkflow = ({ wizard }) => {
 
                   {/* Visual Workflow Steps */}
                   <div className="mt-4 flex items-center gap-2 flex-wrap">
-                    <div className="flex items-center text-xs font-medium text-[var(--color-ink-secondary)] bg-[var(--color-surface-card)] border border-[var(--color-surface-border)] px-2.5 py-1 rounded-md shadow-sm">
+                    <div className="flex items-center text-sm font-medium text-[var(--color-ink-secondary)] bg-[var(--color-surface-card)] border border-[var(--color-surface-border)] px-3 py-1.5 rounded-md shadow-sm">
                       Warga
                     </div>
 
                     {workflow.parsedSteps.map((step, idx) => (
                       <React.Fragment key={idx}>
                         <ChevronRight className="w-4 h-4 text-[var(--color-ink-muted)]" />
-                        <div className={`flex items-center text-xs font-medium px-2.5 py-1 rounded-md shadow-sm ${
+                        <div className={`flex items-center text-sm font-medium px-3 py-1.5 rounded-md shadow-sm ${
                           active ? 'bg-[var(--color-primary)] text-white border border-[var(--color-primary-dark)]' : 'bg-[var(--color-surface-card)] text-[var(--color-ink-secondary)] border border-[var(--color-surface-border)]'
                         }`}>
                           {step.label}

@@ -12,10 +12,10 @@
   --color-accent-dark:    #E5A23F;
   --color-accent-light:   #FFD699;
 
-  --color-surface:        #F7F1DE; /* warm neutral - background app */
+  --color-surface:        #F8FAFC; /* clean white/light slate - background app */
   --color-surface-card:   #FFFFFF;
-  --color-surface-muted:  #F4F1EC;
-  --color-surface-border: #DDD6CC;
+  --color-surface-muted:  #F1F5F9; /* slate-100 */
+  --color-surface-border: #E2E8F0; /* slate-200 */
 
   --color-danger:         #D51C39; /* merah - tolak, hapus, error */
   --color-danger-dark:    #B0152E;
@@ -44,6 +44,10 @@
 }
 
 @layer base {
+  html {
+    font-size: 17px; /* Perbesar base font size dari default 16px menjadi 17px agar font lebih besar sedikit */
+  }
+
   body {
     @apply bg-[var(--color-surface)] text-[var(--color-ink)] font-sans antialiased;
   }

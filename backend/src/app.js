@@ -11,14 +11,11 @@ const app = express();
 
 // ─── Import Routes ────────────────────────────────────────────────────────────
 const lettersRoutes = require('./modules/letters/letters.routes');
-const publicRoutes  = require('./modules/public/public.routes');
 const authRoutes          = require('./routes/authRoutes');
-const suratRoutes         = require('./routes/suratRoutes');
 const wargaRoutes         = require('./routes/wargaRoutes');
 const authRtRwRoutes      = require('./routes/authRtRwRoutes');
 const dashboardRtRwRoutes = require('./routes/dashboardRtRwRoutes');
 const superadminRoutes    = require('./routes/superAdminRoutes');
-const templateSuratRoutes = require('./routes/templateSuratRoutes');
 const ttdRtRwRoutes       = require('./routes/ttdRtRwRoutes');
 const notificationRoutes  = require('./routes/notificationRoutes');
 
@@ -62,16 +59,13 @@ app.get('/health', (req, res) => {
 
 app.use('/api/auth',           authRoutes);
 app.use('/api/auth',           authRtRwRoutes);     // alias mundur /api/auth/login-rt-rw
-app.use('/api/surat',          suratRoutes);
 app.use('/api/warga',          wargaRoutes);
 app.use('/api/ttd',            ttdRtRwRoutes);
 app.use('/api',                dashboardRtRwRoutes);
 app.use('/api/superadmin',     superadminRoutes);
-app.use('/api/template-surat', templateSuratRoutes);
 
 // V2 Route
 app.use('/api/v2/letters', lettersRoutes);
-app.use('/api/v2/public', publicRoutes);
 
 app.use('/api/notifications', notificationRoutes);
 

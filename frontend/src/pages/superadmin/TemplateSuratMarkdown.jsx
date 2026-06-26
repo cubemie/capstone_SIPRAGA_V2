@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api } from '../../utils/api';
-import DashboardLayout from '../../components/layout/DashboardLayout';
 import { Plus, Eye, Trash2, Edit3, Save } from 'lucide-react';
 
 // Panduan variabel Mustache yang tersedia
@@ -240,8 +239,7 @@ export default function TemplateSuratMarkdown() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="max-w-5xl mx-auto">
+    <div className="w-full">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-xl font-bold text-ink">Template Surat (Markdown)</h1>
@@ -336,7 +334,6 @@ export default function TemplateSuratMarkdown() {
             ))}
           </div>
         )}
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

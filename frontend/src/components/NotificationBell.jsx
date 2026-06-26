@@ -68,15 +68,15 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-[var(--color-surface-card)] border border-surface-border rounded-xl shadow-xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-full mt-2 w-96 sm:w-[400px] bg-[var(--color-surface-card)] border border-surface-border rounded-xl shadow-xl z-50 overflow-hidden">
           {/* Header dropdown */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-surface-border">
-            <p className="text-sm font-semibold text-ink">Notifikasi</p>
+            <p className="text-base font-semibold text-ink">Notifikasi</p>
             <div className="flex items-center gap-2">
               {unreadCount > 0 && (
                 <button
                   onClick={() => markAllMutation.mutate()}
-                  className="text-xs text-brand-500 hover:text-brand-700"
+                  className="text-sm text-brand-500 hover:text-brand-700"
                 >
                   Tandai semua dibaca
                 </button>
@@ -88,7 +88,7 @@ export default function NotificationBell() {
           </div>
 
           {/* List notif */}
-          <div className="max-h-80 overflow-y-auto divide-y divide-surface-border">
+          <div className="max-h-[400px] overflow-y-auto divide-y divide-surface-border">
             {notifications.length === 0 ? (
               <div className="py-8 text-center text-ink-muted">
                 <Bell className="w-8 h-8 mx-auto mb-2 text-slate-200" />
@@ -109,12 +109,12 @@ export default function NotificationBell() {
                 >
                   {(() => {
                     const Icon = TYPE_ICONS[notif.type] || Bell;
-                    return <Icon className="w-4.5 h-4.5 mt-0.5 flex-shrink-0 text-brand-600" />;
+                    return <Icon className="w-5 h-5 mt-0.5 flex-shrink-0 text-brand-600" />;
                   })()}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-ink truncate">{notif.title}</p>
-                    <p className="text-xs text-ink-secondary mt-0.5 line-clamp-2">{notif.message}</p>
-                    <p className="text-xs text-ink-muted mt-1">
+                    <p className="text-base font-medium text-ink truncate">{notif.title}</p>
+                    <p className="text-sm text-ink-secondary mt-0.5 line-clamp-2">{notif.message}</p>
+                    <p className="text-sm text-ink-muted mt-1">
                       {new Date(notif.created_at).toLocaleString('id-ID', {
                         day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
                       })}

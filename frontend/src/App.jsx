@@ -59,7 +59,7 @@ export default function App() {
               <Route path="/warga/buat-surat-v2"  element={sa(['warga'], <LetterWizardPage />)} />
               <Route path="/warga/surat/:uuid"    element={sa(['warga'], <LetterDetailPage />)} />
               <Route path="/warga/riwayat"        element={sa(['warga'], <LetterListPage />)} />
-              <Route path="/warga/inbox"          element={sa(['warga'], <LetterInboxPage />)} />
+
 
               {/* RT / RW */}
               <Route path="/rtrw/dashboard"    element={sa(['rt', 'rw'], <RtRwDashboard />)} />
@@ -71,14 +71,14 @@ export default function App() {
 
               {/* Profil — semua role */}
               <Route path="/profil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-            </Route>
 
-            {/* ── Superadmin — halaman sudah embed DashboardLayout sendiri ─ */}
-            <Route path="/superadmin/dashboard"   element={sa(['superadmin'], <SuperAdminDashboard />)} />
-            <Route path="/superadmin/template-md" element={sa(['superadmin'], <TemplateSuratMarkdown />)} />
-            <Route path="/superadmin/akun"        element={sa(['superadmin'], <ManajemenAkun />)} />
-            <Route path="/superadmin/config"      element={sa(['superadmin'], <KonfigurasiInstansi />)} />
-            <Route path="/superadmin/log"         element={sa(['superadmin'], <LogSistem />)} />
+              {/* Superadmin */}
+              <Route path="/superadmin/dashboard"   element={sa(['superadmin'], <SuperAdminDashboard />)} />
+              <Route path="/superadmin/template-md" element={sa(['superadmin'], <TemplateSuratMarkdown />)} />
+              <Route path="/superadmin/akun"        element={sa(['superadmin'], <ManajemenAkun />)} />
+              <Route path="/superadmin/config"      element={sa(['superadmin'], <KonfigurasiInstansi />)} />
+              <Route path="/superadmin/log"         element={sa(['superadmin'], <LogSistem />)} />
+            </Route>
           </Routes>
         </Suspense>
       </Router>

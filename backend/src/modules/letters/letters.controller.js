@@ -129,6 +129,38 @@ class LettersController {
     try {
       const { uuid } = req.params;
       await LettersService.submitLetter(uuid);
+
+      // --- AUTO APPROVE LOGIC ---
+      const userRole = req.user?.role;
+      const approverId = req.user?.id; // For RT/RW, their id is the approverId
+
+      if (userRole === 'admin_rt' || userRole === 'rt' || userRole === 'admin_rw' || userRole === 'rw') {
+        const roleStr = (userRole === 'admin_rt' || userRole === 'rt') ? 'rt' : 'rw';
+        
+        const [[letter]] = await pool.query(
+          `SELECT l.*, lwo.code AS workflow_code 
+           FROM letters l
+           JOIN letter_workflow_options lwo ON l.workflow_option_id = lwo.id
+           WHERE l.uuid = ?`,
+          [uuid]
+        );
+
+        if (letter) {
+           let shouldAutoApprove = false;
+           if (roleStr === 'rt' && ['RT_ONLY', 'RT_THEN_RW', 'RT_RW'].includes(letter.workflow_code)) {
+               shouldAutoApprove = true;
+           } else if (roleStr === 'rw' && ['RW_ONLY'].includes(letter.workflow_code)) {
+               shouldAutoApprove = true;
+           }
+
+           if (shouldAutoApprove) {
+               console.log(`[Auto-Approve] Triggering auto-approve for ${roleStr} on letter ${uuid}`);
+               await ApprovalsService.approveLetter(uuid, roleStr, 'Disetujui otomatis oleh pembuat surat', null, approverId);
+           }
+        }
+      }
+      // --------------------------
+
       res.json({ success: true, message: "Surat berhasil diajukan" });
     } catch (error) {
       console.error("Error submitLetter:", error);

@@ -214,7 +214,7 @@ export default function LetterDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto p-6 space-y-4">
+      <div className="w-full space-y-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="h-24 bg-[var(--color-surface-muted)] rounded-lg animate-pulse" />
         ))}
@@ -224,7 +224,7 @@ export default function LetterDetailPage() {
 
   if (error) {
     return (
-      <div className="max-w-3xl mx-auto p-6 text-center text-[var(--color-danger)] py-16">
+      <div className="w-full text-center text-[var(--color-danger)] py-16">
         Gagal memuat surat: {error.message}
       </div>
     );
@@ -232,7 +232,7 @@ export default function LetterDetailPage() {
 
   if (!letter) {
     return (
-      <div className="max-w-3xl mx-auto p-6 text-center text-[var(--color-ink-muted)] py-16">
+      <div className="w-full text-center text-[var(--color-ink-muted)] py-16">
         Surat tidak ditemukan.
       </div>
     );
@@ -278,7 +278,7 @@ export default function LetterDetailPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
+    <div className="w-full space-y-6">
       <button
         onClick={() => navigate(backPath)}
         className="mb-4 text-xs text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] inline-flex items-center gap-1"

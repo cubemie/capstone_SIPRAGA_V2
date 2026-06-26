@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { KeyRound, Plus, Search, ToggleLeft, ToggleRight, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
-import DashboardLayout from '../../components/layout/DashboardLayout';
 import { api } from '../../utils/api';
 
 function CreateAccountModal({ activeTab, rwOptions, onClose, onSuccess }) {
@@ -306,7 +305,7 @@ export default function ManajemenAkun() {
   );
 
   return (
-    <DashboardLayout>
+    <>
       {showCreateModal && (
         <CreateAccountModal
           activeTab={activeTab}
@@ -316,7 +315,7 @@ export default function ManajemenAkun() {
         />
       )}
 
-      <div className="mx-auto max-w-5xl">
+      <div className="w-full">
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-ink">Manajemen Akun RT/RW</h1>
@@ -457,6 +456,6 @@ export default function ManajemenAkun() {
           )}
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

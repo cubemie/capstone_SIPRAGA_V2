@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api } from '../../utils/api';
-import DashboardLayout from '../../components/layout/DashboardLayout';
 import { Save, Building2 } from 'lucide-react';
 
 export default function KonfigurasiInstansi() {
@@ -63,9 +62,8 @@ export default function KonfigurasiInstansi() {
   ];
 
   return (
-    <DashboardLayout>
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-6">
+    <div className="max-w-2xl">
+      <div className="mb-6">
           <h1 className="text-xl font-bold text-ink">Konfigurasi Instansi</h1>
           <p className="text-sm text-ink-secondary mt-0.5">
             Atur nama desa, kecamatan, dan informasi yang muncul di kop surat
@@ -116,7 +114,6 @@ export default function KonfigurasiInstansi() {
             </button>
           </div>
         )}
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }

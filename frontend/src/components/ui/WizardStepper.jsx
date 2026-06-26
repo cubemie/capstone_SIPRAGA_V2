@@ -21,17 +21,17 @@ export default function WizardStepper({ completedSteps = [] }) {
           return (
             <div key={step.key} className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
               {/* Step indicator */}
-              <div className="flex flex-col items-center gap-0.5">
+              <div className="flex flex-col items-center gap-1">
                 <div className={`
-                  w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all
+                  w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all
                   ${isDone
                     ? 'bg-[var(--color-primary)] text-white'
                     : 'bg-[var(--color-surface-muted)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]'
                   }
                 `}>
-                  {isDone ? <Check className="w-3.5 h-3.5" /> : step.shortLabel}
+                  {isDone ? <Check className="w-4 h-4" /> : step.shortLabel}
                 </div>
-                <span className={`text-[10px] hidden sm:block font-medium whitespace-nowrap
+                <span className={`text-xs sm:text-sm hidden sm:block font-medium whitespace-nowrap
                   ${isDone ? 'text-[var(--color-primary)]' : 'text-[var(--color-ink-muted)]'}
                 `}>
                   {step.label}

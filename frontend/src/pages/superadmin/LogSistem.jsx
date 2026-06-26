@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../../utils/api';
-import DashboardLayout from '../../components/layout/DashboardLayout';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const ACTION_COLORS = {
@@ -39,10 +38,9 @@ export default function LogSistem() {
   const totalPages = Math.ceil((data?.total || 0) / 50);
 
   return (
-    <DashboardLayout>
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-xl font-bold text-ink">Log Sistem</h1>
+    <div className="w-full">
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-ink">Log Sistem</h1>
           <p className="text-sm text-ink-secondary mt-0.5">
             Audit trail seluruh aktivitas pengguna dan sistem
           </p>
@@ -165,7 +163,6 @@ export default function LogSistem() {
             </div>
           )}
         </div>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 }
