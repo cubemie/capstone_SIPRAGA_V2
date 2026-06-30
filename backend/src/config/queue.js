@@ -5,10 +5,12 @@ try {
   const { Queue } = require('bullmq');
   const IORedis = require('ioredis');
 
-  connection = new IORedis({
+  connection = new IORedis(process.env.REDIS_URL || {
     host: process.env.REDIS_HOST || 'localhost',
     port: parseInt(process.env.REDIS_PORT) || 6379,
+    username: process.env.REDIS_USERNAME || 'default',
     password: process.env.REDIS_PASSWORD,
+  }, {
     maxRetriesPerRequest: null,
     lazyConnect: true,
     connectTimeout: 5000,
