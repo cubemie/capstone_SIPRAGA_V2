@@ -4,13 +4,27 @@ let connection = null;
 try {
   const { Queue } = require('bullmq');
   const IORedis = require('ioredis');
+  
+  let redisConfig;
+  if (process.env.REDIS_URL) {
+    const u = new URL(process.env.REDIS_URL);
+    redisConfig = {
+      host: u.hostname,
+      port: parseInt(u.port) || 6379,
+      username: u.username || 'default',
+      password: decodeURIComponent(u.password),
+    };
+  } else {
+    redisConfig = {
+      host: process.env.REDIS_HOST || 'localhost',
+      port: parseInt(process.env.REDIS_PORT) || 6379,
+      username: 'default',
+      password: process.env.REDIS_PASSWORD,
+    };
+  }
 
-  connection = new IORedis(process.env.REDIS_URL || {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT) || 6379,
-    username: process.env.REDIS_USERNAME || 'default',
-    password: process.env.REDIS_PASSWORD,
-  }, {
+  connection = new IORedis({
+    ...redisConfig,
     maxRetriesPerRequest: null,
     lazyConnect: true,
     connectTimeout: 5000,
