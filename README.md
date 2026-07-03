@@ -156,17 +156,183 @@ Halaman untuk melihat dan melengkapi data diri:
 
 ### 🏘️ Fitur untuk RT/RW
 
-> 📝 *Dokumentasi fitur RT/RW akan dilengkapi secara manual.*
+---
 
-<!-- TEMPLATE: Tambahkan dokumentasi fitur RT di sini -->
+#### 1. 🏠 Dashboard RT/RW
+Halaman utama setelah RT atau RW login. Menampilkan ringkasan surat yang perlu diverifikasi:
+- **Butuh Verifikasi** — jumlah surat yang sedang menunggu tindakan
+- **Total Masuk** — total seluruh surat yang masuk ke inbox
+- **Daftar Surat Masuk** — 5 surat terbaru yang perlu diproses (nama warga, jenis surat, tanggal, status)
+- **Tombol "Lihat Semua"** — menuju halaman inbox lengkap
+
+> **Cara akses:** Login sebagai RT/RW → otomatis masuk ke Dashboard RT/RW
+
+---
+
+#### 2. 📥 Inbox Surat Masuk
+Halaman daftar semua surat yang masuk ke antrian verifikasi RT atau RW.
+
+Setiap item menampilkan:
+- Nama warga & NIK
+- Jenis surat
+- Tanggal pengajuan
+- Status surat (Menunggu RT / Diproses RT / Menunggu RW / Diproses RW)
+- Tombol klik untuk membuka detail surat
+
+> **Cara akses:** Dashboard → Klik **"Lihat semua"** atau menu **"Inbox"** di sidebar
+
+---
+
+#### 3. 📋 Detail & Verifikasi Surat
+Halaman untuk meninjau dan mengambil keputusan atas pengajuan surat dari warga.
+
+**Yang bisa dilakukan RT/RW:**
+- Melihat data lengkap surat dan informasi warga
+- Melihat lampiran yang diunggah warga
+- **Setujui** — meneruskan surat ke langkah berikutnya (RW atau selesai)
+- **Tolak** — menolak surat dengan disertai alasan penolakan
+- **Minta Revisi** — meminta warga melengkapi atau memperbaiki data
+
+Setelah disetujui, tanda tangan digital RT/RW yang tersimpan akan otomatis dilekatkan ke PDF surat.
+
+> **Cara akses:** Inbox → Klik nama surat
+
+---
+
+#### 4. ✍️ Tanda Tangan Digital
+Halaman untuk mengatur tanda tangan digital yang akan digunakan secara otomatis di setiap surat yang disetujui.
+
+**Dua metode input:**
+| Metode | Keterangan |
+|--------|------------|
+| Gambar TTD | Mode menggambar tanda tangan langsung di canvas menggunakan mouse/stylus/sentuhan |
+| Upload File | Upload file gambar tanda tangan (format PNG/JPG) |
+
+**Fitur:**
+- **Pratinjau Tersimpan** — melihat tanda tangan yang sedang aktif
+- **Status Aktif/Kosong** — indikator apakah TTD sudah tersimpan
+- Tanda tangan dapat diperbarui kapan saja
+- Disertifikasi oleh SIPRAGA Secure
+
+> **Cara akses:** Menu **"Tanda Tangan"** di sidebar
+
+---
+
+#### 5. 📋 Riwayat Surat RT/RW
+Halaman daftar semua surat yang pernah diproses oleh RT/RW, dilengkapi filter status.
+
+> **Cara akses:** Menu **"Riwayat Surat"** di sidebar
+
+---
+
+#### 6. 👤 Profil RT/RW
+Halaman untuk melihat dan mengelola profil akun RT/RW.
+
+> **Cara akses:** Klik menu **"Profil Saya"** di sidebar
 
 ---
 
 ### 🛡️ Fitur untuk Superadmin
 
-> 📝 *Dokumentasi fitur Superadmin akan dilengkapi secara manual.*
+---
 
-<!-- TEMPLATE: Tambahkan dokumentasi fitur Superadmin di sini -->
+#### 1. 📊 Dashboard Superadmin
+Halaman utama yang menampilkan ringkasan statistik seluruh wilayah:
+- **Total Warga** — jumlah warga terdaftar di seluruh wilayah
+- **Total RT** — jumlah RT aktif
+- **Total RW** — jumlah RW aktif
+- **Surat Selesai** — total surat yang telah berhasil diselesaikan
+
+**Daftar Wilayah RW:**
+- Klik salah satu RW untuk melihat detail datanya
+- Detail mencakup: total warga, estimasi kepala KK, jumlah RT, distribusi jenis kelamin, distribusi pekerjaan (Top 5), dan daftar RT beserta nama ketua
+
+> **Cara akses:** Login sebagai Superadmin → otomatis masuk ke Dashboard
+
+---
+
+#### 2. 👥 Manajemen Akun RT/RW
+Halaman untuk mengelola seluruh akun Ketua RT dan Ketua RW.
+
+**Tab tersedia:**
+- **RT** — daftar semua ketua RT
+- **RW** — daftar semua ketua RW
+
+**Kolom data:** Nomor RT/RW, Nama Ketua, Username, Wilayah (Kelurahan), Status Aktif/Nonaktif
+
+**Aksi yang tersedia per akun:**
+
+| Aksi | Keterangan |
+|------|------------|
+| 🔄 Toggle Aktif/Nonaktif | Menonaktifkan atau mengaktifkan kembali akun |
+| 🔑 Reset Password | Mengatur ulang kata sandi akun |
+| 🗑️ Hapus Akun | Menghapus akun secara permanen |
+
+**Tambah Akun Baru:**
+- Klik tombol **"+ Tambah Akun"**
+- Isi form: No. RT/RW, RW Induk (untuk RT), Nama Ketua, Username, Password, dan data wilayah (Provinsi, Kota, Kecamatan, Kelurahan/Desa)
+
+> **Cara akses:** Menu **"Manajemen Akun"** di sidebar
+
+---
+
+#### 3. 📝 Template Surat (Markdown)
+Halaman untuk membuat dan mengelola template surat dalam format Markdown.
+
+**Fitur:**
+- **Buat Template Baru** — tulis template surat menggunakan Markdown dengan dukungan variabel dinamis
+- **Edit Template** — perbarui konten template yang sudah ada
+- **Preview PDF** — pratinjau hasil render template menjadi PDF
+- **Hapus Template** — menghapus template yang tidak digunakan
+- **Versi Template** — setiap template memiliki nomor versi
+
+**Variabel dinamis yang didukung:**
+
+| Variabel | Keterangan |
+|----------|------------|
+| `{{nama_warga}}` | Nama warga |
+| `{{nik}}` | NIK warga |
+| `{{alamat}}` | Alamat warga |
+| `{{keperluan}}` | Keperluan surat |
+| `{{tanggal}}` | Tanggal surat |
+| `{{nomor_surat}}` | Nomor surat |
+| `{{nama_desa}}` | Nama desa/kelurahan |
+| `{{kecamatan}}` | Kecamatan |
+| `{{kabupaten}}` | Kabupaten/Kota |
+| `{{kepala_desa}}` | Nama kepala desa |
+| `{{nip_kepala}}` | NIP kepala desa |
+
+> **Cara akses:** Menu **"Template Surat"** di sidebar
+
+---
+
+#### 4. ⚙️ Konfigurasi Instansi
+Halaman untuk mengatur informasi instansi yang tampil di kop surat PDF.
+
+**Pengaturan yang bisa diubah:**
+
+| Bagian | Field |
+|--------|-------|
+| Informasi Instansi | Nama Desa/Kelurahan, Kecamatan, Kabupaten/Kota, Provinsi, Kode Pos |
+| Kepala Instansi | Nama Kepala Desa/Lurah, NIP |
+| Kop Surat | Kop Surat Baris 1, Kop Surat Baris 2, URL Logo Instansi |
+
+> **Cara akses:** Menu **"Konfigurasi"** di sidebar
+
+---
+
+#### 5. 🗒️ Log Sistem
+Halaman audit trail yang mencatat seluruh aktivitas pengguna dan sistem.
+
+**Kolom log:** Waktu, Jenis Aksi, Pelaku (nama + role), Target, Detail
+
+**Filter tersedia:**
+- **Filter Role:** Semua / Warga / RT / RW / Superadmin / System
+- **Filter Aksi:** Login, Buat Surat, Approve Surat, Tolak Surat, Hapus Akun, Reset Password, Update Konfigurasi
+
+**Navigasi:** Pagination per 50 entri
+
+> **Cara akses:** Menu **"Log Sistem"** di sidebar
 
 ---
 
@@ -313,50 +479,6 @@ docker compose down
 docker compose down -v
 docker compose -f docker-compose.dev.yml up --build -d
 ```
-
----
-
-## 🌐 Panduan Deployment (Production)
-
-### 1. Deploy Backend ke Railway
-
-1. Push branch utama ke GitHub
-2. Buka [Railway.app](https://railway.app)
-3. Klik **New Project** → Pilih repo kamu
-4. Railway akan otomatis mendeteksi `railway.json` dan membuat service:
-   - Backend
-   - MySQL 8.0
-   - Redis
-5. Setelah deployment selesai, masuk ke service **Backend** → **Variables**, tambahkan:
-
-| Variable | Keterangan |
-|----------|------------|
-| `JWT_SECRET` | Random string yang aman |
-| `SUPABASE_URL` | URL Supabase kamu |
-| `SUPABASE_KEY` | Service role key Supabase |
-| `SUPABASE_BUCKET` | Nama bucket di Supabase |
-| `CLIENT_URL` | URL frontend Vercel kamu |
-
-6. Salin **Public URL** backend (misal: `https://your-backend.up.railway.app`)
-
-### 2. Deploy Frontend ke Vercel
-
-1. Buka [Vercel.com](https://vercel.com)
-2. Klik **New Project** → Pilih repo kamu
-3. Di bagian **Root Directory**, masukkan `frontend`
-4. Tambahkan **Environment Variable**:
-   - `VITE_API_URL` = `<RAILWAY_BACKEND_PUBLIC_URL>/api`
-5. Klik **Deploy**
-
-Selesai! 🚀 Aplikasi siap digunakan di [https://capstone-sipraga-v2.vercel.app](https://capstone-sipraga-v2.vercel.app)
-
----
-
-## 📖 Dokumentasi API
-
-Untuk detail endpoint dan penggunaan API, lihat:
-- **Swagger UI** (lokal/railway): `/api-docs`
-- **API Reference**: `docs/API_REFERENCE.md`
 
 ---
 
