@@ -55,6 +55,38 @@ Setiap surat dilengkapi **live preview PDF**, **tanda tangan digital**, dan **QR
 
 ---
 
+## Struktur Proyek
+
+```
+capstone_RT-RW_CORETAX/
+├── backend/
+│   └── src/
+│       ├── config/          # DB, Redis, Supabase, Swagger
+│       ├── controllers/     # HTTP request handlers
+│       ├── middlewares/     # Auth, error handling, upload
+│       ├── models/          # Database models
+│       ├── routes/          # Definisi rute API
+│       ├── services/        # Logika bisnis
+│       └── utils/           # Helper functions
+├── frontend/
+│   └── src/
+│       ├── components/      # Komponen reusable (Layout, Logo, dll.)
+│       ├── context/         # AuthContext
+│       ├── features/letters/ # Wizard, Detail, Inbox, List surat
+│       ├── pages/
+│       │   ├── auth/        # Login & Register
+│       │   ├── warga/       # Dashboard warga
+│       │   ├── rtrw/        # Dashboard RT/RW, TTD
+│       │   └── superadmin/  # Dashboard, Akun, Template, Config, Log
+│       └── services/        # API calls
+├── database/                # Migrasi & seeding
+├── docs/                    # ERD & API reference
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
 ## Dokumentasi Fitur
 
 ### 👤 Warga
