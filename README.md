@@ -16,6 +16,8 @@
   <img src="https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel&logoColor=white" />
 </p>
 
+![Uploading Capstone-08_Poster.png…]()
+
 ---
 
 ## Demo
