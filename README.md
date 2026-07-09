@@ -87,6 +87,12 @@ capstone_RT-RW_CORETAX/
 
 ---
 
+## 📂 Dokumentasi File
+
+Dataset dapat diunduh melalui Google Drive berikut:
+
+🔗 https://drive.google.com/drive/folders/1qOpPu7l1XgEB-fURUr1Doyt1qqIFsruF
+
 ## Dokumentasi Fitur
 
 ### 👤 Warga
@@ -237,6 +243,7 @@ cd frontend && npm install && npm run dev
 | Swagger | `http://localhost:3000/api-docs` |
 | MySQL | `localhost:3307` |
 | Redis | `localhost:6379` |
+
 
 ---
 
